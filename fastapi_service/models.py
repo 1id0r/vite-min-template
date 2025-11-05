@@ -13,6 +13,7 @@ class SystemDefinition(BaseModel):
     id: str
     label: str
     category: str
+    icon: Optional[str] = None
     description: Optional[str] = None
     forms: Dict[str, FormDefinition]
 
@@ -20,6 +21,7 @@ class SystemDefinition(BaseModel):
 class CategoryDefinition(BaseModel):
     id: str
     label: str
+    icon: Optional[str] = None
     systemIds: List[str]
 
 

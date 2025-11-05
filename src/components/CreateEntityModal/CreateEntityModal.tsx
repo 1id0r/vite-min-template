@@ -7,18 +7,15 @@ import {
   Divider,
   Group,
   Loader,
-  Menu,
   Modal,
   Paper,
-  SegmentedControl,
   Stack,
-  Stepper,
   Text,
 } from '@mantine/core'
-import FormComponent, { withTheme, type IChangeEvent } from '@rjsf/core'
-import { Theme as MantineTheme } from '@rjsf/mantine'
-import validator from '@rjsf/validator-ajv8'
-import { fetchEntityConfig, fetchFormDefinition } from '../api/client'
+import type { IChangeEvent } from '@rjsf/core'
+import type { IconType } from 'react-icons'
+import * as FiIcons from 'react-icons/fi'
+import { fetchEntityConfig, fetchFormDefinition } from '../../api/client'
 import type {
   CategoryDefinition,
   EntityConfig,
@@ -26,34 +23,48 @@ import type {
   FormDefinition,
   StepKey,
   SystemDefinition,
-} from '../types/entity'
-
-const RjsfForm = withTheme(MantineTheme)
-
-type FlowId = string
-type FormStatus = 'idle' | 'loading' | 'success' | 'error'
-
-type RjsfFormRef = InstanceType<typeof FormComponent>
-
-interface FormState {
-  [key: string]: Record<StepKey, unknown>
-}
-
-interface AggregatedResult {
-  flow: FlowId
-  systemId: string
-  formData: Record<StepKey, unknown>
-}
-
-type FormDefinitionsState = Record<string, Partial<Record<StepKey, FormDefinition>>>
-type FormStatusState = Record<string, Partial<Record<StepKey, FormStatus>>>
-type FormErrorState = Record<string, Partial<Record<StepKey, string>>>
+} from '../../types/entity'
+import { FlowStepper } from './FlowStepper'
+import { FormStepCard, type RjsfFormRef } from './FormStepCard'
+import { ResultSummary } from './ResultSummary'
+import { SystemSelectionPanel } from './SystemSelectionPanel'
+import type {
+  AggregatedResult,
+  FlowId,
+  FlowOption,
+  FormStatus,
+  IconResolver,
+} from './types'
 
 const createEmptyStepState = (): Record<StepKey, unknown> => ({
   system: {},
   general: {},
   monitor: {},
 })
+
+const iconRegistry = FiIcons as Record<string, IconType>
+
+const resolveIcon: IconResolver = (name) => {
+  if (!name) {
+    return undefined
+  }
+
+  return iconRegistry[name]
+}
+
+const fallbackCategoryIcon = resolveIcon('FiLayers')!
+const fallbackSystemIcon = resolveIcon('FiBox')!
+const categoryPrefixIcon = resolveIcon('FiArrowLeft') ?? fallbackCategoryIcon
+
+type RjsfFormRefs = Record<StepKey, RjsfFormRef | null>
+
+interface FormState {
+  [key: string]: Record<StepKey, unknown>
+}
+
+type FormDefinitionsState = Record<string, Partial<Record<StepKey, FormDefinition>>>
+type FormStatusState = Record<string, Partial<Record<StepKey, FormStatus>>>
+type FormErrorState = Record<string, Partial<Record<StepKey, string>>>
 
 export function CreateEntityModal() {
   const [opened, setOpened] = useState(false)
@@ -69,7 +80,7 @@ export function CreateEntityModal() {
   const [formDefinitions, setFormDefinitions] = useState<FormDefinitionsState>({})
   const [formStatus, setFormStatus] = useState<FormStatusState>({})
   const [formErrors, setFormErrors] = useState<FormErrorState>({})
-  const formRefs = useRef<Record<StepKey, RjsfFormRef | null>>({
+  const formRefs = useRef<RjsfFormRefs>({
     system: null,
     general: null,
     monitor: null,
@@ -372,15 +383,10 @@ export function CreateEntityModal() {
     (systemId: string) => {
       setSelectedSystem(systemId)
       ensureFormState(systemId)
-      setActiveStep(stepKeys.length > 1 ? 1 : 0)
       setResult(null)
     },
-    [ensureFormState, stepKeys.length]
+    [ensureFormState]
   )
-
-  const handleReturnToSystemStep = useCallback(() => {
-    setActiveStep(0)
-  }, [])
 
   const onFormChange = useCallback((systemId: string, key: StepKey, change: IChangeEvent) => {
     setFormState((prev) => ({
@@ -421,88 +427,7 @@ export function CreateEntityModal() {
     formRefs.current[key] = ref
   }, [])
 
-  const renderForm = useCallback(
-    (key: StepKey) => {
-      if (!selectedSystem) {
-        return (
-          <Alert color='blue' title='Select a system'>
-            Choose one of the templates from the menu to unlock this step.
-          </Alert>
-        )
-      }
-
-      const definition = formDefinitions[selectedSystem]?.[key]
-      const status = formStatus[selectedSystem]?.[key]
-      const error = formErrors[selectedSystem]?.[key]
-
-      if (status === 'error' && !definition) {
-        return (
-          <Paper withBorder shadow='xs' p='md'>
-            <Stack gap='sm'>
-              <Alert color='red' title='Failed to load form'>
-                {error ?? 'Unable to fetch the form definition. Try again.'}
-              </Alert>
-              <Group justify='flex-end'>
-                <Button size='xs' variant='light' onClick={() => requestFormDefinition(selectedSystem, key)}>
-                  Retry
-                </Button>
-              </Group>
-            </Stack>
-          </Paper>
-        )
-      }
-
-      if (!definition) {
-        return (
-          <Paper withBorder shadow='xs' p='md'>
-            <Center>
-              <Loader size='sm' />
-            </Center>
-          </Paper>
-        )
-      }
-
-      const combinedUiSchema = {
-        'ui:submitButtonOptions': {
-          norender: true,
-        },
-        ...(definition.uiSchema ?? {}),
-      }
-
-      return (
-        <Paper withBorder shadow='xs' p='md'>
-          <RjsfForm
-            schema={definition.schema}
-            uiSchema={combinedUiSchema}
-            formData={currentFormState[key]}
-            validator={validator}
-            liveValidate
-            ref={(ref) => attachFormRef(key, ref)}
-            onChange={(change) => {
-              if (!selectedSystem) {
-                return
-              }
-              onFormChange(selectedSystem, key, change)
-            }}
-            onSubmit={(change) => onFormSubmit(key, change)}
-          />
-        </Paper>
-      )
-    },
-    [
-      attachFormRef,
-      currentFormState,
-      formDefinitions,
-      formErrors,
-      formStatus,
-      onFormChange,
-      onFormSubmit,
-      requestFormDefinition,
-      selectedSystem,
-    ]
-  )
-
-  const flowSelection = useMemo(() => {
+  const flowOptions = useMemo<FlowOption[]>(() => {
     if (!config) {
       return []
     }
@@ -524,11 +449,84 @@ export function CreateEntityModal() {
       selectedSystem !== null &&
       formStatus[selectedSystem]?.[activeStepKey] === 'loading')
 
+  const renderStepContent = () => {
+    if (!activeStepKey) {
+      return null
+    }
+
+    if (activeStepKey === 'system') {
+      return (
+        <Paper withBorder p='lg' shadow='xs'>
+          <SystemSelectionPanel
+            categories={categories}
+            systems={systems}
+            selectedSystem={selectedSystem}
+            selectedSystemConfig={selectedSystemConfig ?? null}
+            flowOptions={flowOptions}
+            activeFlow={flow}
+            onFlowChange={handleFlowChange}
+            flowDescription={flowDescription}
+            onSystemSelect={handleSystemSelect}
+            resolveIcon={resolveIcon}
+            fallbackCategoryIcon={fallbackCategoryIcon}
+            fallbackSystemIcon={fallbackSystemIcon}
+            prefixIcon={categoryPrefixIcon}
+          />
+        </Paper>
+      )
+    }
+
+    if (!selectedSystem) {
+      return (
+        <Alert color='blue' title='Select a system'>
+          Choose one of the templates from the menu to unlock this step.
+        </Alert>
+      )
+    }
+
+    const definition = formDefinitions[selectedSystem]?.[activeStepKey]
+    const status = formStatus[selectedSystem]?.[activeStepKey]
+    const error = formErrors[selectedSystem]?.[activeStepKey]
+
+    return (
+      <FormStepCard
+        status={status}
+        definition={definition}
+        error={error}
+        formData={currentFormState[activeStepKey]}
+        attachRef={(ref) => attachFormRef(activeStepKey, ref)}
+        onChange={(change) => onFormChange(selectedSystem, activeStepKey, change)}
+        onSubmit={(change) => onFormSubmit(activeStepKey, change)}
+        onRetry={() => requestFormDefinition(selectedSystem, activeStepKey)}
+        fullHeight
+      />
+    )
+  }
+
   return (
     <>
       <Button onClick={handleOpen}>Create entity</Button>
-      <Modal opened={opened} onClose={handleClose} title='Create new entity' size='xl' radius='md'>
-        <Stack>
+      <Modal
+        opened={opened}
+        onClose={handleClose}
+        title='Create new entity'
+        size='xl'
+        radius='md'
+        styles={{
+          body: {
+            minHeight: 640,
+            display: 'flex',
+            flexDirection: 'column',
+          },
+        }}
+      >
+        <Stack
+          style={{
+            minHeight: 640,
+            flex: 1,
+            display: 'flex',
+          }}
+        >
           {configStatus === 'loading' && !config && (
             <Center py='lg'>
               <Loader />
@@ -550,125 +548,21 @@ export function CreateEntityModal() {
 
           {config && currentFlow && (
             <>
-              <Stepper
-                active={activeStep}
-                allowNextStepsSelect={false}
-                styles={(theme) => ({
-                  step: {
+              <FlowStepper stepKeys={stepKeys} activeStep={activeStep} definitions={stepDefinitions} />
+
+              {!isCompleted && (
+                <Box
+                  style={{
+                    flex: 1,
+                    display: 'flex',
                     flexDirection: 'column',
-                    alignItems: 'center',
-                    textAlign: 'center',
-                  },
-                  stepBody: {
-                    marginLeft: 0,
-                    marginTop: theme.spacing.xs,
-                  },
-                  stepLabel: {
-                    fontSize: theme.fontSizes.sm,
-                    fontWeight: 500,
-                  },
-                })}
-              >
-                {stepKeys.map((key) => {
-                  const definition = stepDefinitions?.[key]
-                  return <Stepper.Step key={key} label={definition?.label ?? key} />
-                })}
-                <Stepper.Completed>{null}</Stepper.Completed>
-              </Stepper>
-
-              {!isCompleted && activeStepKey === 'system' && (
-                <>
-                  <SegmentedControl
-                    fullWidth
-                    value={flow}
-                    onChange={handleFlowChange}
-                    data={flowSelection}
-                    aria-label='Choose creation flow'
-                  />
-
-                  {flowDescription && (
-                    <Text c='dimmed' size='sm'>
-                      {flowDescription}
-                    </Text>
-                  )}
-                </>
+                  }}
+                >
+                  {renderStepContent()}
+                </Box>
               )}
 
-              {!isCompleted && activeStepKey === 'system' && (
-                <Paper withBorder p='md' shadow='xs'>
-                  <Stack gap='sm'>
-                    <Group gap='xs' justify='space-between'>
-                      <Text fw={500}>System template</Text>
-                      {selectedSystemConfig ? (
-                        <Text size='sm' c='dimmed'>
-                          {selectedSystemConfig.description}
-                        </Text>
-                      ) : (
-                        <Text size='sm' c='dimmed'>
-                          Pick a system to continue
-                        </Text>
-                      )}
-                    </Group>
-                    <Stack
-                      gap='xs'
-                      style={{
-                        width: '50%',
-                        marginLeft: 'auto',
-                      }}
-                    >
-                      {categories.map((category) => (
-                        <Menu key={category.id} trigger='hover' position='right-start' withinPortal>
-                          <Menu.Target>
-                            <Button variant='light' fullWidth style={{ justifyContent: 'space-between' }}>
-                              {category.label}
-                            </Button>
-                          </Menu.Target>
-                          <Menu.Dropdown>
-                            {category.systemIds.map((systemId) => {
-                              const system = systems[systemId]
-                              if (!system) {
-                                return null
-                              }
-                              return (
-                                <Menu.Item key={systemId} onClick={() => handleSystemSelect(systemId)}>
-                                  {system.label}
-                                </Menu.Item>
-                              )
-                            })}
-                          </Menu.Dropdown>
-                        </Menu>
-                      ))}
-                    </Stack>
-                  </Stack>
-                </Paper>
-              )}
-
-              {!isCompleted && activeStepKey && activeStepKey !== 'system' && (
-                <Stack gap='md'>
-                  <Group justify='flex-end'>
-                    <Button variant='subtle' size='compact-sm' onClick={handleReturnToSystemStep}>
-                      Change system
-                    </Button>
-                  </Group>
-                  {renderForm(activeStepKey)}
-                </Stack>
-              )}
-
-              {isCompleted && (
-                <Stack>
-                  <Alert color='green' title='Entity ready to create'>
-                    The configuration is assembled from API definitions. Submit it to your API or persist it as needed.
-                  </Alert>
-                  {result && (
-                    <Box component='pre' bg='gray.0' p='sm' style={{ overflowX: 'auto' }}>
-                      {JSON.stringify(result, null, 2)}
-                    </Box>
-                  )}
-                  <Group justify='flex-end'>
-                    <Button onClick={handleClose}>Close</Button>
-                  </Group>
-                </Stack>
-              )}
+              {isCompleted && <ResultSummary result={result} onClose={handleClose} />}
 
               {!isCompleted && (
                 <>

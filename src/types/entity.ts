@@ -17,6 +17,7 @@ export interface SystemDefinition {
   id: string;
   label: string;
   category: string;
+  icon?: string;
   description?: string;
   forms: Partial<Record<StepKey, FormDefinition>>;
 }
@@ -24,6 +25,7 @@ export interface SystemDefinition {
 export interface CategoryDefinition {
   id: string;
   label: string;
+  icon?: string;
   systemIds: string[];
 }
 

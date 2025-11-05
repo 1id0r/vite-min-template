@@ -3,6 +3,7 @@ SYSTEMS = {
         "id": "laptop",
         "label": "Laptop",
         "category": "compute",
+        "icon": "FiMonitor",
         "description": "Represents individual developer or field laptops that report compliance posture.",
         "forms": {
             "system": {
@@ -33,8 +34,13 @@ SYSTEMS = {
                     },
                 },
                 "uiSchema": {
-                    "assetId": {"ui:autofocus": True},
-                    "ownerEmail": {"ui:placeholder": "name@company.com"},
+                    "assetId": {"ui:autofocus": True, "ui:options": {"colSpan": 6}},
+                    "serial": {"ui:options": {"colSpan": 6}},
+                    "ownerEmail": {
+                        "ui:placeholder": "name@company.com",
+                        "ui:options": {"colSpan": 6},
+                    },
+                    "osVersion": {"ui:options": {"colSpan": 6}},
                 },
                 "initialData": {"osVersion": "macOS 15"},
             },
@@ -55,7 +61,8 @@ SYSTEMS = {
                     },
                 },
                 "uiSchema": {
-                    "environment": {"ui:widget": "radio"},
+                    "environment": {"ui:widget": "radio", "ui:options": {"colSpan": 6}},
+                    "team": {"ui:options": {"colSpan": 6}},
                     "notes": {"ui:widget": "textarea"},
                 },
             },
@@ -96,6 +103,7 @@ SYSTEMS = {
         "id": "server",
         "label": "Server",
         "category": "compute",
+        "icon": "FiServer",
         "description": "Fleet server provisioning for data center or cloud based VMs with richer metadata.",
         "forms": {
             "system": {
@@ -129,8 +137,11 @@ SYSTEMS = {
                     },
                 },
                 "uiSchema": {
-                    "hostname": {"ui:autofocus": True},
-                    "tags": {"ui:options": {"orderable": False}},
+                    "hostname": {"ui:autofocus": True, "ui:options": {"colSpan": 6}},
+                    "region": {"ui:options": {"colSpan": 6}},
+                    "cpuCores": {"ui:options": {"colSpan": 6}},
+                    "memoryGb": {"ui:options": {"colSpan": 6}},
+                    "tags": {"ui:options": {"orderable": False, "colSpan": 12}},
                 },
             },
             "general": {
@@ -152,7 +163,14 @@ SYSTEMS = {
                         },
                     },
                 },
-                "uiSchema": {"ownerSlack": {"ui:placeholder": "#oncall-core"}},
+                "uiSchema": {
+                    "service": {"ui:options": {"colSpan": 6}},
+                    "tier": {"ui:options": {"colSpan": 6}},
+                    "ownerSlack": {
+                        "ui:placeholder": "#oncall-core",
+                        "ui:options": {"colSpan": 12},
+                    },
+                },
             },
             "monitor": {
                 "schema": {
@@ -184,6 +202,7 @@ SYSTEMS = {
         "id": "kafka",
         "label": "Kafka",
         "category": "data",
+        "icon": "FiActivity",
         "description": "Cluster level Kafka monitoring with replication, storage, and lag thresholds.",
         "forms": {
             "system": {
@@ -208,6 +227,11 @@ SYSTEMS = {
                         },
                     },
                 },
+                "uiSchema": {
+                    "clusterName": {"ui:options": {"colSpan": 6}},
+                    "brokers": {"ui:options": {"colSpan": 6}},
+                    "schemaRegistry": {"ui:options": {"colSpan": 12}},
+                },
             },
             "general": {
                 "schema": {
@@ -231,6 +255,11 @@ SYSTEMS = {
                             "default": "sse-s3",
                         },
                     },
+                },
+                "uiSchema": {
+                    "businessOwner": {"ui:options": {"colSpan": 6}},
+                    "retentionHours": {"ui:options": {"colSpan": 6}},
+                    "encryption": {"ui:options": {"colSpan": 6}},
                 },
             },
             "monitor": {
@@ -265,6 +294,7 @@ SYSTEMS = {
         "id": "mongo",
         "label": "MongoDB",
         "category": "data",
+        "icon": "FiDatabase",
         "description": "Replica set and sharded cluster telemetry definitions for MongoDB deployments.",
         "forms": {
             "system": {
@@ -289,6 +319,11 @@ SYSTEMS = {
                         },
                     },
                 },
+                "uiSchema": {
+                    "deploymentType": {"ui:options": {"colSpan": 6}},
+                    "version": {"ui:options": {"colSpan": 6}},
+                    "connectionString": {"ui:options": {"colSpan": 12}},
+                },
             },
             "general": {
                 "schema": {
@@ -308,7 +343,10 @@ SYSTEMS = {
                         },
                     },
                 },
-                "uiSchema": {"owners": {"ui:options": {"orderable": False}}},
+                "uiSchema": {
+                    "dataClassification": {"ui:options": {"colSpan": 6}},
+                    "owners": {"ui:options": {"orderable": False, "colSpan": 12}},
+                },
             },
             "monitor": {
                 "schema": {
@@ -339,6 +377,7 @@ SYSTEMS = {
         "id": "linux",
         "label": "Linux",
         "category": "platform",
+        "icon": "FiLayers",
         "description": "Generic Linux host provisioning with package, user, and hardening baselines.",
         "forms": {
             "system": {
@@ -360,6 +399,11 @@ SYSTEMS = {
                         },
                     },
                 },
+                "uiSchema": {
+                    "distro": {"ui:options": {"colSpan": 6}},
+                    "version": {"ui:options": {"colSpan": 6}},
+                    "hardened": {"ui:options": {"colSpan": 6}},
+                },
             },
             "general": {
                 "schema": {
@@ -376,6 +420,10 @@ SYSTEMS = {
                             "format": "uri",
                         },
                     },
+                },
+                "uiSchema": {
+                    "changeRequest": {"ui:options": {"colSpan": 6}},
+                    "documentation": {"ui:options": {"colSpan": 6}},
                 },
             },
             "monitor": {
@@ -400,9 +448,9 @@ SYSTEMS = {
 }
 
 CATEGORIES = [
-    {"id": "compute", "label": "Compute", "systemIds": ["laptop", "server"]},
-    {"id": "data", "label": "Data", "systemIds": ["kafka", "mongo"]},
-    {"id": "platform", "label": "Platform", "systemIds": ["linux"]},
+    {"id": "compute", "label": "Compute", "icon": "FiCpu", "systemIds": ["laptop", "server"]},
+    {"id": "data", "label": "Data", "icon": "FiDatabase", "systemIds": ["kafka", "mongo"]},
+    {"id": "platform", "label": "Platform", "icon": "FiLayers", "systemIds": ["linux"]},
 ]
 
 FLOWS = {
@@ -415,7 +463,7 @@ FLOWS = {
     "monitor": {
         "id": "monitor",
         "label": "Monitor",
-        "description": "Provision an entity that reports monitoring telemetry and alerting details.",
+        "description": "",
         "steps": ["system", "general", "monitor"],
     },
 }
