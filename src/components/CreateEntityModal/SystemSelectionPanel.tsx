@@ -22,7 +22,7 @@ export function SystemSelectionPanel({
     <Group align='flex-start' justify='space-between' gap='xl' wrap='nowrap'>
       <Stack gap='xs' style={{ flex: 1 }}>
         <Text size='sm' c='dimmed'>
-          {selectedSystemConfig ? selectedSystemConfig.description : 'Pick a system to continue'}
+          {selectedSystemConfig ? selectedSystemConfig.description : 'בחר מערכת כדי להמשיך'}
         </Text>
       </Stack>
 
@@ -35,12 +35,12 @@ export function SystemSelectionPanel({
           styles={{
             root: {
               alignSelf: 'flex-end',
-              backgroundColor: '#f9fafb',
+              // backgroundColor: '#f9fafb',
               padding: '3px',
               border: '1px solid #e5e7eb',
             },
             indicator: {
-              backgroundColor: '#0047FF',
+              // backgroundColor: '#0047FF',
               boxShadow: '0 1px 2px rgba(0, 0, 0, 0.05)',
             },
             label: {
@@ -59,6 +59,24 @@ export function SystemSelectionPanel({
         <Stack gap='xs'>
           {categories.map((category) => {
             const CategoryIcon = resolveIcon(category.icon) ?? fallbackCategoryIcon
+
+            const renderSystemItem = (systemId: string) => {
+              const system = systems[systemId]
+              if (!system) {
+                return null
+              }
+              const SystemIcon = resolveIcon(system.icon) ?? fallbackSystemIcon
+              return (
+                <Menu.Item
+                  key={systemId}
+                  onClick={() => onSystemSelect(systemId)}
+                  leftSection={<SystemIcon size={16} />}
+                >
+                  {system.label}
+                </Menu.Item>
+              )
+            }
+
             return (
               <Menu key={category.id} trigger='hover' position='left-start' withinPortal offset={8}>
                 <Menu.Target>
@@ -70,8 +88,6 @@ export function SystemSelectionPanel({
                     styles={(theme) => ({
                       root: {
                         borderColor: theme.colors.blue[3],
-                        fontWeight: 500,
-                        gap: theme.spacing.md,
                       },
                       section: {
                         alignItems: 'center',
@@ -90,23 +106,21 @@ export function SystemSelectionPanel({
                   </Button>
                 </Menu.Target>
                 <Menu.Dropdown>
-                  {category.systemIds.map((systemId) => {
-                    const system = systems[systemId]
-                    if (!system) {
-                      return null
-                    }
-
-                    const SystemIcon = resolveIcon(system.icon) ?? fallbackSystemIcon
-                    return (
-                      <Menu.Item
-                        key={systemId}
-                        onClick={() => onSystemSelect(systemId)}
-                        leftSection={<SystemIcon size={16} />}
-                      >
-                        {system.label}
-                      </Menu.Item>
-                    )
-                  })}
+                  {category.systemIds.map((systemId) => renderSystemItem(systemId))}
+                  {category.subMenus?.map((submenu) => (
+                    <Menu
+                      key={`${category.id}-${submenu.label}`}
+                      trigger='hover'
+                      position='left-start'
+                      withinPortal
+                      offset={4}
+                    >
+                      <Menu.Target>
+                        <Menu.Item rightSection={<PrefixIcon size={14} />}>{submenu.label}</Menu.Item>
+                      </Menu.Target>
+                      <Menu.Dropdown>{submenu.systemIds.map((systemId) => renderSystemItem(systemId))}</Menu.Dropdown>
+                    </Menu>
+                  ))}
                 </Menu.Dropdown>
               </Menu>
             )

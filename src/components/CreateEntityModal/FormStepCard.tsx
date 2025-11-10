@@ -51,8 +51,19 @@ const FormObjectFieldTemplate = ({ properties, title, description }: ObjectField
         )}
         <Grid gutter='md'>
           {visible.map((property) => {
-            const schema = ((property.content as any)?.props?.schema ?? property.schema ?? {}) as Record<string, unknown>
-            const uiSchema = ((property.content as any)?.props?.uiSchema ?? {}) as Record<string, unknown>
+            type PropertyMeta = {
+              schema?: Record<string, unknown>
+              uiSchema?: Record<string, unknown>
+            }
+            const meta = property as PropertyMeta
+            const schema = ((property.content as any)?.props?.schema ?? meta.schema ?? {}) as Record<
+              string,
+              unknown
+            >
+            const uiSchema = ((property.content as any)?.props?.uiSchema ?? meta.uiSchema ?? {}) as Record<
+              string,
+              unknown
+            >
             const options = (uiSchema['ui:options'] ?? {}) as Record<string, unknown>
             const spanOption = typeof options.colSpan === 'number' ? options.colSpan : undefined
             const shouldFull = shouldSpanFullWidth(schema, uiSchema)
@@ -141,18 +152,19 @@ export function FormStepCard({
 
   return (
     <Paper withBorder shadow='xs' p='md' style={paperStyle}>
-      <RjsfForm
-        schema={definition.schema}
-        uiSchema={combinedUiSchema}
-        formData={formData}
-        validator={validator}
-        liveValidate
-        ref={attachRef}
-        style={fullHeight ? { display: 'flex', flexDirection: 'column', flex: 1 } : undefined}
-        templates={{ ObjectFieldTemplate: FormObjectFieldTemplate }}
-        onChange={onChange}
-        onSubmit={onSubmit}
-      />
+      <Box style={fullHeight ? { display: 'flex', flexDirection: 'column', flex: 1 } : undefined}>
+        <RjsfForm
+          schema={definition.schema}
+          uiSchema={combinedUiSchema}
+          formData={formData}
+          validator={validator}
+          liveValidate
+          ref={attachRef}
+          templates={{ ObjectFieldTemplate: FormObjectFieldTemplate }}
+          onChange={onChange}
+          onSubmit={onSubmit}
+        />
+      </Box>
     </Paper>
   )
 }

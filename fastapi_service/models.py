@@ -18,11 +18,17 @@ class SystemDefinition(BaseModel):
     forms: Dict[str, FormDefinition]
 
 
+class CategorySubMenuDefinition(BaseModel):
+    label: str
+    systemIds: List[str]
+
+
 class CategoryDefinition(BaseModel):
     id: str
     label: str
     icon: Optional[str] = None
     systemIds: List[str]
+    subMenus: Optional[List[CategorySubMenuDefinition]] = None
 
 
 class FlowDefinition(BaseModel):

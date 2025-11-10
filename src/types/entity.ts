@@ -27,6 +27,10 @@ export interface CategoryDefinition {
   label: string;
   icon?: string;
   systemIds: string[];
+  subMenus?: {
+    label: string;
+    systemIds: string[];
+  }[];
 }
 
 export interface FlowDefinition {

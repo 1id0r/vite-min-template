@@ -1,17 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import {
-  Alert,
-  Box,
-  Button,
-  Center,
-  Divider,
-  Group,
-  Loader,
-  Modal,
-  Paper,
-  Stack,
-  Text,
-} from '@mantine/core'
+import { Alert, Box, Button, Center, Divider, Group, Loader, Modal, Paper, Stack, Text } from '@mantine/core'
 import type { IChangeEvent } from '@rjsf/core'
 import type { IconType } from 'react-icons'
 import * as FiIcons from 'react-icons/fi'
@@ -28,13 +16,7 @@ import { FlowStepper } from './FlowStepper'
 import { FormStepCard, type RjsfFormRef } from './FormStepCard'
 import { ResultSummary } from './ResultSummary'
 import { SystemSelectionPanel } from './SystemSelectionPanel'
-import type {
-  AggregatedResult,
-  FlowId,
-  FlowOption,
-  FormStatus,
-  IconResolver,
-} from './types'
+import type { AggregatedResult, FlowId, FlowOption, FormStatus, IconResolver } from './types'
 
 const createEmptyStepState = (): Record<StepKey, unknown> => ({
   system: {},
@@ -539,7 +521,7 @@ export function CreateEntityModal() {
                 <Text size='sm'>{configError ?? 'Check that the API is running on port 8000 and retry.'}</Text>
                 <Group justify='flex-end'>
                   <Button size='xs' variant='light' onClick={handleConfigRetry}>
-                    Retry
+                    נסה שוב
                   </Button>
                 </Group>
               </Stack>
@@ -567,16 +549,16 @@ export function CreateEntityModal() {
               {!isCompleted && (
                 <>
                   <Divider />
-                  <Group justify='space-between'>
+                  <Group dir='rtl' justify='space-between'>
                     <Button variant='default' onClick={goToPreviousStep} disabled={activeStep === 0}>
-                      Back
+                      חזור
                     </Button>
                     <Group>
                       <Button variant='default' onClick={handleClose}>
-                        Cancel
+                        ביטול
                       </Button>
                       <Button onClick={handleAdvance} disabled={nextButtonDisabled}>
-                        {activeStep === stepKeys.length - 1 ? 'Create entity' : 'Next'}
+                        {activeStep === stepKeys.length - 1 ? ' צור יישות' : 'המשך'}
                       </Button>
                     </Group>
                   </Group>
