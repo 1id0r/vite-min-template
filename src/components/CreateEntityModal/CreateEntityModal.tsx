@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { Alert, Box, Button, Center, Divider, Group, Loader, Modal, Paper, Stack, Text } from '@mantine/core'
+import { Alert, Box, Button, Center, Divider, Group, Loader, Modal, Stack, Text } from '@mantine/core'
 import type { IChangeEvent } from '@rjsf/core'
 import type { IconType } from 'react-icons'
 import * as FiIcons from 'react-icons/fi'
@@ -16,11 +16,21 @@ import { FlowStepper } from './FlowStepper'
 import { FormStepCard, type RjsfFormRef } from './FormStepCard'
 import { ResultSummary } from './ResultSummary'
 import { SystemSelectionPanel } from './SystemSelectionPanel'
+import { GeneralDetailsForm, type GeneralDetailsFormValue, type GeneralFormErrors } from '../GeneralDetailsForm'
 import type { AggregatedResult, FlowId, FlowOption, FormStatus, IconResolver } from './types'
 
-const createEmptyStepState = (): Record<StepKey, unknown> => ({
+const createGeneralFormValue = (entityLabel: string): GeneralDetailsFormValue => ({
+  displayName: '',
+  description: '',
+  entityType: entityLabel,
+  contactInfo: '',
+  responsibleParty: '',
+  links: [{ label: '', url: '' }],
+})
+
+const createEmptyStepState = (entityLabel = ''): Record<StepKey, unknown> => ({
   system: {},
-  general: {},
+  general: createGeneralFormValue(entityLabel),
   monitor: {},
 })
 
@@ -62,6 +72,7 @@ export function CreateEntityModal() {
   const [formDefinitions, setFormDefinitions] = useState<FormDefinitionsState>({})
   const [formStatus, setFormStatus] = useState<FormStatusState>({})
   const [formErrors, setFormErrors] = useState<FormErrorState>({})
+  const [generalFormErrors, setGeneralFormErrors] = useState<Record<string, GeneralFormErrors>>({})
   const formRefs = useRef<RjsfFormRefs>({
     system: null,
     general: null,
@@ -160,7 +171,7 @@ export function CreateEntityModal() {
     })
   }, [])
 
-  const ensureFormState = useCallback((systemId: string) => {
+  const ensureFormState = useCallback((systemId: string, entityLabel = '') => {
     setFormState((prev) => {
       if (prev[systemId]) {
         return prev
@@ -168,13 +179,18 @@ export function CreateEntityModal() {
 
       return {
         ...prev,
-        [systemId]: createEmptyStepState(),
+        [systemId]: createEmptyStepState(entityLabel),
       }
     })
   }, [])
 
   const requestFormDefinition = useCallback(
     async (systemId: string, stepKey: StepKey) => {
+      if (stepKey === 'general') {
+        ensureFormState(systemId)
+        return null
+      }
+
       ensureFormState(systemId)
 
       setFormStatus((prev) => ({
@@ -232,7 +248,7 @@ export function CreateEntityModal() {
   )
 
   useEffect(() => {
-    if (!selectedSystem || !activeStepKey || activeStepKey === 'system') {
+    if (!selectedSystem || !activeStepKey || activeStepKey === 'system' || activeStepKey === 'general') {
       return
     }
 
@@ -249,7 +265,7 @@ export function CreateEntityModal() {
   }, [activeStepKey, formDefinitions, formStatus, requestFormDefinition, selectedSystem])
 
   useEffect(() => {
-    if (!selectedSystem || !activeStepKey || activeStepKey === 'system') {
+    if (!selectedSystem || !activeStepKey || activeStepKey === 'system' || activeStepKey === 'general') {
       return
     }
 
@@ -303,6 +319,71 @@ export function CreateEntityModal() {
     setActiveStep(stepKeys.length)
   }, [aggregateResult, stepKeys.length])
 
+  const handleGeneralValueChange = useCallback((systemId: string, nextValue: GeneralDetailsFormValue) => {
+    setFormState((prev) => ({
+      ...prev,
+      [systemId]: {
+        ...(prev[systemId] ?? createEmptyStepState(nextValue.entityType)),
+        general: nextValue,
+      },
+    }))
+  }, [])
+
+  const clearGeneralFieldError = useCallback((systemId: string, field: keyof GeneralFormErrors) => {
+    setGeneralFormErrors((prev) => {
+      const systemErrors = prev[systemId]
+      if (!systemErrors || !systemErrors[field]) {
+        return prev
+      }
+      const nextSystemErrors = { ...systemErrors }
+      delete nextSystemErrors[field]
+      const next = { ...prev, [systemId]: nextSystemErrors }
+      if (Object.keys(nextSystemErrors).length === 0) {
+        delete next[systemId]
+      }
+      return { ...next }
+    })
+  }, [])
+
+  const validateGeneralStep = useCallback(
+    (systemId: string) => {
+      const generalValue =
+        (formState[systemId]?.general as GeneralDetailsFormValue | undefined) ??
+        createGeneralFormValue(config?.systems?.[systemId]?.label ?? '')
+
+      const errors: GeneralFormErrors = {}
+      if (!generalValue.displayName.trim()) {
+        errors.displayName = 'שדה חובה'
+      }
+      if (!generalValue.description.trim()) {
+        errors.description = 'שדה חובה'
+      }
+      if (!generalValue.entityType.trim()) {
+        errors.entityType = 'שדה חובה'
+      }
+
+      if (Object.keys(errors).length > 0) {
+        setGeneralFormErrors((prev) => ({
+          ...prev,
+          [systemId]: errors,
+        }))
+        return false
+      }
+
+      setGeneralFormErrors((prev) => {
+        if (!prev[systemId]) {
+          return prev
+        }
+        const next = { ...prev }
+        delete next[systemId]
+        return next
+      })
+
+      return true
+    },
+    [config, formState]
+  )
+
   const handleAdvance = useCallback(() => {
     if (!stepKeys.length) {
       return
@@ -317,6 +398,18 @@ export function CreateEntityModal() {
       return
     }
 
+    if (currentKey === 'general') {
+      if (!selectedSystem || !validateGeneralStep(selectedSystem)) {
+        return
+      }
+      if (activeStep === stepKeys.length - 1) {
+        handleCreate()
+      } else {
+        goToNextStep()
+      }
+      return
+    }
+
     const formRef = formRefs.current[currentKey]
 
     if (formRef && typeof formRef.submit === 'function') {
@@ -326,7 +419,7 @@ export function CreateEntityModal() {
     } else {
       goToNextStep()
     }
-  }, [activeStep, canMoveNext, goToNextStep, handleCreate, stepKeys])
+  }, [activeStep, canMoveNext, goToNextStep, handleCreate, selectedSystem, stepKeys, validateGeneralStep])
 
   const handleOpen = useCallback(() => {
     setOpened(true)
@@ -345,6 +438,7 @@ export function CreateEntityModal() {
     setSelectedSystem(null)
     setResult(null)
     setFormState({})
+    setGeneralFormErrors({})
     resetRefs()
   }, [resetRefs])
 
@@ -359,15 +453,29 @@ export function CreateEntityModal() {
     setActiveStep(0)
     setResult(null)
     setSelectedSystem(null)
+    setGeneralFormErrors({})
   }, [])
 
   const handleSystemSelect = useCallback(
     (systemId: string) => {
+      const systemLabel = config?.systems?.[systemId]?.label ?? ''
       setSelectedSystem(systemId)
-      ensureFormState(systemId)
+      ensureFormState(systemId, systemLabel)
+      setFormState((prev) => ({
+        ...prev,
+        [systemId]: {
+          ...(prev[systemId] ?? createEmptyStepState(systemLabel)),
+          general: createGeneralFormValue(systemLabel),
+        },
+      }))
+      setGeneralFormErrors((prev) => {
+        const next = { ...prev }
+        delete next[systemId]
+        return next
+      })
       setResult(null)
     },
-    [ensureFormState]
+    [config, ensureFormState]
   )
 
   const onFormChange = useCallback((systemId: string, key: StepKey, change: IChangeEvent) => {
@@ -428,6 +536,7 @@ export function CreateEntityModal() {
     (activeStepKey === 'system' && !canMoveNext) ||
     (activeStepKey !== null &&
       activeStepKey !== 'system' &&
+      activeStepKey !== 'general' &&
       selectedSystem !== null &&
       formStatus[selectedSystem]?.[activeStepKey] === 'loading')
 
@@ -438,23 +547,21 @@ export function CreateEntityModal() {
 
     if (activeStepKey === 'system') {
       return (
-        <Paper withBorder p='lg' shadow='xs'>
-          <SystemSelectionPanel
-            categories={categories}
-            systems={systems}
-            selectedSystem={selectedSystem}
-            selectedSystemConfig={selectedSystemConfig ?? null}
-            flowOptions={flowOptions}
-            activeFlow={flow}
-            onFlowChange={handleFlowChange}
-            flowDescription={flowDescription}
-            onSystemSelect={handleSystemSelect}
-            resolveIcon={resolveIcon}
-            fallbackCategoryIcon={fallbackCategoryIcon}
-            fallbackSystemIcon={fallbackSystemIcon}
-            prefixIcon={categoryPrefixIcon}
-          />
-        </Paper>
+        <SystemSelectionPanel
+          categories={categories}
+          systems={systems}
+          selectedSystem={selectedSystem}
+          selectedSystemConfig={selectedSystemConfig ?? null}
+          flowOptions={flowOptions}
+          activeFlow={flow}
+          onFlowChange={handleFlowChange}
+          flowDescription={flowDescription}
+          onSystemSelect={handleSystemSelect}
+          resolveIcon={resolveIcon}
+          fallbackCategoryIcon={fallbackCategoryIcon}
+          fallbackSystemIcon={fallbackSystemIcon}
+          prefixIcon={categoryPrefixIcon}
+        />
       )
     }
 
@@ -463,6 +570,22 @@ export function CreateEntityModal() {
         <Alert color='blue' title='Select a system'>
           Choose one of the templates from the menu to unlock this step.
         </Alert>
+      )
+    }
+
+    if (activeStepKey === 'general') {
+      const generalValue =
+        (formState[selectedSystem]?.general as GeneralDetailsFormValue | undefined) ??
+        createGeneralFormValue(systems[selectedSystem]?.label ?? '')
+      const errors = generalFormErrors[selectedSystem] ?? {}
+
+      return (
+        <GeneralDetailsForm
+          value={generalValue}
+          errors={errors}
+          onChange={(nextValue: GeneralDetailsFormValue) => handleGeneralValueChange(selectedSystem, nextValue)}
+          onFieldTouched={(field: keyof GeneralFormErrors) => clearGeneralFieldError(selectedSystem, field)}
+        />
       )
     }
 
@@ -530,7 +653,10 @@ export function CreateEntityModal() {
 
           {config && currentFlow && (
             <>
-              <FlowStepper stepKeys={stepKeys} activeStep={activeStep} definitions={stepDefinitions} />
+              <Stack gap="md">
+                <FlowStepper stepKeys={stepKeys} activeStep={activeStep} definitions={stepDefinitions} />
+                <Divider />
+              </Stack>
 
               {!isCompleted && (
                 <Box

@@ -10,6 +10,7 @@ interface FlowStepperProps {
 export function FlowStepper({ stepKeys, activeStep, definitions }: FlowStepperProps) {
   return (
     <Stepper
+      dir='rtl'
       active={activeStep}
       allowNextStepsSelect={false}
       styles={(theme) => ({

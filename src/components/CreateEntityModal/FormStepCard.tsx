@@ -4,7 +4,7 @@ import { Theme as MantineTheme } from '@rjsf/mantine'
 import validator from '@rjsf/validator-ajv8'
 import type { ObjectFieldTemplateProps } from '@rjsf/utils'
 import type { FormDefinition } from '../../types/entity'
-import { OwningTeamAsyncSelect } from '../form-widgets/OwningTeamAsyncSelect'
+import { AsyncSelectWidget } from '../form-widgets/AsyncSelectWidget'
 import type { FormStatus } from './types'
 
 const RjsfForm = withTheme(MantineTheme)
@@ -89,7 +89,7 @@ const FormObjectFieldTemplate = ({ properties, title, description }: ObjectField
 }
 
 const formWidgets = {
-  OwningTeamAsyncSelect,
+  AsyncSelect: AsyncSelectWidget,
 }
 
 interface FormStepCardProps {
@@ -115,17 +115,17 @@ export function FormStepCard({
   onRetry,
   fullHeight = false,
 }: FormStepCardProps) {
-  const paperStyle = fullHeight
+  const containerStyle = fullHeight
     ? {
         height: '100%',
         display: 'flex',
         flexDirection: 'column' as const,
       }
-    : undefined
+    : {}
 
   if (status === 'error' && !definition) {
     return (
-      <Paper withBorder shadow='xs' p='md' style={paperStyle}>
+      <Paper p='md' shadow='none' withBorder={false} style={containerStyle}>
         <Stack gap='sm'>
           <Alert color='red' title='Failed to load form'>
             {error ?? 'Unable to fetch the form definition. Try again.'}
@@ -140,7 +140,7 @@ export function FormStepCard({
 
   if (!definition) {
     return (
-      <Paper withBorder shadow='xs' p='md' style={paperStyle}>
+      <Paper p='md' shadow='none' withBorder={false} style={containerStyle}>
         <Center style={fullHeight ? { flex: 1 } : undefined}>
           <Loader size='sm' />
         </Center>
@@ -156,7 +156,7 @@ export function FormStepCard({
   }
 
   return (
-    <Paper withBorder shadow='xs' p='md' style={paperStyle}>
+    <Paper p='md' shadow='none' withBorder={false} style={containerStyle}>
       <Box style={fullHeight ? { display: 'flex', flexDirection: 'column', flex: 1 } : undefined}>
         <RjsfForm
           schema={definition.schema}

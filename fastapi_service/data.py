@@ -1,453 +1,65 @@
+def basic_forms(entity_label: str):
+    return {
+        "system": {
+            "schema": {
+                "title": f"{entity_label} setup",
+                "type": "object",
+                "required": ["identifier", "region"],
+                "properties": {
+                    "identifier": {"type": "string", "title": "Identifier"},
+                    "region": {"type": "string", "title": "Region"},
+                    "capacity": {"type": "integer", "title": "Capacity", "minimum": 0},
+                },
+            },
+            "uiSchema": {
+                "identifier": {"ui:options": {"colSpan": 6}},
+                "region": {"ui:options": {"colSpan": 6}},
+                "capacity": {"ui:options": {"colSpan": 6}},
+            },
+        },
+        "general": {
+            "schema": {
+                "title": f"{entity_label} general",
+                "type": "object",
+                "properties": {
+                    "owner": {"type": "string", "title": "Owner"},
+                    "environment": {
+                        "type": "string",
+                        "title": "Environment",
+                        "enum": ["dev", "qa", "prod"],
+                    },
+                },
+            },
+            "uiSchema": {
+                "owner": {
+                    "ui:widget": "AsyncSelect",
+                    "ui:options": {
+                        "colSpan": 6,
+                        "asyncOptions": {"path": "/owning-teams"},
+                        "placeholder": "Select owner",
+                    },
+                },
+                "environment": {"ui:options": {"colSpan": 6}},
+            },
+        },
+        "monitor": {
+            "schema": {
+                "title": f"{entity_label} monitoring",
+                "type": "object",
+                "properties": {
+                    "alertChannel": {"type": "string", "title": "Alert channel"},
+                    "enableTelemetry": {"type": "boolean", "title": "Enable telemetry", "default": True},
+                },
+            },
+            "uiSchema": {
+                "alertChannel": {"ui:options": {"colSpan": 6}},
+                "enableTelemetry": {"ui:options": {"colSpan": 6}},
+            },
+        },
+    }
+
+
 SYSTEMS = {
-    "laptop": {
-        "id": "laptop",
-        "label": "Laptop",
-        "category": "compute",
-        "icon": "FiMonitor",
-        "description": "Represents individual developer or field laptops that report compliance posture.",
-        "forms": {
-            "system": {
-                "schema": {
-                    "title": "Laptop setup",
-                    "type": "object",
-                    "required": ["assetId", "ownerEmail"],
-                    "properties": {
-                        "assetId": {
-                            "type": "string",
-                            "title": "Asset tag",
-                            "minLength": 3,
-                        },
-                        "serial": {
-                            "type": "string",
-                            "title": "Serial number",
-                        },
-                        "ownerEmail": {
-                            "type": "string",
-                            "title": "Primary owner",
-                            "format": "email",
-                        },
-                        "osVersion": {
-                            "type": "string",
-                            "title": "OS version",
-                            "default": "macOS 15",
-                        },
-                    },
-                },
-                "uiSchema": {
-                    "assetId": {"ui:autofocus": True, "ui:options": {"colSpan": 6}},
-                    "serial": {"ui:options": {"colSpan": 6}},
-                    "ownerEmail": {
-                        "ui:placeholder": "name@company.com",
-                        "ui:options": {"colSpan": 6},
-                    },
-                    "osVersion": {"ui:options": {"colSpan": 6}},
-                },
-                "initialData": {"osVersion": "macOS 15"},
-            },
-            "general": {
-                "schema": {
-                    "title": "Laptop general",
-                    "type": "object",
-                    "required": ["team", "environment"],
-                    "properties": {
-                        "environment": {
-                            "type": "string",
-                            "title": "Environment",
-                            "enum": ["dev", "qa", "prod"],
-                            "enumNames": ["Development", "Quality", "Production"],
-                        },
-                        "team": {"type": "string", "title": "Owning team"},
-                        "notes": {"type": "string", "title": "Notes"},
-                    },
-                },
-                "uiSchema": {
-                    "environment": {"ui:widget": "radio", "ui:options": {"colSpan": 6}},
-                    "team": {
-                        "ui:widget": "OwningTeamAsyncSelect",
-                        "ui:options": {"colSpan": 6, "placeholder": "Search owning team"},
-                    },
-                    "notes": {"ui:widget": "textarea"},
-                },
-            },
-            "monitor": {
-                "schema": {
-                    "title": "Laptop monitoring",
-                    "type": "object",
-                    "required": ["heartbeatInterval", "alertEmails"],
-                    "properties": {
-                        "heartbeatInterval": {
-                            "type": "number",
-                            "title": "Heartbeat interval (minutes)",
-                            "minimum": 1,
-                            "default": 5,
-                        },
-                        "alertEmails": {
-                            "type": "array",
-                            "title": "Alert recipients",
-                            "items": {"type": "string", "format": "email"},
-                            "minItems": 1,
-                        },
-                        "enableDiskChecks": {
-                            "type": "boolean",
-                            "title": "Disk capacity alerts",
-                            "default": True,
-                        },
-                    },
-                },
-                "uiSchema": {
-                    "alertEmails": {
-                        "items": {"ui:placeholder": "alerts@company.com"},
-                    }
-                },
-            },
-        },
-    },
-    "server": {
-        "id": "server",
-        "label": "Server",
-        "category": "compute",
-        "icon": "FiServer",
-        "description": "Fleet server provisioning for data center or cloud based VMs with richer metadata.",
-        "forms": {
-            "system": {
-                "schema": {
-                    "title": "Server blueprint",
-                    "type": "object",
-                    "required": ["hostname", "region", "cpuCores"],
-                    "properties": {
-                        "hostname": {"type": "string", "title": "Hostname"},
-                        "region": {
-                            "type": "string",
-                            "title": "Region",
-                            "enum": ["us-east-1", "us-west-2", "eu-west-1"],
-                        },
-                        "cpuCores": {
-                            "type": "integer",
-                            "title": "CPU cores",
-                            "minimum": 2,
-                            "default": 4,
-                        },
-                        "memoryGb": {
-                            "type": "integer",
-                            "title": "Memory (GB)",
-                            "default": 16,
-                        },
-                        "tags": {
-                            "type": "array",
-                            "title": "Tags",
-                            "items": {"type": "string"},
-                        },
-                    },
-                },
-                "uiSchema": {
-                    "hostname": {"ui:autofocus": True, "ui:options": {"colSpan": 6}},
-                    "region": {"ui:options": {"colSpan": 6}},
-                    "cpuCores": {"ui:options": {"colSpan": 6}},
-                    "memoryGb": {"ui:options": {"colSpan": 6}},
-                    "tags": {"ui:options": {"orderable": False, "colSpan": 12}},
-                },
-            },
-            "general": {
-                "schema": {
-                    "title": "Server general",
-                    "type": "object",
-                    "required": ["service", "tier"],
-                    "properties": {
-                        "service": {"type": "string", "title": "Service name"},
-                        "tier": {
-                            "type": "string",
-                            "title": "Tier",
-                            "enum": ["critical", "important", "best-effort"],
-                        },
-                        "ownerSlack": {
-                            "type": "string",
-                            "title": "Slack channel",
-                            "pattern": "^#.*$",
-                        },
-                    },
-                },
-                "uiSchema": {
-                    "service": {"ui:options": {"colSpan": 6}},
-                    "tier": {"ui:options": {"colSpan": 6}},
-                    "ownerSlack": {
-                        "ui:placeholder": "#oncall-core",
-                        "ui:options": {"colSpan": 12},
-                    },
-                },
-            },
-            "monitor": {
-                "schema": {
-                    "title": "Server monitoring",
-                    "type": "object",
-                    "required": ["errorBudgetMinutes", "pagerRotation"],
-                    "properties": {
-                        "errorBudgetMinutes": {
-                            "type": "integer",
-                            "title": "Monthly error budget (minutes)",
-                            "minimum": 0,
-                            "default": 30,
-                        },
-                        "pagerRotation": {
-                            "type": "string",
-                            "title": "Pager rotation",
-                        },
-                        "syntheticCheckUrl": {
-                            "type": "string",
-                            "title": "Synthetic URL",
-                            "format": "uri",
-                        },
-                    },
-                },
-            },
-        },
-    },
-    "kafka": {
-        "id": "kafka",
-        "label": "Kafka",
-        "category": "data",
-        "icon": "FiActivity",
-        "description": "Cluster level Kafka monitoring with replication, storage, and lag thresholds.",
-        "forms": {
-            "system": {
-                "schema": {
-                    "title": "Kafka cluster setup",
-                    "type": "object",
-                    "required": ["clusterName", "brokers"],
-                    "properties": {
-                        "clusterName": {
-                            "type": "string",
-                            "title": "Cluster name",
-                        },
-                        "brokers": {
-                            "type": "integer",
-                            "title": "Broker count",
-                            "minimum": 1,
-                        },
-                        "schemaRegistry": {
-                            "type": "string",
-                            "title": "Schema registry URL",
-                            "format": "uri",
-                        },
-                    },
-                },
-                "uiSchema": {
-                    "clusterName": {"ui:options": {"colSpan": 6}},
-                    "brokers": {"ui:options": {"colSpan": 6}},
-                    "schemaRegistry": {"ui:options": {"colSpan": 12}},
-                },
-            },
-            "general": {
-                "schema": {
-                    "title": "Kafka general",
-                    "type": "object",
-                    "required": ["businessOwner", "retentionHours"],
-                    "properties": {
-                        "businessOwner": {
-                            "type": "string",
-                            "title": "Business owner",
-                        },
-                        "retentionHours": {
-                            "type": "integer",
-                            "title": "Log retention (hours)",
-                            "minimum": 24,
-                        },
-                        "encryption": {
-                            "type": "string",
-                            "title": "Encryption at rest",
-                            "enum": ["none", "sse-s3", "kms"],
-                            "default": "sse-s3",
-                        },
-                    },
-                },
-                "uiSchema": {
-                    "businessOwner": {"ui:options": {"colSpan": 6}},
-                    "retentionHours": {"ui:options": {"colSpan": 6}},
-                    "encryption": {"ui:options": {"colSpan": 6}},
-                },
-            },
-            "monitor": {
-                "schema": {
-                    "title": "Kafka monitoring",
-                    "type": "object",
-                    "required": ["maxConsumerLag", "replicationFactor"],
-                    "properties": {
-                        "maxConsumerLag": {
-                            "type": "integer",
-                            "title": "Max consumer lag (messages)",
-                            "minimum": 0,
-                            "default": 5000,
-                        },
-                        "replicationFactor": {
-                            "type": "integer",
-                            "title": "Required replication factor",
-                            "minimum": 1,
-                            "maximum": 5,
-                            "default": 3,
-                        },
-                        "alertTopic": {
-                            "type": "string",
-                            "title": "Alert topic",
-                        },
-                    },
-                },
-            },
-        },
-    },
-    "mongo": {
-        "id": "mongo",
-        "label": "MongoDB",
-        "category": "data",
-        "icon": "FiDatabase",
-        "description": "Replica set and sharded cluster telemetry definitions for MongoDB deployments.",
-        "forms": {
-            "system": {
-                "schema": {
-                    "title": "Mongo deployment",
-                    "type": "object",
-                    "required": ["deploymentType", "version"],
-                    "properties": {
-                        "deploymentType": {
-                            "type": "string",
-                            "title": "Deployment type",
-                            "enum": ["replicaset", "sharded"],
-                        },
-                        "version": {
-                            "type": "string",
-                            "title": "Mongo version",
-                            "default": "7.0",
-                        },
-                        "connectionString": {
-                            "type": "string",
-                            "title": "Connection string",
-                        },
-                    },
-                },
-                "uiSchema": {
-                    "deploymentType": {"ui:options": {"colSpan": 6}},
-                    "version": {"ui:options": {"colSpan": 6}},
-                    "connectionString": {"ui:options": {"colSpan": 12}},
-                },
-            },
-            "general": {
-                "schema": {
-                    "title": "Mongo general",
-                    "type": "object",
-                    "required": ["dataClassification"],
-                    "properties": {
-                        "dataClassification": {
-                            "type": "string",
-                            "title": "Data classification",
-                            "enum": ["public", "internal", "restricted"],
-                        },
-                        "owners": {
-                            "type": "array",
-                            "title": "Owners",
-                            "items": {"type": "string"},
-                        },
-                    },
-                },
-                "uiSchema": {
-                    "dataClassification": {"ui:options": {"colSpan": 6}},
-                    "owners": {"ui:options": {"orderable": False, "colSpan": 12}},
-                },
-            },
-            "monitor": {
-                "schema": {
-                    "title": "Mongo monitoring",
-                    "type": "object",
-                    "required": ["backupWindow", "slowQueryThresholdMs"],
-                    "properties": {
-                        "backupWindow": {
-                            "type": "string",
-                            "title": "Backup window",
-                        },
-                        "slowQueryThresholdMs": {
-                            "type": "integer",
-                            "title": "Slow query threshold (ms)",
-                            "default": 200,
-                        },
-                        "enableOplogChecks": {
-                            "type": "boolean",
-                            "title": "Monitor Oplog replication lag",
-                            "default": True,
-                        },
-                    },
-                },
-            },
-        },
-    },
-    "linux": {
-        "id": "linux",
-        "label": "Linux",
-        "category": "platform",
-        "icon": "FiLayers",
-        "description": "Generic Linux host provisioning with package, user, and hardening baselines.",
-        "forms": {
-            "system": {
-                "schema": {
-                    "title": "Linux baseline",
-                    "type": "object",
-                    "required": ["distro", "version"],
-                    "properties": {
-                        "distro": {
-                            "type": "string",
-                            "title": "Distribution",
-                            "enum": ["ubuntu", "debian", "rhel", "amazon-linux"],
-                        },
-                        "version": {"type": "string", "title": "Version"},
-                        "hardened": {
-                            "type": "boolean",
-                            "title": "Apply CIS baseline",
-                            "default": True,
-                        },
-                    },
-                },
-                "uiSchema": {
-                    "distro": {"ui:options": {"colSpan": 6}},
-                    "version": {"ui:options": {"colSpan": 6}},
-                    "hardened": {"ui:options": {"colSpan": 6}},
-                },
-            },
-            "general": {
-                "schema": {
-                    "title": "Linux general",
-                    "type": "object",
-                    "properties": {
-                        "changeRequest": {
-                            "type": "string",
-                            "title": "Change request ID",
-                        },
-                        "documentation": {
-                            "type": "string",
-                            "title": "Docs URL",
-                            "format": "uri",
-                        },
-                    },
-                },
-                "uiSchema": {
-                    "changeRequest": {"ui:options": {"colSpan": 6}},
-                    "documentation": {"ui:options": {"colSpan": 6}},
-                },
-            },
-            "monitor": {
-                "schema": {
-                    "title": "Linux monitoring",
-                    "type": "object",
-                    "properties": {
-                        "logAggregation": {
-                            "type": "string",
-                            "title": "Log aggregation endpoint",
-                        },
-                        "syslogFacility": {
-                            "type": "string",
-                            "title": "Syslog facility",
-                            "enum": ["kern", "mail", "daemon", "auth", "local0"],
-                        },
-                    },
-                },
-            },
-        },
-    },
     "vm_linux": {
         "id": "vm_linux",
         "label": "VM - Linux",
@@ -680,12 +292,166 @@ SYSTEMS = {
             },
         },
     },
+    **{
+        system_id: {
+            "id": system_id,
+            "label": label,
+            "category": "network",
+            "icon": icon,
+            "description": desc,
+            "forms": basic_forms(label),
+        }
+        for system_id, label, icon, desc in [
+            ("dns", "DNS", "FiGlobe", "Authoritative DNS components"),
+            ("gslb", "GSLB", "FiMap", "Global server load balancer"),
+            ("avi", "Avi", "FiAirplay", "Avi load balancer"),
+            ("dp", "DP", "FiShare2", "Data plane device"),
+        ]
+    },
+    **{
+        system_id: {
+            "id": system_id,
+            "label": label,
+            "category": "ml",
+            "icon": icon,
+            "description": desc,
+            "forms": basic_forms(label),
+        }
+        for system_id, label, icon, desc in [
+            ("prophet", "Prophet", "FiTrendingUp", "Time-series forecasting pipelines"),
+            ("runai", "Run:AI", "FiCpu", "GPU scheduling platform"),
+            ("jupyter", "Jupyter", "FiBook", "Interactive notebooks"),
+            ("llm", "LLM", "FiFeather", "Large language model serving"),
+            ("richard", "Richard", "FiCode", "Internal ML service"),
+        ]
+    },
+    **{
+        system_id: {
+            "id": system_id,
+            "label": label,
+            "category": "search",
+            "icon": icon,
+            "description": desc,
+            "forms": basic_forms(label),
+        }
+        for system_id, label, icon, desc in [
+            ("eck", "ECK", "FiSearch", "Elastic Cloud on Kubernetes"),
+            ("solr", "Solr", "FiSearch", "Apache Solr clusters"),
+        ]
+    },
+    **{
+        system_id: {
+            "id": system_id,
+            "label": label,
+            "category": "databases",
+            "icon": icon,
+            "description": desc,
+            "forms": basic_forms(label),
+        }
+        for system_id, label, icon, desc in [
+            ("sql_server", "SQL Server", "FiDatabase", "Microsoft SQL Server instances"),
+            ("postgresql", "PostgreSQL", "FiDatabase", "PostgreSQL clusters"),
+            ("oracle_db", "Oracle Database", "FiDatabase", "Oracle multi-tenant database"),
+            ("mongo_k", "Mongo K", "FiDatabase", "MongoDB clusters"),
+            ("redis", "Redis", "FiDatabase", "Redis caches"),
+            ("s3_db", "S3", "FiDatabase", "S3 data lake buckets"),
+        ]
+    },
+    **{
+        system_id: {
+            "id": system_id,
+            "label": label,
+            "category": "filesystems",
+            "icon": icon,
+            "description": desc,
+            "forms": basic_forms(label),
+        }
+        for system_id, label, icon, desc in [
+            ("hadoop_hdfs", "Hadoop-HDFS", "FiHardDrive", "HDFS storage clusters"),
+            ("nfs", "NFS", "FiHardDrive", "Network file systems"),
+            ("cifs", "CIFS", "FiHardDrive", "SMB/CIFS shares"),
+        ]
+    },
+    **{
+        system_id: {
+            "id": system_id,
+            "label": label,
+            "category": "transport",
+            "icon": icon,
+            "description": desc,
+            "forms": basic_forms(label),
+        }
+        for system_id, label, icon, desc in [
+            ("kafka", "Kafka", "FiActivity", "Kafka messaging"),
+            ("rabbitmq", "RabbitMQ", "FiSend", "RabbitMQ brokers"),
+            ("spark_ocp4", "Spark on OCP4", "FiZap", "Spark workloads on OpenShift"),
+            ("airflow", "Airflow", "FiWind", "Workflow orchestration"),
+            ("tardis_xport", "Tardis-Xport", "FiShuffle", "Data export service"),
+            ("ibm_mq", "IBM MQ", "FiInbox", "IBM MQ queues"),
+            ("s3_pipeline", "S3", "FiCloud", "S3 transport pipelines"),
+        ]
+    },
+    **{
+        system_id: {
+            "id": system_id,
+            "label": label,
+            "category": "applications",
+            "icon": icon,
+            "description": desc,
+            "forms": basic_forms(label),
+        }
+        for system_id, label, icon, desc in [
+            ("tiva", "תיבה", "FiPackage", "Flow application Teiva"),
+            ("mishloach", "משלוח", "FiSend", "Flow application Mishloach"),
+        ]
+    },
 }
 
 CATEGORIES = [
-    {"id": "compute", "label": "Compute", "icon": "FiCpu", "systemIds": ["laptop", "server"]},
-    {"id": "data", "label": "Data", "icon": "FiDatabase", "systemIds": ["kafka", "mongo"]},
-    {"id": "platform", "label": "Platform", "icon": "FiLayers", "systemIds": ["linux"]},
+    {
+        "id": "network",
+        "label": "רכיבי רשת",
+        "icon": "FiGlobe",
+        "systemIds": ["dns", "gslb", "avi", "dp"],
+    },
+    {
+        "id": "ml",
+        "label": "למידת מכונה",
+        "icon": "FiTrendingUp",
+        "systemIds": ["prophet", "runai", "jupyter", "llm", "richard"],
+    },
+    {
+        "id": "search",
+        "label": "מנועי חיפוש",
+        "icon": "FiSearch",
+        "systemIds": ["eck", "solr"],
+    },
+    {
+        "id": "databases",
+        "label": "מסדי נתונים",
+        "icon": "FiDatabase",
+        "systemIds": ["sql_server", "postgresql", "oracle_db", "mongo_k", "redis", "s3_db"],
+    },
+    {
+        "id": "filesystems",
+        "label": "מערכות קבצים",
+        "icon": "FiHardDrive",
+        "systemIds": ["hadoop_hdfs", "nfs", "cifs"],
+    },
+    {
+        "id": "transport",
+        "label": "עיבוד ושינוע",
+        "icon": "FiShuffle",
+        "systemIds": [
+            "kafka",
+            "rabbitmq",
+            "spark_ocp4",
+            "airflow",
+            "tardis_xport",
+            "ibm_mq",
+            "s3_pipeline",
+        ],
+    },
     {
         "id": "virtualization",
         "label": "וירטואליזציה",
@@ -697,6 +463,18 @@ CATEGORIES = [
             }
         ],
         "systemIds": ["ocp4", "pvc"],
+    },
+    {
+        "id": "applications",
+        "label": "אפליקציות",
+        "icon": "FiGrid",
+        "systemIds": [],
+        "subMenus": [
+            {
+                "label": "זרימה",
+                "systemIds": ["tiva", "mishloach"],
+            }
+        ],
     },
 ]
 
