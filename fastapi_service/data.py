@@ -62,7 +62,10 @@ SYSTEMS = {
                 },
                 "uiSchema": {
                     "environment": {"ui:widget": "radio", "ui:options": {"colSpan": 6}},
-                    "team": {"ui:options": {"colSpan": 6}},
+                    "team": {
+                        "ui:widget": "OwningTeamAsyncSelect",
+                        "ui:options": {"colSpan": 6, "placeholder": "Search owning team"},
+                    },
                     "notes": {"ui:widget": "textarea"},
                 },
             },
@@ -695,6 +698,16 @@ CATEGORIES = [
         ],
         "systemIds": ["ocp4", "pvc"],
     },
+]
+
+OWNING_TEAMS = [
+    "Observability",
+    "Core Platform",
+    "Site Reliability",
+    "Data Integrity",
+    "Growth Engineering",
+    "Security Operations",
+    "Developer Experience",
 ]
 
 FLOWS = {

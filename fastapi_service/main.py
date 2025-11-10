@@ -3,8 +3,8 @@ from typing import Dict, List
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 
-from .data import CATEGORIES, FLOWS, STEPS, SYSTEMS
-from .models import (
+from data import CATEGORIES, FLOWS, OWNING_TEAMS, STEPS, SYSTEMS
+from models import (
     CategoryDefinition,
     EntityConfig,
     FlowDefinition,
@@ -83,6 +83,11 @@ async def get_form(system_id: str, step_key: str) -> FormDefinition:
         raise HTTPException(status_code=404, detail="Form not found for step")
 
     return form
+
+
+@app.get("/owning-teams", response_model=List[str])
+async def get_owning_teams() -> List[str]:
+    return OWNING_TEAMS
 
 
 @app.get("/")

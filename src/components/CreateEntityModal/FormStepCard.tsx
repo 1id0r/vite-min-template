@@ -4,6 +4,7 @@ import { Theme as MantineTheme } from '@rjsf/mantine'
 import validator from '@rjsf/validator-ajv8'
 import type { ObjectFieldTemplateProps } from '@rjsf/utils'
 import type { FormDefinition } from '../../types/entity'
+import { OwningTeamAsyncSelect } from '../form-widgets/OwningTeamAsyncSelect'
 import type { FormStatus } from './types'
 
 const RjsfForm = withTheme(MantineTheme)
@@ -87,6 +88,10 @@ const FormObjectFieldTemplate = ({ properties, title, description }: ObjectField
   )
 }
 
+const formWidgets = {
+  OwningTeamAsyncSelect,
+}
+
 interface FormStepCardProps {
   status?: FormStatus
   definition?: FormDefinition
@@ -160,6 +165,7 @@ export function FormStepCard({
           validator={validator}
           liveValidate
           ref={attachRef}
+          widgets={formWidgets}
           templates={{ ObjectFieldTemplate: FormObjectFieldTemplate }}
           onChange={onChange}
           onSubmit={onSubmit}

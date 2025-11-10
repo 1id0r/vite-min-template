@@ -43,3 +43,7 @@ export async function fetchFormDefinition(
 ): Promise<FormDefinition> {
   return request<FormDefinition>(`/systems/${systemId}/forms/${stepKey}`);
 }
+
+export async function fetchOwningTeams(): Promise<string[]> {
+  return request<string[]>("/owning-teams");
+}
