@@ -1,3 +1,44 @@
+GENERAL_FORM_DEFINITION = {
+    "schema": {
+        "title": "פרטים כלליים",
+        "type": "object",
+        "required": ["displayName", "description", "entityType"],
+        "properties": {
+            "displayName": {"type": "string", "title": "שם תצוגה"},
+            "entityType": {"type": "string", "title": "סוג יישות", "readOnly": True},
+            "description": {"type": "string", "title": "תיאור"},
+            "contactInfo": {"type": "string", "title": "פרטי התקשרות"},
+            "responsibleParty": {"type": "string", "title": "גורם אחראי"},
+            "links": {
+                "type": "array",
+                "title": "לינקים",
+                "items": {
+                    "type": "object",
+                    "required": [],
+                    "properties": {
+                        "label": {"type": "string", "title": "שם תצוגה"},
+                        "url": {"type": "string", "title": "לינק"},
+                    },
+                },
+            },
+        },
+    },
+    "uiSchema": {
+        "displayName": {"ui:options": {"colSpan": 6}},
+        "entityType": {"ui:disabled": True, "ui:options": {"colSpan": 6}},
+        "description": {"ui:widget": "textarea", "ui:options": {"colSpan": 12}},
+        "contactInfo": {"ui:options": {"colSpan": 6}},
+        "responsibleParty": {"ui:options": {"colSpan": 6}},
+        "links": {
+            "ui:options": {"orderable": False},
+            "items": {
+                "label": {"ui:options": {"colSpan": 6, "placeholder": "שם תצוגה ללינק"}},
+                "url": {"ui:options": {"colSpan": 6, "placeholder": "לינק"}},
+            },
+        },
+    },
+}
+
 def basic_forms(entity_label: str):
     return {
         "system": {
@@ -15,31 +56,6 @@ def basic_forms(entity_label: str):
                 "identifier": {"ui:options": {"colSpan": 6}},
                 "region": {"ui:options": {"colSpan": 6}},
                 "capacity": {"ui:options": {"colSpan": 6}},
-            },
-        },
-        "general": {
-            "schema": {
-                "title": f"{entity_label} general",
-                "type": "object",
-                "properties": {
-                    "owner": {"type": "string", "title": "Owner"},
-                    "environment": {
-                        "type": "string",
-                        "title": "Environment",
-                        "enum": ["dev", "qa", "prod"],
-                    },
-                },
-            },
-            "uiSchema": {
-                "owner": {
-                    "ui:widget": "AsyncSelect",
-                    "ui:options": {
-                        "colSpan": 6,
-                        "asyncOptions": {"path": "/owning-teams"},
-                        "placeholder": "Select owner",
-                    },
-                },
-                "environment": {"ui:options": {"colSpan": 6}},
             },
         },
         "monitor": {
@@ -124,7 +140,7 @@ SYSTEMS = {
         "id": "vm_windows",
         "label": "VM - Windows",
         "category": "virtualization",
-        "icon": "FiMonitor",
+        "icon": "MdDesktopWindows",
         "description": "Windows guest templates with licensing and domain join data.",
         "forms": {
             "system": {
@@ -302,8 +318,8 @@ SYSTEMS = {
             "forms": basic_forms(label),
         }
         for system_id, label, icon, desc in [
-            ("dns", "DNS", "FiGlobe", "Authoritative DNS components"),
-            ("gslb", "GSLB", "FiMap", "Global server load balancer"),
+            ("dns", "DNS", "MdOutlineDns", "Authoritative DNS components"),
+            ("gslb", "GSLB", "FiGlobe", "Global server load balancer"),
             ("avi", "Avi", "FiAirplay", "Avi load balancer"),
             ("dp", "DP", "FiShare2", "Data plane device"),
         ]
@@ -336,7 +352,7 @@ SYSTEMS = {
         }
         for system_id, label, icon, desc in [
             ("eck", "ECK", "FiSearch", "Elastic Cloud on Kubernetes"),
-            ("solr", "Solr", "FiSearch", "Apache Solr clusters"),
+            ("solr", "Solr", "SiApachesolr", "Apache Solr clusters"),
         ]
     },
     **{
@@ -349,12 +365,12 @@ SYSTEMS = {
             "forms": basic_forms(label),
         }
         for system_id, label, icon, desc in [
-            ("sql_server", "SQL Server", "FiDatabase", "Microsoft SQL Server instances"),
-            ("postgresql", "PostgreSQL", "FiDatabase", "PostgreSQL clusters"),
-            ("oracle_db", "Oracle Database", "FiDatabase", "Oracle multi-tenant database"),
-            ("mongo_k", "Mongo K", "FiDatabase", "MongoDB clusters"),
-            ("redis", "Redis", "FiDatabase", "Redis caches"),
-            ("s3_db", "S3", "FiDatabase", "S3 data lake buckets"),
+            ("sql_server", "SQL Server", "SiSqlite", "Microsoft SQL Server instances"),
+            ("postgresql", "PostgreSQL", "SiPostgresql", "PostgreSQL clusters"),
+            ("oracle_db", "Oracle Database", "SiOracle", "Oracle multi-tenant database"),
+            ("mongo_k", "Mongo K", "SiMongodb", "MongoDB clusters"),
+            ("redis", "Redis", "SiRedis", "Redis caches"),
+            ("s3_db", "S3", "MdStorage", "S3 data lake buckets"),
         ]
     },
     **{
@@ -382,9 +398,9 @@ SYSTEMS = {
             "forms": basic_forms(label),
         }
         for system_id, label, icon, desc in [
-            ("kafka", "Kafka", "FiActivity", "Kafka messaging"),
-            ("rabbitmq", "RabbitMQ", "FiSend", "RabbitMQ brokers"),
-            ("spark_ocp4", "Spark on OCP4", "FiZap", "Spark workloads on OpenShift"),
+            ("kafka", "Kafka", "SiApachekafka", "Kafka messaging"),
+            ("rabbitmq", "RabbitMQ", "SiRabbitmq", "RabbitMQ brokers"),
+            ("spark_ocp4", "Spark on OCP4", "SiRedhat", "Spark workloads on OpenShift"),
             ("airflow", "Airflow", "FiWind", "Workflow orchestration"),
             ("tardis_xport", "Tardis-Xport", "FiShuffle", "Data export service"),
             ("ibm_mq", "IBM MQ", "FiInbox", "IBM MQ queues"),

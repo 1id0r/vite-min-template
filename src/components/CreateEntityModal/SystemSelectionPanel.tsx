@@ -81,14 +81,15 @@ export function SystemSelectionPanel({
               <Menu key={category.id} trigger='hover' position='left-start' withinPortal offset={8}>
                 <Menu.Target>
                   <Button
-                    variant='subtle'
-                    color='gray'
+                    variant='outline'
+                    color='black'
                     radius='md'
-                    leftSection={<PrefixIcon size={18} />}
-                    styles={{
+                    leftSection={<PrefixIcon size={16} />}
+                    styles={(theme) => ({
                       root: {
-                        // border: 'none',
-                        borderColor: 'grey',
+                        borderColor: theme.colors.blue[3],
+                        fontWeight: 500,
+                        gap: theme.spacing.md,
                       },
                       section: {
                         alignItems: 'center',
@@ -98,9 +99,9 @@ export function SystemSelectionPanel({
                         display: 'flex',
                         justifyContent: 'flex-end',
                         alignItems: 'center',
-                        gap: 8,
+                        gap: theme.spacing.xs,
                       },
-                    }}
+                    })}
                   >
                     <Text component='span'>{category.label}</Text>
                     <CategoryIcon size={18} />
