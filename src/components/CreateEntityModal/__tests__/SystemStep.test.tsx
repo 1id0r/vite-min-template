@@ -4,13 +4,7 @@ import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, expect, it, vi } from 'vitest'
 import { SystemStep } from '../SystemStep'
-import type { FlowId } from '../types'
 import { DISPLAY_FLOW_ID } from '../iconRegistry'
-
-const baseFlowOptions = [
-  { label: 'Display', value: DISPLAY_FLOW_ID },
-  { label: 'Monitor', value: 'monitor' as FlowId },
-]
 
 const systems = {
   sql_server: {
@@ -36,8 +30,6 @@ function renderSystemStep(props: Partial<React.ComponentProps<typeof SystemStep>
     <MantineProvider>
       <SystemStep
         flow={DISPLAY_FLOW_ID}
-        flowOptions={baseFlowOptions}
-        onFlowChange={() => {}}
         categories={categories}
         systems={systems}
         selectedSystem={null}

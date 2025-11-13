@@ -1,4 +1,4 @@
-import { Button, Group, Menu, SegmentedControl, Stack, Text } from '@mantine/core'
+import { Button, Group, Menu, Stack, Text } from '@mantine/core'
 import type { SystemSelectionPanelProps } from './types'
 
 export function SystemSelectionPanel({
@@ -6,10 +6,6 @@ export function SystemSelectionPanel({
   systems,
   selectedSystem,
   selectedSystemConfig,
-  flowOptions,
-  activeFlow,
-  onFlowChange,
-  flowDescription,
   onSystemSelect,
   resolveIcon,
   fallbackCategoryIcon,
@@ -27,35 +23,6 @@ export function SystemSelectionPanel({
       </Stack>
 
       <Stack gap='md' w={240}>
-        <SegmentedControl
-          value={activeFlow}
-          onChange={onFlowChange}
-          data={flowOptions}
-          radius='md'
-          styles={{
-            root: {
-              alignSelf: 'flex-end',
-              // backgroundColor: '#f9fafb',
-              padding: '3px',
-              border: '1px solid #e5e7eb',
-            },
-            indicator: {
-              // backgroundColor: '#0047FF',
-              boxShadow: '0 1px 2px rgba(0, 0, 0, 0.05)',
-            },
-            label: {
-              padding: '6px 16px',
-              fontSize: '15px',
-            },
-          }}
-        />
-
-        {flowDescription && (
-          <Text size='xs' c='dimmed'>
-            {flowDescription}
-          </Text>
-        )}
-
         <Stack gap='xs'>
           {categories.map((category) => {
             const CategoryIcon = resolveIcon(category.icon) ?? fallbackCategoryIcon

@@ -2,8 +2,17 @@ from typing import Dict, List
 
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel
 
-from data import CATEGORIES, FLOWS, GENERAL_FORM_DEFINITION, OWNING_TEAMS, STEPS, SYSTEMS
+from data import (
+    CATEGORIES,
+    FLOWS,
+    GENERAL_FORM_DEFINITION,
+    OWNING_TEAMS,
+    STEPS,
+    SYSTEMS,
+    build_general_form_definition,
+)
 from models import (
     CategoryDefinition,
     EntityConfig,
@@ -48,6 +57,23 @@ def _build_config() -> EntityConfig:
 
 CONFIG = _build_config()
 
+EXISTING_DISPLAY_NAMES = {
+    "Elastic Search Operations",
+    "ECK Production",
+    "Search Control Plane",
+}
+EXISTING_DISPLAY_NAMES_NORMALIZED = {name.lower() for name in EXISTING_DISPLAY_NAMES}
+
+
+class ValidationRequest(BaseModel):
+    value: str
+
+
+class ValidationResponse(BaseModel):
+    exists: bool
+    valid: bool
+    message: str | None = None
+
 
 @app.get("/health")
 async def health() -> Dict[str, str]:
@@ -79,7 +105,8 @@ async def get_form(system_id: str, step_key: str) -> FormDefinition:
         raise HTTPException(status_code=404, detail="System not found")
 
     if step_key == "general":
-        general_form = FormDefinition(**GENERAL_FORM_DEFINITION)
+        general_definition = build_general_form_definition(system_id)
+        general_form = FormDefinition(**general_definition)
         general_form.initialData = {
             "entityType": system.label,
             "links": [{"label": "", "url": ""}],
@@ -101,3 +128,11 @@ async def get_owning_teams() -> List[str]:
 @app.get("/")
 async def root() -> Dict[str, str]:
     return {"message": "Entity configuration service"}
+
+
+@app.post("/validate/display-name", response_model=ValidationResponse)
+async def validate_display_name(payload: ValidationRequest) -> ValidationResponse:
+    normalized = payload.value.strip().lower()
+    exists = normalized in EXISTING_DISPLAY_NAMES_NORMALIZED
+    message = "Display name already exists" if exists else None
+    return ValidationResponse(exists=exists, valid=not exists, message=message)

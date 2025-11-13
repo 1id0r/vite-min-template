@@ -219,18 +219,25 @@ function StepContent({
 
   if (activeStepKey === 'system') {
     return (
-      <SystemStep
-        flow={flow}
-        flowOptions={flowOptions}
-        onFlowChange={handleFlowChange}
-        flowDescription={flowDescription}
-        categories={categories}
-        systems={systems}
-        selectedSystem={selectedSystem}
-        selectedSystemConfig={selectedSystemConfig}
-        onSystemSelect={handleSystemSelect}
-        onIconAnnotate={annotateSystemIcon}
-      />
+      <Stack gap='lg'>
+        {flowOptions.length > 1 && (
+          <FlowSelector
+            flow={flow}
+            flowOptions={flowOptions}
+            onFlowChange={handleFlowChange}
+            flowDescription={flowDescription}
+          />
+        )}
+        <SystemStep
+          flow={flow}
+          categories={categories}
+          systems={systems}
+          selectedSystem={selectedSystem}
+          selectedSystemConfig={selectedSystemConfig}
+          onSystemSelect={handleSystemSelect}
+          onIconAnnotate={annotateSystemIcon}
+        />
+      </Stack>
     )
   }
 
@@ -254,6 +261,64 @@ function StepContent({
       onRetry={() => requestFormDefinition(selectedSystem, activeStepKey)}
       fullHeight
     />
+  )
+}
+
+interface FlowSelectorProps {
+  flow: FlowId
+  flowOptions: FlowOption[]
+  onFlowChange: (value: string) => void
+  flowDescription?: string
+}
+
+function FlowSelector({ flow, flowOptions, onFlowChange, flowDescription }: FlowSelectorProps) {
+  const labelTranslations: Record<string, string> = {
+    display: 'תצוגה',
+    monitor: 'ניטור',
+  }
+
+  return (
+    <Stack gap={4} align='flex-end'>
+      <Box
+        dir='rtl'
+        style={{
+          display: 'flex',
+          border: '1px solid #E5E7EB',
+          borderRadius: 12,
+          overflow: 'hidden',
+          backgroundColor: '#FFFFFF',
+        }}
+      >
+        {flowOptions.map((option, index) => {
+          const isActive = option.value === flow
+          const isLast = index === flowOptions.length - 1
+          return (
+            <button
+              key={option.value}
+              type='button'
+              onClick={() => onFlowChange(option.value)}
+              style={{
+                padding: '8px 20px',
+                border: 'none',
+                borderLeft: isLast ? 'none' : '1px solid #E5E7EB',
+                backgroundColor: isActive ? '#0B5FFF' : '#FFFFFF',
+                color: isActive ? '#FFFFFF' : '#111827',
+                fontWeight: 600,
+                fontSize: '15px',
+                cursor: 'pointer',
+              }}
+            >
+              {labelTranslations[option.value] ?? option.label}
+            </button>
+          )
+        })}
+      </Box>
+      {flowDescription && (
+        <Text size='xs' c='dimmed'>
+          {flowDescription}
+        </Text>
+      )}
+    </Stack>
   )
 }
 

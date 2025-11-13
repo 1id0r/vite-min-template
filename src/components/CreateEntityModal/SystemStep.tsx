@@ -2,13 +2,10 @@ import type { CategoryDefinition, SystemDefinition } from '../../types/entity'
 import { DisplayIconMenu } from './DisplayIconMenu'
 import { SystemSelectionPanel } from './SystemSelectionPanel'
 import { DISPLAY_FLOW_ID, DISPLAY_FLOW_SYSTEM_IDS, categoryPrefixIcon, fallbackCategoryIcon, fallbackSystemIcon, resolveIcon } from './iconRegistry'
-import type { FlowId, FlowOption } from './types'
+import type { FlowId } from './types'
 
 interface SystemStepProps {
   flow: FlowId
-  flowOptions: FlowOption[]
-  onFlowChange: (value: string) => void
-  flowDescription?: string
   categories: CategoryDefinition[]
   systems: Record<string, SystemDefinition>
   selectedSystem: string | null
@@ -19,9 +16,6 @@ interface SystemStepProps {
 
 export function SystemStep({
   flow,
-  flowOptions,
-  onFlowChange,
-  flowDescription,
   categories,
   systems,
   selectedSystem,
@@ -40,10 +34,6 @@ export function SystemStep({
           onIconAnnotate(systemId, iconName)
           onSystemSelect(systemId)
         }}
-        flowOptions={flowOptions}
-        activeFlow={flow}
-        onFlowChange={onFlowChange}
-        flowDescription={flowDescription}
         fallbackSystemIcon={fallbackSystemIcon}
       />
     )
@@ -55,10 +45,6 @@ export function SystemStep({
       systems={systems}
       selectedSystem={selectedSystem}
       selectedSystemConfig={selectedSystemConfig ?? null}
-      flowOptions={flowOptions}
-      activeFlow={flow}
-      onFlowChange={onFlowChange}
-      flowDescription={flowDescription}
       onSystemSelect={onSystemSelect}
       resolveIcon={resolveIcon}
       fallbackCategoryIcon={fallbackCategoryIcon}

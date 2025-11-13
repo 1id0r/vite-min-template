@@ -1,11 +1,13 @@
-import { Alert, Box, Button, Center, Grid, Loader, Paper, Stack, Text } from '@mantine/core'
+import { useMemo } from 'react'
+import { Alert, Box, Button, Center, Grid, Group, Loader, Paper, Stack, Text } from '@mantine/core'
 import FormComponent, { withTheme, type IChangeEvent } from '@rjsf/core'
 import { Theme as MantineTheme } from '@rjsf/mantine'
 import validator from '@rjsf/validator-ajv8'
-import type { ObjectFieldTemplateProps } from '@rjsf/utils'
+import type { ObjectFieldTemplateProps, UiSchema } from '@rjsf/utils'
 import type { FormDefinition } from '../../types/entity'
 import { AsyncSelectWidget } from '../form-widgets/AsyncSelectWidget'
 import type { FormStatus } from './types'
+import { useAsyncValidation, type AsyncValidationFieldConfig, type AsyncValidationStatus } from '../../hooks/useAsyncValidation'
 
 const RjsfForm = withTheme(MantineTheme)
 
@@ -33,7 +35,16 @@ const shouldSpanFullWidth = (schema: Record<string, unknown>, uiSchema: Record<s
   return false
 }
 
-const FormObjectFieldTemplate = ({ properties, title, description }: ObjectFieldTemplateProps) => {
+type TemplatePropsWithContext = ObjectFieldTemplateProps & {
+  formContext?: {
+    asyncValidationStatus?: Record<string, AsyncValidationStatus>
+  }
+}
+
+const FormObjectFieldTemplate = (props: ObjectFieldTemplateProps) => {
+  const { properties, title, description } = props
+  const formContext = (props as TemplatePropsWithContext).formContext
+  const asyncStatusMap = (formContext?.asyncValidationStatus ?? {}) as Record<string, AsyncValidationStatus>
   const visible = properties.filter((property) => !property.hidden)
   const hidden = properties.filter((property) => property.hidden)
 
@@ -73,7 +84,17 @@ const FormObjectFieldTemplate = ({ properties, title, description }: ObjectField
 
             return (
               <Grid.Col key={property.name} span={{ base: 12, sm: span }}>
-                {property.content}
+                <Stack gap={4}>
+                  {property.content}
+                  {asyncStatusMap[property.name] === 'loading' && (
+                    <Group justify='flex-end' gap='xs'>
+                      <Loader size='xs' />
+                      <Text size='xs' c='dimmed'>
+                        בודק זמינות...
+                      </Text>
+                    </Group>
+                  )}
+                </Stack>
               </Grid.Col>
             )
           })}
@@ -115,6 +136,10 @@ export function FormStepCard({
   onRetry,
   fullHeight = false,
 }: FormStepCardProps) {
+  const asyncConfigs = useMemo(() => extractAsyncValidationConfigs(definition?.uiSchema), [definition])
+  const stepFormData = (formData as Record<string, unknown>) ?? undefined
+  const { extraErrors, statusMap } = useAsyncValidation(stepFormData, asyncConfigs)
+
   const containerStyle = fullHeight
     ? {
         height: '100%',
@@ -163,9 +188,13 @@ export function FormStepCard({
           uiSchema={combinedUiSchema}
           formData={formData}
           validator={validator}
+          extraErrors={extraErrors}
           liveValidate
           ref={attachRef}
           widgets={formWidgets}
+          formContext={{
+            asyncValidationStatus: statusMap,
+          }}
           templates={{ ObjectFieldTemplate: FormObjectFieldTemplate }}
           onChange={onChange}
           onSubmit={onSubmit}
@@ -173,4 +202,47 @@ export function FormStepCard({
       </Box>
     </Paper>
   )
+}
+
+function extractAsyncValidationConfigs(uiSchema?: UiSchema): AsyncValidationFieldConfig[] {
+  if (!uiSchema) {
+    return []
+  }
+
+  return Object.entries(uiSchema).reduce<AsyncValidationFieldConfig[]>((acc, [fieldKey, config]) => {
+    if (!config || typeof config !== 'object') {
+      return acc
+    }
+
+    const options = (config as Record<string, unknown>)['ui:options']
+    if (!options || typeof options !== 'object') {
+      return acc
+    }
+
+    const asyncOptions = (options as Record<string, unknown>).asyncValidation as
+      | {
+          validationRoute?: string
+          debounceMs?: number
+          duplicateMessage?: string
+          serverMessage?: string
+          field?: string
+        }
+      | undefined
+
+    if (!asyncOptions?.validationRoute) {
+      return acc
+    }
+
+    acc.push({
+      field: asyncOptions.field ?? fieldKey,
+      validationRoute: asyncOptions.validationRoute,
+      debounceMs: asyncOptions.debounceMs,
+      messages: {
+        duplicate: asyncOptions.duplicateMessage,
+        server: asyncOptions.serverMessage,
+      },
+    })
+
+    return acc
+  }, [])
 }

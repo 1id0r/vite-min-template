@@ -23,10 +23,6 @@ export interface SystemSelectionPanelProps {
   systems: Record<string, SystemDefinition>
   selectedSystem: string | null
   selectedSystemConfig: SystemDefinition | null
-  flowOptions: FlowOption[]
-  activeFlow: FlowId
-  onFlowChange: (value: string) => void
-  flowDescription?: string
   onSystemSelect: (systemId: string) => void
   resolveIcon: IconResolver
   fallbackCategoryIcon: IconType

@@ -1,3 +1,5 @@
+from copy import deepcopy
+
 GENERAL_FORM_DEFINITION = {
     "schema": {
         "title": "פרטים כלליים",
@@ -38,6 +40,39 @@ GENERAL_FORM_DEFINITION = {
         },
     },
 }
+
+DISPLAY_NAME_ASYNC_VALIDATION = {
+    "validationRoute": "/validate/display-name",
+    "field": "displayName",
+    "debounceMs": 500,
+    "duplicateMessage": "שם התצוגה כבר תפוס",
+    "serverMessage": "לא ניתן לאמת כרגע",
+}
+
+GENERAL_FORM_CUSTOMIZATIONS = {
+    "eck": {
+        "displayName": {
+            "ui:options": {
+                "asyncValidation": DISPLAY_NAME_ASYNC_VALIDATION,
+            }
+        }
+    }
+}
+
+def build_general_form_definition(system_id: str):
+    general_form = deepcopy(GENERAL_FORM_DEFINITION)
+    ui_schema = deepcopy(general_form.get("uiSchema") or {})
+    overrides = GENERAL_FORM_CUSTOMIZATIONS.get(system_id)
+    if overrides:
+        for field, field_override in overrides.items():
+            field_ui = deepcopy(ui_schema.get(field) or {})
+            options = deepcopy(field_ui.get("ui:options") or {})
+            override_options = field_override.get("ui:options") or {}
+            options.update(override_options)
+            field_ui["ui:options"] = options
+            ui_schema[field] = field_ui
+    general_form["uiSchema"] = ui_schema
+    return general_form
 
 def basic_forms(entity_label: str):
     return {
