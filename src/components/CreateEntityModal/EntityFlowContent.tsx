@@ -92,9 +92,7 @@ export function EntityFlowContent({
   }
 
   if (configStatus === 'error' && !config) {
-    return (
-      <ConfigErrorNotice message={configError} onRetry={handleConfigRetry} />
-    )
+    return <ConfigErrorNotice message={configError} onRetry={handleConfigRetry} />
   }
 
   if (!config || stepKeys.length === 0) {
@@ -273,8 +271,8 @@ interface FlowSelectorProps {
 
 function FlowSelector({ flow, flowOptions, onFlowChange, flowDescription }: FlowSelectorProps) {
   const labelTranslations: Record<string, string> = {
-    display: 'תצוגה',
-    monitor: 'ניטור',
+    display: 'יישות מנוטרת',
+    monitor: 'יישות תצוגה',
   }
 
   return (
@@ -284,7 +282,7 @@ function FlowSelector({ flow, flowOptions, onFlowChange, flowDescription }: Flow
         style={{
           display: 'flex',
           border: '1px solid #E5E7EB',
-          borderRadius: 12,
+          borderRadius: 16,
           overflow: 'hidden',
           backgroundColor: '#FFFFFF',
         }}
@@ -298,7 +296,7 @@ function FlowSelector({ flow, flowOptions, onFlowChange, flowDescription }: Flow
               type='button'
               onClick={() => onFlowChange(option.value)}
               style={{
-                padding: '8px 20px',
+                padding: '6px 20px',
                 border: 'none',
                 borderLeft: isLast ? 'none' : '1px solid #E5E7EB',
                 backgroundColor: isActive ? '#0B5FFF' : '#FFFFFF',
