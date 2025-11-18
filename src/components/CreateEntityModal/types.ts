@@ -1,7 +1,7 @@
 import type { IconType } from 'react-icons'
 import type { CategoryDefinition, SystemDefinition } from '../../types/entity'
 
-export type FlowId = string
+export type FlowId = 'monitor' | 'display' | 'general'
 
 export type FormStatus = 'idle' | 'loading' | 'success' | 'error'
 
@@ -28,4 +28,5 @@ export interface SystemSelectionPanelProps {
   fallbackCategoryIcon: IconType
   fallbackSystemIcon: IconType
   prefixIcon: IconType
+  showGeneralOption?: boolean
 }

@@ -126,14 +126,18 @@ export function useEntityFlowState(): UseEntityFlowStateResult {
 
     const [firstFlow] = Object.values<FlowDefinition>(config.flows)
     if (firstFlow) {
-      setFlow(firstFlow.id)
+      setFlow(firstFlow.id as FlowId)
       setActiveStep(0)
       setSelectedSystem(null)
     }
   }, [config, flow])
 
   const currentFlow = config ? config.flows[flow] ?? null : null
-  const stepKeys: StepKey[] = currentFlow?.steps ?? []
+  const baseStepKeys: StepKey[] = currentFlow?.steps ?? []
+  const stepKeys: StepKey[] =
+    flow === 'monitor' && selectedSystem === 'general'
+      ? baseStepKeys.filter((key) => key !== 'monitor')
+      : baseStepKeys
   const isCompleted = currentFlow ? activeStep === stepKeys.length : false
   const activeStepKey = !isCompleted ? stepKeys[activeStep] ?? null : null
 

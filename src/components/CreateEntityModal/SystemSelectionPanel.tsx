@@ -11,6 +11,7 @@ export function SystemSelectionPanel({
   fallbackCategoryIcon,
   fallbackSystemIcon,
   prefixIcon: PrefixIcon,
+  showGeneralOption = false,
 }: SystemSelectionPanelProps) {
   const selectedSystemLabel = selectedSystem ? systems[selectedSystem]?.label ?? selectedSystem : null
 
@@ -24,6 +25,33 @@ export function SystemSelectionPanel({
 
       <Stack gap='md' w={240}>
         <Stack gap='xs'>
+          {showGeneralOption && (
+            <Button
+              variant='outline'
+              color='black'
+              radius='md'
+              leftSection={<PrefixIcon size={16} color='rgb(11, 95, 255)' />}
+              onClick={() => onSystemSelect('general')}
+              styles={(theme) => ({
+                root: {
+                  borderColor: 'rgb(11, 95, 255)',
+                  fontWeight: 600,
+                  gap: theme.spacing.md,
+                  justifyContent: 'center',
+                },
+                section: { alignItems: 'center' },
+                label: {
+                  flex: 1,
+                  display: 'flex',
+                  justifyContent: 'flex-end',
+                  alignItems: 'center',
+                  gap: theme.spacing.xs,
+                },
+              })}
+            >
+              <Text component='span'>כללי</Text>
+            </Button>
+          )}
           {categories.map((category) => {
             const CategoryIcon = resolveIcon(category.icon) ?? fallbackCategoryIcon
 
@@ -45,16 +73,32 @@ export function SystemSelectionPanel({
             }
 
             return (
-              <Menu key={category.id} trigger='hover' position='left-start' withinPortal offset={8}>
+              <Menu
+                key={category.id}
+                trigger='hover'
+                position='left-start'
+                withinPortal
+                offset={8}
+                styles={{
+                  item: {
+                    '&[data-hovered]': {
+                      backgroundColor: 'rgba(11, 95, 255, 0.08)',
+                    },
+                  },
+                  dropdown: {
+                    overflow: 'hidden',
+                  },
+                }}
+              >
                 <Menu.Target>
                   <Button
                     variant='outline'
                     color='black'
                     radius='md'
-                    leftSection={<PrefixIcon size={16} />}
+                    leftSection={<PrefixIcon size={16} color='rgb(11, 95, 255)' />}
                     styles={(theme) => ({
                       root: {
-                        borderColor: theme.colors.blue[3],
+                        borderColor: 'rgb(11, 95, 255)',
                         fontWeight: 500,
                         gap: theme.spacing.md,
                       },
@@ -83,9 +127,21 @@ export function SystemSelectionPanel({
                       position='left-start'
                       withinPortal
                       offset={4}
+                      styles={{
+                        item: {
+                          '&[data-hovered]': {
+                            backgroundColor: 'rgba(11, 95, 255, 0.08)',
+                          },
+                        },
+                        dropdown: {
+                          overflow: 'hidden',
+                        },
+                      }}
                     >
                       <Menu.Target>
-                        <Menu.Item leftSection={<PrefixIcon size={14} />}>{submenu.label}</Menu.Item>
+                        <Menu.Item leftSection={<PrefixIcon size={14} color='rgb(11, 95, 255)' />}>
+                          {submenu.label}
+                        </Menu.Item>
                       </Menu.Target>
                       <Menu.Dropdown>{submenu.systemIds.map((systemId) => renderSystemItem(systemId))}</Menu.Dropdown>
                     </Menu>

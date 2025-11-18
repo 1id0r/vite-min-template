@@ -111,6 +111,16 @@ def basic_forms(entity_label: str):
 
 
 SYSTEMS = {
+    "general": {
+        "id": "general",
+        "label": "כללי",
+        "category": "applications",
+        "icon": "FiLayers",
+        "description": "ישות כללית ללא פרטי ניטור",
+        "forms": {
+            "general": GENERAL_FORM_DEFINITION,
+        },
+    },
     "vm_linux": {
         "id": "vm_linux",
         "label": "VM - Linux",

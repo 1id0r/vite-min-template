@@ -289,10 +289,10 @@
     "@jridgewell/resolve-uri" "^3.1.0"
     "@jridgewell/sourcemap-codec" "^1.4.14"
 
-"@mantine/core@>=8", "@mantine/core@8.3.6":
-  version "8.3.6"
-  resolved "https://registry.npmjs.org/@mantine/core/-/core-8.3.6.tgz"
-  integrity sha512-paTl+0x+O/QtgMtqVJaG8maD8sfiOdgPmLOyG485FmeGZ1L3KMdEkhxZtmdGlDFsLXhmMGQ57ducT90bvhXX5A==
+"@mantine/core@>=8", "@mantine/core@8.3.8":
+  version "8.3.8"
+  resolved "https://registry.npmjs.org/@mantine/core/-/core-8.3.8.tgz"
+  integrity sha512-UM3Za7Yl0FzbZ2zPgHwNyCpLgtSqkAi8ku13+gRS/6JB0FjwSkMwibERUqQIpwqAHdR5KNmIohjuqHu8guJowg==
   dependencies:
     "@floating-ui/react" "^0.27.16"
     clsx "^2.1.1"
@@ -301,37 +301,37 @@
     react-textarea-autosize "8.5.9"
     type-fest "^4.41.0"
 
-"@mantine/dates@>=8":
-  version "8.3.6"
-  resolved "https://registry.npmjs.org/@mantine/dates/-/dates-8.3.6.tgz"
-  integrity sha512-lSi1zvyL86SKeePH0J3vOjAR7ZIVNOrZm6ja7jAH6IBdcpQOKH8TXbrcAi5okEStvmvkne7pVaGu0VkdE8KnAw==
+"@mantine/dates@>=8", "@mantine/dates@8.3.8":
+  version "8.3.8"
+  resolved "https://registry.npmjs.org/@mantine/dates/-/dates-8.3.8.tgz"
+  integrity sha512-N5G7ANPEZo0ObtRzCt7/4tXgChrPd9sl8xMyfdsIHJlgHGuDuQzk27zafh74yJlM49z+Yn5YZJX20DwzXFOwRQ==
   dependencies:
     clsx "^2.1.1"
 
-"@mantine/hooks@>=8", "@mantine/hooks@8.3.6":
-  version "8.3.6"
-  resolved "https://registry.npmjs.org/@mantine/hooks/-/hooks-8.3.6.tgz"
-  integrity sha512-liHfaWXHAkLjJy+Bkr29UsCwAoDQ/a64WrM67lksx8F0qqyjR5RQH8zVlhuOjdpQnwtlUkE/YiTvbJiPcoI0bw==
+"@mantine/hooks@>=8", "@mantine/hooks@8.3.8":
+  version "8.3.8"
+  resolved "https://registry.npmjs.org/@mantine/hooks/-/hooks-8.3.8.tgz"
+  integrity sha512-2YCUk5IWz+Ebi7VpbdscUz1MwulyaVPKr236ugMfpK0PFwsun4aBaLCAc8UeMGP0LtoSkuFvnsCPR4U6rhNfeQ==
 
-"@rjsf/core@^6.0.0-beta.23":
-  version "6.0.0-beta.23"
-  resolved "https://registry.npmjs.org/@rjsf/core/-/core-6.0.0-beta.23.tgz"
-  integrity sha512-t6oE7U64s1w8WWkRXs5A+mZ1zcbFfwof7F+mB1Kl/AyQAdbeOVsz2DYJ5DuroUtE5NrWP1swEshAHBkQJSxaKw==
+"@rjsf/core@^6.x", "@rjsf/core@6.0.1":
+  version "6.0.1"
+  resolved "https://registry.npmjs.org/@rjsf/core/-/core-6.0.1.tgz"
+  integrity sha512-+S2nlt0J4FRWLhB9Gn0lAt1qoRjDiRlosNl2d9ofhQtBAjrZP4pn52uErT0B0RMDRqw4X/ICMfi/lmj29Ascww==
   dependencies:
     lodash "^4.17.21"
     lodash-es "^4.17.21"
-    markdown-to-jsx "^7.7.13"
+    markdown-to-jsx "^8.0.0"
     prop-types "^15.8.1"
 
-"@rjsf/mantine@^6.0.0-beta.23":
-  version "6.0.0-beta.23"
-  resolved "https://registry.npmjs.org/@rjsf/mantine/-/mantine-6.0.0-beta.23.tgz"
-  integrity sha512-DSKdlA/HexF5ppZj4j9Xv1CwZHMOJMS61jCjYe8sZPxZrLI6UYK4yfXvkzBgxqa5zrmwfvAmNP4ahtJfRlEzUg==
+"@rjsf/mantine@6.0.1":
+  version "6.0.1"
+  resolved "https://registry.npmjs.org/@rjsf/mantine/-/mantine-6.0.1.tgz"
+  integrity sha512-nldeBFNpJgjuuJS//Ktac8Af/lI20BOmK2HW89mNPjFnfb04xFcIufqn7TM9kvvRMoreU5ACT51+iwOLffiiDw==
 
-"@rjsf/utils@^6.0.0-beta.23":
-  version "6.0.0-beta.23"
-  resolved "https://registry.npmjs.org/@rjsf/utils/-/utils-6.0.0-beta.23.tgz"
-  integrity sha512-C3xfi6NJPA83viYaQY4YXurOV0VXVfhgjGH4O0lnF5JPzh1k81E2tPcYHvdaH1LHhWQoZzXONocnpHL37CfU9A==
+"@rjsf/utils@^6.x", "@rjsf/utils@6.0.1":
+  version "6.0.1"
+  resolved "https://registry.npmjs.org/@rjsf/utils/-/utils-6.0.1.tgz"
+  integrity sha512-ystv5I87MmwjD5oybbHivMbULcpNp5jDQyB76rYv7G+Aqs/OdPJydtr2sm/40JkCAvXUgX+7eBZOKmUFk8A3lA==
   dependencies:
     fast-uri "^3.1.0"
     json-schema-merge-allof "^0.8.1"
@@ -340,10 +340,10 @@
     lodash-es "^4.17.21"
     react-is "^18.3.1"
 
-"@rjsf/validator-ajv8@^6.0.0-beta.23":
-  version "6.0.0-beta.23"
-  resolved "https://registry.npmjs.org/@rjsf/validator-ajv8/-/validator-ajv8-6.0.0-beta.23.tgz"
-  integrity sha512-Rtjm+ZZiPfYHCV7dPEGcWrBqXaxH6J1LLfWToIYOyM95+zaFcffUises6epsXOMFXq8AC7RWKjhUiadjSOk5HA==
+"@rjsf/validator-ajv8@6.0.1":
+  version "6.0.1"
+  resolved "https://registry.npmjs.org/@rjsf/validator-ajv8/-/validator-ajv8-6.0.1.tgz"
+  integrity sha512-4ccK+vjHnVTDQVqQAXkkGQQp50xUC7Mj0xre4+VnhquDDU80KC/Uru8eKNsIYk0rkj5KxkpxHEP3Y8ZrTXyDpg==
   dependencies:
     ajv "^8.17.1"
     ajv-formats "^2.1.1"
@@ -1119,10 +1119,10 @@ magic-string@^0.30.12:
   dependencies:
     "@jridgewell/sourcemap-codec" "^1.5.5"
 
-markdown-to-jsx@^7.7.13:
-  version "7.7.17"
-  resolved "https://registry.npmjs.org/markdown-to-jsx/-/markdown-to-jsx-7.7.17.tgz"
-  integrity sha512-7mG/1feQ0TX5I7YyMZVDgCC/y2I3CiEhIRQIhyov9nGBP5eoVrOXXHuL5ZP8GRfxVZKRiXWJgwXkb9It+nQZfQ==
+markdown-to-jsx@^8.0.0:
+  version "8.0.0"
+  resolved "https://registry.npmjs.org/markdown-to-jsx/-/markdown-to-jsx-8.0.0.tgz"
+  integrity sha512-hWEaRxeCDjes1CVUQqU+Ov0mCqBqkGhLKjL98KdbwHSgEWZZSJQeGlJQatVfeZ3RaxrfTrZZ3eczl2dhp5c/pA==
 
 math-intrinsics@^1.1.0:
   version "1.1.0"

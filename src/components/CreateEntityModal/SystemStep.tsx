@@ -46,6 +46,7 @@ export function SystemStep({
       selectedSystem={selectedSystem}
       selectedSystemConfig={selectedSystemConfig ?? null}
       onSystemSelect={onSystemSelect}
+      showGeneralOption={flow === 'monitor'}
       resolveIcon={resolveIcon}
       fallbackCategoryIcon={fallbackCategoryIcon}
       fallbackSystemIcon={fallbackSystemIcon}

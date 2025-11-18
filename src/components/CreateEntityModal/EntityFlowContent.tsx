@@ -12,6 +12,8 @@ import { FlowStepper } from './FlowStepper'
 import { FormStepCard, type RjsfFormRef } from './FormStepCard'
 import { ResultSummary } from './ResultSummary'
 import { SystemStep } from './SystemStep'
+import { DisplayIconMenu } from './DisplayIconMenu'
+import { DISPLAY_FLOW_ID, DISPLAY_FLOW_SYSTEM_IDS, fallbackSystemIcon } from './iconRegistry'
 import type { AggregatedResult, FlowId, FlowOption, FormStatus } from './types'
 
 interface EntityFlowContentProps {
@@ -219,12 +221,26 @@ function StepContent({
     return (
       <Stack gap='lg'>
         {flowOptions.length > 1 && (
-          <FlowSelector
-            flow={flow}
-            flowOptions={flowOptions}
-            onFlowChange={handleFlowChange}
-            flowDescription={flowDescription}
-          />
+          <Stack gap={6}>
+            <Box dir='rtl'>
+              <Text size='sm' fw={700} c='gray.8'>
+                בחירת יישות <Text component='span' c='red.6'>*</Text>
+              </Text>
+            </Box>
+            <FlowSelector
+              flow={flow}
+              flowOptions={flowOptions}
+              onFlowChange={handleFlowChange}
+              flowDescription={flowDescription}
+            />
+          </Stack>
+        )}
+        {flow !== DISPLAY_FLOW_ID && (
+          <Box dir='rtl'>
+            <Text size='sm' fw={700} c='gray.8'>
+              סוג יישות <Text component='span' c='red.6'>*</Text>
+            </Text>
+          </Box>
         )}
         <SystemStep
           flow={flow}
@@ -247,7 +263,7 @@ function StepContent({
   const status = formStatus[selectedSystem]?.[activeStepKey]
   const error = formErrors[selectedSystem]?.[activeStepKey]
 
-  return (
+  const formCard = (
     <FormStepCard
       status={status}
       definition={definition}
@@ -260,6 +276,40 @@ function StepContent({
       fullHeight
     />
   )
+
+  const shouldShowGeneralIcons = flow === 'monitor' && selectedSystem === 'general' && activeStepKey === 'general'
+
+  if (shouldShowGeneralIcons) {
+    const currentIconName =
+      typeof currentFormState.system === 'object' && currentFormState.system !== null
+        ? (currentFormState.system as Record<string, unknown>).icon
+        : undefined
+    const selectedDisplayIconId = DISPLAY_FLOW_SYSTEM_IDS.find(
+      (id) => systems[id]?.icon && systems[id]?.icon === currentIconName
+    )
+
+    return (
+      <Stack gap='md'>
+        {formCard}
+        <DisplayIconMenu
+          systems={systems}
+          allowedSystemIds={DISPLAY_FLOW_SYSTEM_IDS}
+          selectedSystem={selectedDisplayIconId ?? null}
+          selectedIconId={selectedDisplayIconId ?? null}
+          onSystemSelect={() => {}}
+          onIconSelect={(iconSystemId, iconName) => {
+            if (!selectedSystem) {
+              return
+            }
+            annotateSystemIcon(selectedSystem, iconName ?? systems[iconSystemId]?.icon)
+          }}
+          fallbackSystemIcon={fallbackSystemIcon}
+        />
+      </Stack>
+    )
+  }
+
+  return formCard
 }
 
 interface FlowSelectorProps {
@@ -270,9 +320,10 @@ interface FlowSelectorProps {
 }
 
 function FlowSelector({ flow, flowOptions, onFlowChange, flowDescription }: FlowSelectorProps) {
+  // Match label to the actual flow value (no visual inversion)
   const labelTranslations: Record<string, string> = {
-    display: 'יישות מנוטרת',
-    monitor: 'יישות תצוגה',
+    monitor: 'יישות מנוטרת',
+    display: 'יישות תצוגה',
   }
 
   return (

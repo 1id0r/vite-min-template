@@ -1,4 +1,4 @@
-import { Box, ScrollArea, SimpleGrid, Stack, Text, Tooltip, UnstyledButton } from '@mantine/core'
+import { Box, ScrollArea, SimpleGrid, Stack, Text, UnstyledButton } from '@mantine/core'
 import type { IconType } from 'react-icons'
 import type { SystemDefinition } from '../../types/entity'
 import { resolveIcon } from './iconRegistry'
@@ -7,6 +7,7 @@ interface DisplayIconMenuProps {
   systems: Record<string, SystemDefinition>
   allowedSystemIds: string[]
   selectedSystem: string | null
+  selectedIconId?: string | null
   onSystemSelect: (systemId: string) => void
   onIconSelect?: (systemId: string, iconName?: string) => void
   fallbackSystemIcon: IconType
@@ -16,6 +17,7 @@ export function DisplayIconMenu({
   systems,
   allowedSystemIds,
   selectedSystem,
+  selectedIconId,
   onSystemSelect,
   onIconSelect,
   fallbackSystemIcon,
@@ -54,46 +56,42 @@ export function DisplayIconMenu({
             >
               {visibleSystems.map((system) => {
                 const Icon = resolveIcon(system.icon) ?? fallbackSystemIcon
-                const isSelected = selectedSystem === system.id
+                const isSelected = (selectedIconId ?? selectedSystem) === system.id
                 const iconName = system.icon
 
                 return (
-                  <Tooltip
+                  <UnstyledButton
                     key={system.id}
-                    label={system.label}
-                    position='top'
-                    transitionProps={{ duration: 150 }}
-                    withArrow
+                    aria-label={system.label}
+                    onClick={() => {
+                      if (onIconSelect) {
+                        onIconSelect(system.id, iconName)
+                      } else {
+                        onSystemSelect(system.id)
+                      }
+                    }}
+                    title={system.label}
+                    style={(theme) => ({
+                      borderRadius: 8,
+                      border: `1px solid ${
+                        isSelected ? 'rgba(11, 95, 255, 0.3)' : theme.colors.gray[3]
+                      }`,
+                      padding: theme.spacing.xs,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      width: '100%',
+                      maxWidth: 64,
+                      minHeight: 64,
+                      aspectRatio: '1 / 1',
+                      margin: '0 auto',
+                      transition: 'border-color 120ms ease, box-shadow 120ms ease, background-color 120ms ease',
+                      boxShadow: isSelected ? `0 0 0 1px rgba(11, 95, 255, 0.18)` : undefined,
+                      backgroundColor: isSelected ? 'rgba(11, 95, 255, 0.08)' : theme.white,
+                    })}
                   >
-                    <UnstyledButton
-                      aria-label={system.label}
-                      onClick={() => {
-                        if (onIconSelect) {
-                          onIconSelect(system.id, iconName)
-                        } else {
-                          onSystemSelect(system.id)
-                        }
-                      }}
-                      style={(theme) => ({
-                        borderRadius: 8,
-                        border: `1px solid ${isSelected ? theme.colors.blue[5] : theme.colors.gray[3]}`,
-                        padding: theme.spacing.xs,
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        width: '100%',
-                        maxWidth: 64,
-                        minHeight: 64,
-                        aspectRatio: '1 / 1',
-                        margin: '0 auto',
-                        transition: 'border-color 120ms ease, box-shadow 120ms ease',
-                        boxShadow: isSelected ? `0 0 0 1px ${theme.colors.blue[1]}` : undefined,
-                        backgroundColor: isSelected ? theme.colors.blue[0] : theme.white,
-                      })}
-                    >
-                      <Icon size={22} />
-                    </UnstyledButton>
-                  </Tooltip>
+                    <Icon size={22} />
+                  </UnstyledButton>
                 )
               })}
             </SimpleGrid>
