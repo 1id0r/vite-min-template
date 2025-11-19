@@ -30,7 +30,6 @@ export function SystemSelectionPanel({
               variant='outline'
               color='black'
               radius='md'
-              leftSection={<PrefixIcon size={16} color='rgb(11, 95, 255)' />}
               onClick={() => onSystemSelect('general')}
               styles={(theme) => ({
                 root: {
@@ -39,7 +38,7 @@ export function SystemSelectionPanel({
                   gap: theme.spacing.md,
                   justifyContent: 'center',
                 },
-                section: { alignItems: 'center' },
+                section: { alignItems: 'center', marginInlineStart: 0 },
                 label: {
                   flex: 1,
                   display: 'flex',

@@ -30,6 +30,13 @@ export const buildAggregateResult = (
     return acc
   }, {} as Record<StepKey, unknown>)
 
+  if (data.monitor && typeof data.monitor === 'object' && data.monitor !== null) {
+    data.monitor = {
+      type: selectedSystem,
+      details: data.monitor,
+    }
+  }
+
   return {
     flow,
     systemId: selectedSystem,

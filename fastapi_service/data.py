@@ -110,20 +110,157 @@ def basic_forms(entity_label: str):
     }
 
 
+ORACLE_MONITOR_FORM = {
+    "schema": {
+        "title": "Oracle monitoring",
+        "type": "object",
+        "required": ["dc"],
+        "properties": {
+            "dc": {"type": "string", "title": "DC"},
+            "host": {"type": "string", "title": "Host"},
+            "database": {"type": "string", "title": "Database"},
+        },
+    },
+    "uiSchema": {
+        "dc": {"ui:options": {"colSpan": 4, "placeholder": "dc-01"}},
+        "host": {"ui:options": {"colSpan": 4}},
+        "database": {"ui:options": {"colSpan": 4}},
+    },
+}
+
+ORACLE_FORMS = basic_forms("Oracle Database")
+ORACLE_FORMS["monitor"] = ORACLE_MONITOR_FORM
+
+MONGO_MONITOR_FORM = {
+    "schema": {
+        "title": "Mongo monitoring",
+        "type": "object",
+        "required": ["dc"],
+        "properties": {
+            "dc": {"type": "string", "title": "DC"},
+            "host": {"type": "string", "title": "Host"},
+            "database": {"type": "string", "title": "Database"},
+        },
+    },
+    "uiSchema": {
+        "dc": {"ui:options": {"colSpan": 4, "placeholder": "dc-01"}},
+        "host": {"ui:options": {"colSpan": 4}},
+        "database": {"ui:options": {"colSpan": 4}},
+    },
+}
+
+MONGO_FORMS = basic_forms("Mongo K")
+MONGO_FORMS["monitor"] = MONGO_MONITOR_FORM
+
+SQL_MONITOR_FORM = {
+    "schema": {
+        "title": "SQL monitoring",
+        "type": "object",
+        "properties": {
+            "dc": {"type": "string", "title": "DC"},
+            "host": {"type": "string", "title": "Host"},
+            "database": {"type": "string", "title": "Database"},
+        },
+    },
+    "uiSchema": {
+        "dc": {"ui:options": {"colSpan": 4, "placeholder": "dc-01"}},
+        "host": {"ui:options": {"colSpan": 4}},
+        "database": {"ui:options": {"colSpan": 4}},
+    },
+}
+
+SQL_FORMS = basic_forms("SQL Server")
+SQL_FORMS["monitor"] = SQL_MONITOR_FORM
+
+
 SYSTEMS = {
+
+    "splunk": {
+        "id": "splunk",
+        "label": "Splunk",
+        "category": "databases",
+        "icon": "FiDatabase",
+        "description": "Splunk indexers",
+        "forms": basic_forms("Splunk"),
+    },
+    "hdfs": {
+        "id": "hdfs",
+        "label": "HDFS",
+        "category": "filesystems",
+        "icon": "FiHardDrive",
+        "description": "HDFS cluster",
+        "forms": basic_forms("HDFS"),
+    },
+    "nifi": {
+        "id": "nifi",
+        "label": "NiFi",
+        "category": "transport",
+        "icon": "FiWind",
+        "description": "NiFi data flows",
+        "forms": basic_forms("NiFi"),
+    },
+    "os": {
+        "id": "os",
+        "label": "Operating System",
+        "category": "virtualization",
+        "icon": "FiCpu",
+        "description": "Generic OS",
+        "forms": basic_forms("Operating System"),
+    },
+    "chevila": {
+        "id": "chevila",
+        "label": "חבילה",
+        "category": "services",
+        "icon": "FiPackage",
+        "description": "חבילה שירותית",
+        "forms": basic_forms("חבילה"),
+    },
+    "ribua": {
+        "id": "ribua",
+        "label": "ריבוע",
+        "category": "services",
+        "icon": "FiGrid",
+        "description": "ריבוע שירותי",
+        "forms": basic_forms("ריבוע"),
+    },
+
     "general": {
         "id": "general",
         "label": "כללי",
         "category": "applications",
         "icon": "FiLayers",
-        "description": "ישות כללית ללא פרטי ניטור",
+        "description": "ישות כללית ",
         "forms": {
             "general": GENERAL_FORM_DEFINITION,
         },
     },
+    "oracle_db": {
+        "id": "oracle_db",
+        "label": "Oracle Database",
+        "category": "databases",
+        "icon": "SiOracle",
+        "description": "Oracle multi-tenant database",
+        "forms": ORACLE_FORMS,
+    },
+    "mongo_k": {
+        "id": "mongo_k",
+        "label": "Mongo K",
+        "category": "databases",
+        "icon": "SiMongodb",
+        "description": "MongoDB clusters",
+        "forms": MONGO_FORMS,
+    },
+    "sql_server": {
+        "id": "sql_server",
+        "label": "SQL Server",
+        "category": "databases",
+        "icon": "SiSqlite",
+        "description": "Microsoft SQL Server instances",
+        "forms": SQL_FORMS,
+    },
     "vm_linux": {
         "id": "vm_linux",
-        "label": "VM - Linux",
+        "label": "Linux",
         "category": "virtualization",
         "icon": "FiCpu",
         "description": "Virtualized Linux guest templates with hypervisor placement and sizing.",
@@ -183,7 +320,7 @@ SYSTEMS = {
     },
     "vm_windows": {
         "id": "vm_windows",
-        "label": "VM - Windows",
+        "label": "Windows",
         "category": "virtualization",
         "icon": "MdDesktopWindows",
         "description": "Windows guest templates with licensing and domain join data.",
@@ -410,10 +547,7 @@ SYSTEMS = {
             "forms": basic_forms(label),
         }
         for system_id, label, icon, desc in [
-            ("sql_server", "SQL Server", "SiSqlite", "Microsoft SQL Server instances"),
             ("postgresql", "PostgreSQL", "SiPostgresql", "PostgreSQL clusters"),
-            ("oracle_db", "Oracle Database", "SiOracle", "Oracle multi-tenant database"),
-            ("mongo_k", "Mongo K", "SiMongodb", "MongoDB clusters"),
             ("redis", "Redis", "SiRedis", "Redis caches"),
             ("s3_db", "S3", "MdStorage", "S3 data lake buckets"),
         ]
@@ -470,72 +604,34 @@ SYSTEMS = {
 
 CATEGORIES = [
     {
-        "id": "network",
-        "label": "רכיבי רשת",
-        "icon": "FiGlobe",
-        "systemIds": ["dns", "gslb", "avi", "dp"],
-    },
-    {
-        "id": "ml",
-        "label": "למידת מכונה",
-        "icon": "FiTrendingUp",
-        "systemIds": ["prophet", "runai", "jupyter", "llm", "richard"],
-    },
-    {
-        "id": "search",
-        "label": "מנועי חיפוש",
-        "icon": "FiSearch",
-        "systemIds": ["eck", "solr"],
-    },
-    {
         "id": "databases",
         "label": "מסדי נתונים",
         "icon": "FiDatabase",
-        "systemIds": ["sql_server", "postgresql", "oracle_db", "mongo_k", "redis", "s3_db"],
+        "systemIds": ["oracle_db", "mongo_k", "sql_server", "redis", "postgresql", "eck", "splunk"],
     },
     {
         "id": "filesystems",
-        "label": "מערכות קבצים",
+        "label": "אחסון נתונים",
         "icon": "FiHardDrive",
-        "systemIds": ["hadoop_hdfs", "nfs", "cifs"],
+        "systemIds": ["s3_db", "hadoop_hdfs", "hdfs", "nfs", "cifs"],
     },
     {
         "id": "transport",
         "label": "עיבוד ושינוע",
         "icon": "FiShuffle",
-        "systemIds": [
-            "kafka",
-            "rabbitmq",
-            "spark_ocp4",
-            "airflow",
-            "tardis_xport",
-            "ibm_mq",
-            "s3_pipeline",
-        ],
+        "systemIds": ["kafka", "rabbitmq", "spark_ocp4", "airflow", "nifi", "ibm_mq"],
     },
     {
         "id": "virtualization",
         "label": "וירטואליזציה",
         "icon": "FiCpu",
-        "subMenus": [
-            {
-                "label": "VM",
-                "systemIds": ["vm_linux", "vm_windows"],
-            }
-        ],
-        "systemIds": ["ocp4", "pvc"],
+        "systemIds": ["vm_linux", "vm_windows", "os", "pvc", "dns"],
     },
     {
-        "id": "applications",
-        "label": "אפליקציות",
+        "id": "services",
+        "label": "שירותים",
         "icon": "FiGrid",
-        "systemIds": [],
-        "subMenus": [
-            {
-                "label": "זרימה",
-                "systemIds": ["tiva", "mishloach"],
-            }
-        ],
+        "systemIds": ["chevila", "ribua"],
     },
 ]
 
