@@ -114,7 +114,7 @@ ORACLE_MONITOR_FORM = {
     "schema": {
         "title": "Oracle monitoring",
         "type": "object",
-        "required": ["dc"],
+        "required": ["dc", "host", "database"],
         "properties": {
             "dc": {"type": "string", "title": "DC"},
             "host": {"type": "string", "title": "Host"},
@@ -135,7 +135,8 @@ MONGO_MONITOR_FORM = {
     "schema": {
         "title": "Mongo monitoring",
         "type": "object",
-        "required": ["dc"],
+        "required": ["dc", "host", "database"],
+        "required": ["dc", "host", "database"],
         "properties": {
             "dc": {"type": "string", "title": "DC"},
             "host": {"type": "string", "title": "Host"},
@@ -152,10 +153,75 @@ MONGO_MONITOR_FORM = {
 MONGO_FORMS = basic_forms("Mongo K")
 MONGO_FORMS["monitor"] = MONGO_MONITOR_FORM
 
+REDIS_MONITOR_FORM = {
+    "schema": {
+        "title": "Redis monitoring",
+        "type": "object",
+        "required": ["dc", "environment", "database","instance"],
+        "properties": {
+            "dc": {"type": "string", "title": "DC"},
+            "environment": {"type": "string", "title": "Environment"},
+            "database": {"type": "string", "title": "Database"},
+            "instance": {"type": "string", "title": "Instance"},
+        },
+    },
+    "uiSchema": {
+        "dc": {"ui:options": {"colSpan": 3, "placeholder": "dc-01"}},
+        "environment": {"ui:options": {"colSpan": 3}},
+        "database": {"ui:options": {"colSpan": 3}},
+        "instance": {"ui:options": {"colSpan": 3}},
+    },
+}
+
+REDIS_FORMS = basic_forms("Redis")
+REDIS_FORMS["monitor"] = REDIS_MONITOR_FORM
+
+POSTGRES_MONITOR_FORM = {
+    "schema": {
+        "title": "PostgreSQL monitoring",
+        "type": "object",
+        "required": ["host", "dc","database"],
+        "properties": {
+            "dc": {"type": "string", "title": "DC"},
+            "host": {"type": "string", "title": "Host"},
+            "database": {"type": "string", "title": "Database"},
+        },
+    },
+    "uiSchema": {
+        "dc": {"ui:options": {"colSpan": 4, "placeholder": "dc-01"}},
+        "host": {"ui:options": {"colSpan": 4}},
+        "database": {"ui:options": {"colSpan": 4}},
+    },
+}
+
+POSTGRES_FORMS = basic_forms("PostgreSQL")
+POSTGRES_FORMS["monitor"] = POSTGRES_MONITOR_FORM
+
+ECK_MONITOR_FORM = {
+    "schema": {
+        "title": "ECK monitoring",
+        "type": "object",
+                "required": ["cluster", "index"],
+
+        "properties": {
+            "cluster": {"type": "string", "title": "Cluster"},
+            "index": {"type": "string", "title": "Index"},
+        },
+    },
+    "uiSchema": {
+        "cluster": {"ui:options": {"colSpan": 6}},
+        "index": {"ui:options": {"colSpan": 6}},
+    },
+}
+
+ECK_FORMS = basic_forms("ECK")
+ECK_FORMS["monitor"] = ECK_MONITOR_FORM
+
 SQL_MONITOR_FORM = {
     "schema": {
         "title": "SQL monitoring",
         "type": "object",
+        "required":["dc","host","database"],
         "properties": {
             "dc": {"type": "string", "title": "DC"},
             "host": {"type": "string", "title": "Host"},
@@ -172,9 +238,181 @@ SQL_MONITOR_FORM = {
 SQL_FORMS = basic_forms("SQL Server")
 SQL_FORMS["monitor"] = SQL_MONITOR_FORM
 
+S3_MONITOR_FORM = {
+    "schema": {
+        "title": "S3 monitoring",
+        "type": "object",
+        "required": ["dc", "name"],
+        "properties": {
+            "dc": {"type": "string", "title": "DC"},
+            "name": {"type": "string", "title": "Name"},
+        },
+    },
+    "uiSchema": {
+        "dc": {"ui:options": {"colSpan": 6, "placeholder": "dc-01"}},
+        "name": {"ui:options": {"colSpan": 6}},
+    },
+}
+
+S3_FORMS = basic_forms("S3")
+S3_FORMS["monitor"] = S3_MONITOR_FORM
+
+HDFS_MONITOR_FORM = {
+    "schema": {
+        "title": "HDFS monitoring",
+        "type": "object",
+        "required": ["network", "dc", "url"],
+        "properties": {
+            "network": {"type": "string", "title": "Network"},
+            "dc": {"type": "string", "title": "DC"},
+            "url": {"type": "string", "title": "URL"},
+        },
+    },
+    "uiSchema": {
+        "network": {"ui:options": {"colSpan": 4}},
+        "dc": {"ui:options": {"colSpan": 4}},
+        "url": {"ui:options": {"colSpan": 4}},
+    },
+}
+
+HDFS_FORMS = basic_forms("HDFS")
+HDFS_FORMS["monitor"] = HDFS_MONITOR_FORM
+
+NFS_MONITOR_FORM = {
+    "schema": {
+        "title": "NFS monitoring",
+        "type": "object",
+        "required": ["network", "dc", "route"],
+        "properties": {
+            "network": {"type": "string", "title": "Network"},
+            "dc": {"type": "string", "title": "DC"},
+            "route": {"type": "string", "title": "Route"},
+        },
+    },
+    "uiSchema": {
+        "network": {"ui:options": {"colSpan": 4}},
+        "dc": {"ui:options": {"colSpan": 4}},
+        "route": {"ui:options": {"colSpan": 4}},
+    },
+}
+
+NFS_FORMS = basic_forms("NFS")
+NFS_FORMS["monitor"] = NFS_MONITOR_FORM
+
+CIFS_MONITOR_FORM = {
+    "schema": {
+        "title": "CIFS monitoring",
+        "type": "object",
+        "required": ["network", "dc", "route"],
+        "properties": {
+            "network": {"type": "string", "title": "Network"},
+            "dc": {"type": "string", "title": "DC"},
+            "route": {"type": "string", "title": "Route"},
+        },
+    },
+    "uiSchema": {
+        "network": {"ui:options": {"colSpan": 4}},
+        "dc": {"ui:options": {"colSpan": 4}},
+        "route": {"ui:options": {"colSpan": 4}},
+    },
+}
+
+CIFS_FORMS = basic_forms("CIFS")
+CIFS_FORMS["monitor"] = CIFS_MONITOR_FORM
+
+KAFKA_MONITOR_FORM = {
+    "schema": {
+        "title": "Kafka monitoring",
+        "type": "object",
+        "required": ["cluster", "topic", "consumer"],
+        "properties": {
+            "cluster": {"type": "string", "title": "Cluster"},
+            "topic": {"type": "string", "title": "Topic"},
+            "consumer": {"type": "string", "title": "Consumer"},
+        },
+    },
+    "uiSchema": {
+        "cluster": {
+            "ui:widget": "AsyncSelect",
+            "ui:options": {
+                "asyncOptions": {"path": "/owning-teams", "placeholder": "Select cluster"},
+            },
+        },
+        "topic": {"ui:options": {"colSpan": 6}},
+        "consumer": {"ui:options": {"colSpan": 6}},
+    },
+}
+
+KAFKA_FORMS = basic_forms("Kafka")
+KAFKA_FORMS["monitor"] = KAFKA_MONITOR_FORM
+
+RABBIT_MONITOR_FORM = {
+    "schema": {
+        "title": "RabbitMQ monitoring",
+        "type": "object",
+        "required": ["network", "dc", "queue"],
+        "properties": {
+            "network": {"type": "string", "title": "Network"},
+            "dc": {"type": "string", "title": "DC"},
+            "queue": {"type": "string", "title": "שם תור"},
+        },
+    },
+    "uiSchema": {
+        "network": {"ui:options": {"colSpan": 4}},
+        "dc": {"ui:options": {"colSpan": 4}},
+        "queue": {"ui:options": {"colSpan": 4}},
+    },
+}
+
+RABBIT_FORMS = basic_forms("RabbitMQ")
+RABBIT_FORMS["monitor"] = RABBIT_MONITOR_FORM
+
+SPARK_MONITOR_FORM = {
+    "schema": {
+        "title": "Spark monitoring",
+        "type": "object",
+        "required": ["namespace", "applicationName"],
+        "properties": {
+            "namespace": {"type": "string", "title": "Namespace"},
+            "applicationName": {"type": "string", "title": "Application name"},
+        },
+    },
+    "uiSchema": {
+        "namespace": {"ui:options": {"colSpan": 6}},
+        "applicationName": {"ui:options": {"colSpan": 6}},
+    },
+}
+
+SPARK_FORMS = basic_forms("Spark on OCP4")
+SPARK_FORMS["monitor"] = SPARK_MONITOR_FORM
+
 
 SYSTEMS = {
 
+    "redis": {
+        "id": "redis",
+        "label": "Redis",
+        "category": "databases",
+        "icon": "SiRedis",
+        "description": "Redis caches",
+        "forms": REDIS_FORMS,
+    },
+    "postgresql": {
+        "id": "postgresql",
+        "label": "PostgreSQL",
+        "category": "databases",
+        "icon": "SiPostgresql",
+        "description": "PostgreSQL clusters",
+        "forms": POSTGRES_FORMS,
+    },
+    "eck": {
+        "id": "eck",
+        "label": "ECK",
+        "category": "search",
+        "icon": "FiSearch",
+        "description": "Elastic Cloud on Kubernetes",
+        "forms": ECK_FORMS,
+    },
     "splunk": {
         "id": "splunk",
         "label": "Splunk",
@@ -222,6 +460,62 @@ SYSTEMS = {
         "icon": "FiGrid",
         "description": "ריבוע שירותי",
         "forms": basic_forms("ריבוע"),
+    },
+    "s3_db": {
+        "id": "s3_db",
+        "label": "S3",
+        "category": "databases",
+        "icon": "MdStorage",
+        "description": "S3 data lake buckets",
+        "forms": S3_FORMS,
+    },
+    "hadoop_hdfs": {
+        "id": "hadoop_hdfs",
+        "label": "Hadoop-HDFS",
+        "category": "filesystems",
+        "icon": "FiHardDrive",
+        "description": "HDFS storage clusters",
+        "forms": HDFS_FORMS,
+    },
+    "nfs": {
+        "id": "nfs",
+        "label": "NFS",
+        "category": "filesystems",
+        "icon": "FiHardDrive",
+        "description": "Network file systems",
+        "forms": NFS_FORMS,
+    },
+    "cifs": {
+        "id": "cifs",
+        "label": "CIFS",
+        "category": "filesystems",
+        "icon": "FiHardDrive",
+        "description": "SMB/CIFS shares",
+        "forms": CIFS_FORMS,
+    },
+    "kafka": {
+        "id": "kafka",
+        "label": "Kafka",
+        "category": "transport",
+        "icon": "SiApachekafka",
+        "description": "Kafka messaging",
+        "forms": KAFKA_FORMS,
+    },
+    "rabbitmq": {
+        "id": "rabbitmq",
+        "label": "RabbitMQ",
+        "category": "transport",
+        "icon": "SiRabbitmq",
+        "description": "RabbitMQ brokers",
+        "forms": RABBIT_FORMS,
+    },
+    "spark_ocp4": {
+        "id": "spark_ocp4",
+        "label": "Spark on OCP4",
+        "category": "transport",
+        "icon": "SiRedhat",
+        "description": "Spark workloads on OpenShift",
+        "forms": SPARK_FORMS,
     },
 
     "general": {
@@ -533,38 +827,7 @@ SYSTEMS = {
             "forms": basic_forms(label),
         }
         for system_id, label, icon, desc in [
-            ("eck", "ECK", "FiSearch", "Elastic Cloud on Kubernetes"),
             ("solr", "Solr", "SiApachesolr", "Apache Solr clusters"),
-        ]
-    },
-    **{
-        system_id: {
-            "id": system_id,
-            "label": label,
-            "category": "databases",
-            "icon": icon,
-            "description": desc,
-            "forms": basic_forms(label),
-        }
-        for system_id, label, icon, desc in [
-            ("postgresql", "PostgreSQL", "SiPostgresql", "PostgreSQL clusters"),
-            ("redis", "Redis", "SiRedis", "Redis caches"),
-            ("s3_db", "S3", "MdStorage", "S3 data lake buckets"),
-        ]
-    },
-    **{
-        system_id: {
-            "id": system_id,
-            "label": label,
-            "category": "filesystems",
-            "icon": icon,
-            "description": desc,
-            "forms": basic_forms(label),
-        }
-        for system_id, label, icon, desc in [
-            ("hadoop_hdfs", "Hadoop-HDFS", "FiHardDrive", "HDFS storage clusters"),
-            ("nfs", "NFS", "FiHardDrive", "Network file systems"),
-            ("cifs", "CIFS", "FiHardDrive", "SMB/CIFS shares"),
         ]
     },
     **{
@@ -577,9 +840,6 @@ SYSTEMS = {
             "forms": basic_forms(label),
         }
         for system_id, label, icon, desc in [
-            ("kafka", "Kafka", "SiApachekafka", "Kafka messaging"),
-            ("rabbitmq", "RabbitMQ", "SiRabbitmq", "RabbitMQ brokers"),
-            ("spark_ocp4", "Spark on OCP4", "SiRedhat", "Spark workloads on OpenShift"),
             ("airflow", "Airflow", "FiWind", "Workflow orchestration"),
             ("tardis_xport", "Tardis-Xport", "FiShuffle", "Data export service"),
             ("ibm_mq", "IBM MQ", "FiInbox", "IBM MQ queues"),
