@@ -7,7 +7,11 @@ import type { ObjectFieldTemplateProps, RJSFSchema, UiSchema } from '@rjsf/utils
 import type { FormDefinition } from '../../types/entity'
 import { AsyncSelectWidget } from '../form-widgets/AsyncSelectWidget'
 import type { FormStatus } from './types'
-import { useAsyncValidation, type AsyncValidationFieldConfig, type AsyncValidationStatus } from '../../hooks/useAsyncValidation'
+import {
+  useAsyncValidation,
+  type AsyncValidationFieldConfig,
+  type AsyncValidationStatus,
+} from '../../hooks/useAsyncValidation'
 
 const RjsfForm = withTheme(MantineTheme)
 
@@ -55,7 +59,7 @@ const FormObjectFieldTemplate = (props: ObjectFieldTemplateProps) => {
 
   return (
     <>
-      <Stack gap='sm'>
+      <Stack gap='sm' align='flex-end'>
         {title && (
           <Text fw={600} size='sm'>
             {title}
@@ -114,6 +118,22 @@ const formWidgets = {
   AsyncSelect: AsyncSelectWidget,
 }
 
+const HiddenErrorList = () => null
+
+const ArrayFieldTitle = ({ title }: { title?: string }) => {
+  if (!title || title.toLowerCase() === 'links') {
+    return null
+  }
+
+  return (
+    <div style={{ width: '100%', display: 'flex', justifyContent: 'flex-end' }}>
+      <Text fw={600} size='sm'>
+        {title}
+      </Text>
+    </div>
+  )
+}
+
 interface FormStepCardProps {
   status?: FormStatus
   definition?: FormDefinition
@@ -137,10 +157,7 @@ export function FormStepCard({
   onRetry,
   fullHeight = false,
 }: FormStepCardProps) {
-  const asyncConfigs = useMemo(
-    () => extractAsyncValidationConfigs(definition?.uiSchema),
-    [definition?.uiSchema]
-  )
+  const asyncConfigs = useMemo(() => extractAsyncValidationConfigs(definition?.uiSchema), [definition?.uiSchema])
   const stepFormData = (formData as Record<string, unknown>) ?? undefined
   const { extraErrors, statusMap } = useAsyncValidation(stepFormData, asyncConfigs)
 
@@ -161,10 +178,7 @@ export function FormStepCard({
     }),
     [definition?.uiSchema]
   )
-  const formContextValue = useMemo(
-    () => ({ asyncValidationStatus: statusMap }),
-    [statusMap]
-  )
+  const formContextValue = useMemo(() => ({ asyncValidationStatus: statusMap }), [statusMap])
 
   if (status === 'error' && !definition) {
     return (
@@ -206,7 +220,11 @@ export function FormStepCard({
           ref={attachRef}
           widgets={formWidgets}
           formContext={formContextValue}
-          templates={{ ObjectFieldTemplate: FormObjectFieldTemplate }}
+          templates={{
+            ObjectFieldTemplate: FormObjectFieldTemplate,
+            ErrorListTemplate: HiddenErrorList,
+            ArrayFieldTitleTemplate: ArrayFieldTitle,
+          }}
           onChange={onChange}
           onSubmit={onSubmit}
         />

@@ -13,8 +13,9 @@ GENERAL_FORM_DEFINITION = {
             "responsibleParty": {"type": "string", "title": "גורם אחראי"},
             "links": {
                 "type": "array",
-                "title": "לינקים",
+                "title": "",
                 "items": {
+                    "title": "",
                     "type": "object",
                     "required": [],
                     "properties": {
@@ -155,7 +156,7 @@ MONGO_FORMS["monitor"] = MONGO_MONITOR_FORM
 
 REDIS_MONITOR_FORM = {
     "schema": {
-        "title": "Redis monitoring",
+        "title": "Redis",
         "type": "object",
         "required": ["dc", "environment", "database","instance"],
         "properties": {
@@ -166,10 +167,10 @@ REDIS_MONITOR_FORM = {
         },
     },
     "uiSchema": {
-        "dc": {"ui:options": {"colSpan": 3, "placeholder": "dc-01"}},
-        "environment": {"ui:options": {"colSpan": 3}},
-        "database": {"ui:options": {"colSpan": 3}},
-        "instance": {"ui:options": {"colSpan": 3}},
+        "dc": {"ui:options": {"colSpan": 6, "placeholder": "dc-01"}},
+        "environment": {"ui:options": {"colSpan": 6}},
+        "database": {"ui:options": {"colSpan": 6}},
+        "instance": {"ui:options": {"colSpan": 6}},
     },
 }
 

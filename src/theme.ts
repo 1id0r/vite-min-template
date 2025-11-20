@@ -1,5 +1,14 @@
-import { createTheme } from "@mantine/core";
+import { createTheme, InputWrapper } from "@mantine/core";
 
 export const theme = createTheme({
-  /* Put your mantine theme override here */
+  components: {
+    InputWrapper: InputWrapper.extend({
+      styles: {
+        label: {
+          width: "100%",
+          textAlign: "right",
+        },
+      },
+    }),
+  },
 });
