@@ -84,7 +84,7 @@ export const SystemSelectionPanel = memo(function SystemSelectionPanel({
               onClick={handleGeneralSelect}
               styles={(theme) => ({
                 root: {
-                  borderColor: 'rgb(11, 95, 255)',
+                  borderColor: 'rgba(11, 95, 255,0.5)',
                   fontWeight: 600,
                   gap: theme.spacing.md,
                   justifyContent: 'center',
@@ -105,13 +105,7 @@ export const SystemSelectionPanel = memo(function SystemSelectionPanel({
           {categories.map((category) => {
             const CategoryIcon = resolveIcon(category.icon) ?? fallbackCategoryIcon
             return (
-              <Menu
-                key={category.id}
-                trigger='hover'
-                position='left-start'
-                withinPortal
-                offset={8}
-              >
+              <Menu key={category.id} trigger='hover' position='left-start' withinPortal offset={8}>
                 <Menu.Target>
                   <Button
                     variant='outline'
@@ -120,7 +114,7 @@ export const SystemSelectionPanel = memo(function SystemSelectionPanel({
                     leftSection={<PrefixIcon size={16} color='rgb(11, 95, 255)' />}
                     styles={(theme) => ({
                       root: {
-                        borderColor: 'rgb(11, 95, 255)',
+                        borderColor: 'rgba(11, 95, 255,0.5)',
                         fontWeight: 500,
                         gap: theme.spacing.md,
                       },
@@ -152,7 +146,7 @@ export const SystemSelectionPanel = memo(function SystemSelectionPanel({
                     >
                       <Menu.Target>
                         <Menu.Item
-                          leftSection={<PrefixIcon size={14} color='rgb(11, 95, 255)' />}
+                          leftSection={<PrefixIcon size={14} color='rgb(11, 95, 255,0.5)' />}
                           className={menuItemHoverClass}
                         >
                           {submenu.label}
@@ -170,8 +164,8 @@ export const SystemSelectionPanel = memo(function SystemSelectionPanel({
         </Stack>
 
         {selectedSystemLabel && (
-          <Text size='sm' fw={600} c='blue.7'>
-            Selected entity: {selectedSystemLabel}
+          <Text size='sm' dir='rtl' fw={600} c='rgb(11, 95, 255)'>
+            יישות נבחרת: {selectedSystemLabel}
           </Text>
         )}
       </Stack>

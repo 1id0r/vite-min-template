@@ -38,7 +38,7 @@ export function DisplayIconMenu({
         <Box
           w='100%'
           style={{
-            border: '1px solid #e5e7eb',
+            border: '1px solid rgb(11, 95, 255)',
             borderRadius: 16,
             padding: '12px 16px',
           }}
@@ -50,6 +50,7 @@ export function DisplayIconMenu({
               verticalSpacing={12}
               style={{
                 marginLeft: 'auto',
+                borderColor: 'rgb(11, 95, 255)',
                 // width: 'min(100%, 520px)',
                 justifyItems: 'center',
               }}
@@ -73,9 +74,7 @@ export function DisplayIconMenu({
                     title={system.label}
                     style={(theme) => ({
                       borderRadius: 8,
-                      border: `1px solid ${
-                        isSelected ? 'rgba(11, 95, 255, 0.3)' : theme.colors.gray[3]
-                      }`,
+                      border: `1px solid ${isSelected ? 'rgba(11, 95, 255, 0.3)' : 'rgb(11, 95, 255,0.3)'}`,
                       padding: theme.spacing.xs,
                       display: 'flex',
                       alignItems: 'center',
@@ -85,7 +84,7 @@ export function DisplayIconMenu({
                       minHeight: 64,
                       aspectRatio: '1 / 1',
                       margin: '0 auto',
-                      transition: 'border-color 120ms ease, box-shadow 120ms ease, background-color 120ms ease',
+
                       boxShadow: isSelected ? `0 0 0 1px rgba(11, 95, 255, 0.18)` : undefined,
                       backgroundColor: isSelected ? 'rgba(11, 95, 255, 0.08)' : theme.white,
                     })}
