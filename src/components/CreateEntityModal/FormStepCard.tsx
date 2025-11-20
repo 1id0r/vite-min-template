@@ -1,9 +1,9 @@
-import { useMemo } from 'react'
+import { useMemo, type ReactElement } from 'react'
 import { Alert, Box, Button, Center, Grid, Group, Loader, Paper, Stack, Text } from '@mantine/core'
 import FormComponent, { withTheme, type IChangeEvent } from '@rjsf/core'
 import { Theme as MantineTheme } from '@rjsf/mantine'
 import validator from '@rjsf/validator-ajv8'
-import type { ObjectFieldTemplateProps, UiSchema } from '@rjsf/utils'
+import type { ObjectFieldTemplateProps, RJSFSchema, UiSchema } from '@rjsf/utils'
 import type { FormDefinition } from '../../types/entity'
 import { AsyncSelectWidget } from '../form-widgets/AsyncSelectWidget'
 import type { FormStatus } from './types'
@@ -13,7 +13,7 @@ const RjsfForm = withTheme(MantineTheme)
 
 export type RjsfFormRef = InstanceType<typeof FormComponent>
 
-const shouldSpanFullWidth = (schema: Record<string, unknown>, uiSchema: Record<string, unknown>) => {
+const shouldSpanFullWidth = (schema: RJSFSchema, uiSchema: UiSchema) => {
   const typeValue = schema.type
   const types = Array.isArray(typeValue) ? typeValue : typeValue ? [typeValue] : []
   const widget = uiSchema['ui:widget']
@@ -41,6 +41,11 @@ type TemplatePropsWithContext = ObjectFieldTemplateProps & {
   }
 }
 
+type FieldContentProps = {
+  schema?: RJSFSchema
+  uiSchema?: UiSchema
+}
+
 const FormObjectFieldTemplate = (props: ObjectFieldTemplateProps) => {
   const { properties, title, description } = props
   const formContext = (props as TemplatePropsWithContext).formContext
@@ -64,18 +69,14 @@ const FormObjectFieldTemplate = (props: ObjectFieldTemplateProps) => {
         <Grid gutter='md'>
           {visible.map((property) => {
             type PropertyMeta = {
-              schema?: Record<string, unknown>
-              uiSchema?: Record<string, unknown>
+              schema?: RJSFSchema
+              uiSchema?: UiSchema
             }
             const meta = property as PropertyMeta
-            const schema = ((property.content as any)?.props?.schema ?? meta.schema ?? {}) as Record<
-              string,
-              unknown
-            >
-            const uiSchema = ((property.content as any)?.props?.uiSchema ?? meta.uiSchema ?? {}) as Record<
-              string,
-              unknown
-            >
+            const contentProps =
+              ((property.content as ReactElement<FieldContentProps>)?.props as FieldContentProps | undefined) ?? {}
+            const schema = (contentProps.schema ?? meta.schema ?? {}) as RJSFSchema
+            const uiSchema = (contentProps.uiSchema ?? meta.uiSchema ?? {}) as UiSchema
             const options = (uiSchema['ui:options'] ?? {}) as Record<string, unknown>
             const spanOption = typeof options.colSpan === 'number' ? options.colSpan : undefined
             const shouldFull = shouldSpanFullWidth(schema, uiSchema)
@@ -136,7 +137,10 @@ export function FormStepCard({
   onRetry,
   fullHeight = false,
 }: FormStepCardProps) {
-  const asyncConfigs = useMemo(() => extractAsyncValidationConfigs(definition?.uiSchema), [definition])
+  const asyncConfigs = useMemo(
+    () => extractAsyncValidationConfigs(definition?.uiSchema),
+    [definition?.uiSchema]
+  )
   const stepFormData = (formData as Record<string, unknown>) ?? undefined
   const { extraErrors, statusMap } = useAsyncValidation(stepFormData, asyncConfigs)
 
@@ -147,6 +151,20 @@ export function FormStepCard({
         flexDirection: 'column' as const,
       }
     : {}
+
+  const combinedUiSchema = useMemo(
+    () => ({
+      'ui:submitButtonOptions': {
+        norender: true,
+      },
+      ...(definition?.uiSchema ?? {}),
+    }),
+    [definition?.uiSchema]
+  )
+  const formContextValue = useMemo(
+    () => ({ asyncValidationStatus: statusMap }),
+    [statusMap]
+  )
 
   if (status === 'error' && !definition) {
     return (
@@ -173,18 +191,13 @@ export function FormStepCard({
     )
   }
 
-  const combinedUiSchema = {
-    'ui:submitButtonOptions': {
-      norender: true,
-    },
-    ...(definition.uiSchema ?? {}),
-  }
+  const ensuredDefinition = definition
 
   return (
     <Paper p='md' shadow='none' withBorder={false} style={containerStyle}>
       <Box style={fullHeight ? { display: 'flex', flexDirection: 'column', flex: 1 } : undefined}>
         <RjsfForm
-          schema={definition.schema}
+          schema={ensuredDefinition.schema}
           uiSchema={combinedUiSchema}
           formData={formData}
           validator={validator}
@@ -192,9 +205,7 @@ export function FormStepCard({
           liveValidate
           ref={attachRef}
           widgets={formWidgets}
-          formContext={{
-            asyncValidationStatus: statusMap,
-          }}
+          formContext={formContextValue}
           templates={{ ObjectFieldTemplate: FormObjectFieldTemplate }}
           onChange={onChange}
           onSubmit={onSubmit}

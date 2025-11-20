@@ -26,7 +26,7 @@ import { DISPLAY_FLOW_ID, fallbackSystemIconName } from '../iconRegistry'
 
 type ConfigStatus = 'idle' | 'loading' | 'error' | 'success'
 
-interface UseEntityFlowStateResult {
+export interface UseEntityFlowStateResult {
   config: EntityConfig | null
   configStatus: ConfigStatus
   configError: string | null
@@ -133,20 +133,27 @@ export function useEntityFlowState(): UseEntityFlowStateResult {
   }, [config, flow])
 
   const currentFlow = config ? config.flows[flow] ?? null : null
-  const baseStepKeys: StepKey[] = currentFlow?.steps ?? []
-  const stepKeys: StepKey[] =
-    flow === 'monitor' && selectedSystem === 'general'
-      ? baseStepKeys.filter((key) => key !== 'monitor')
-      : baseStepKeys
-  const isCompleted = currentFlow ? activeStep === stepKeys.length : false
-  const activeStepKey = !isCompleted ? stepKeys[activeStep] ?? null : null
+  const stepKeys = useMemo<StepKey[]>(() => {
+    if (!currentFlow) {
+      return []
+    }
+    if (flow === 'monitor' && selectedSystem === 'general') {
+      return currentFlow.steps.filter((key) => key !== 'monitor')
+    }
+    return currentFlow.steps
+  }, [currentFlow, flow, selectedSystem])
+  const totalSteps = stepKeys.length
+  const isCompleted = currentFlow ? activeStep === totalSteps : false
+  const activeStepKey = useMemo<StepKey | null>(() => {
+    if (isCompleted) {
+      return null
+    }
+    return stepKeys[activeStep] ?? null
+  }, [activeStep, isCompleted, stepKeys])
 
   useEffect(() => {
-    if (!currentFlow) {
-      return
-    }
-
-    if (activeStep > currentFlow.steps.length) {
+    const stepCount = currentFlow?.steps.length ?? 0
+    if (stepCount && activeStep > stepCount) {
       setActiveStep(0)
     }
   }, [currentFlow, activeStep])
@@ -292,8 +299,18 @@ export function useEntityFlowState(): UseEntityFlowStateResult {
     setActiveStep((step) => Math.max(step - 1, 0))
   }, [])
 
-  const selectedSystemConfig = selectedSystem && config ? config.systems[selectedSystem] ?? null : null
-  const currentFormState = selectedSystem ? formState[selectedSystem] ?? createEmptyStepState() : createEmptyStepState()
+  const selectedSystemConfig = useMemo<SystemDefinition | null>(() => {
+    if (!selectedSystem || !config) {
+      return null
+    }
+    return config.systems[selectedSystem] ?? null
+  }, [config, selectedSystem])
+  const currentFormState = useMemo(() => {
+    if (!selectedSystem) {
+      return createEmptyStepState()
+    }
+    return formState[selectedSystem] ?? createEmptyStepState()
+  }, [formState, selectedSystem])
   const canMoveNext = Boolean(selectedSystem)
 
   const aggregateResult = useCallback(() => {
@@ -427,10 +444,16 @@ export function useEntityFlowState(): UseEntityFlowStateResult {
     }))
   }, [config])
 
-  const categories = (config?.categories ?? []) as CategoryDefinition[]
-  const systems = (config?.systems ?? {}) as Record<string, SystemDefinition>
-  const stepDefinitions = config?.steps
-  const flowDescription = currentFlow?.description?.trim()
+  const categories = useMemo(
+    () => (config?.categories ?? []) as CategoryDefinition[],
+    [config]
+  )
+  const systems = useMemo(
+    () => (config?.systems ?? {}) as Record<string, SystemDefinition>,
+    [config]
+  )
+  const stepDefinitions = useMemo(() => config?.steps, [config])
+  const flowDescription = useMemo(() => currentFlow?.description?.trim(), [currentFlow])
   const nextButtonDisabled =
     (activeStepKey === 'system' && !canMoveNext) ||
     (activeStepKey !== null &&
@@ -438,38 +461,75 @@ export function useEntityFlowState(): UseEntityFlowStateResult {
       selectedSystem !== null &&
       formStatus[selectedSystem]?.[activeStepKey] === 'loading')
 
-  return {
-    config,
-    configStatus,
-    configError,
-    handleConfigRetry,
-    flow,
-    flowOptions,
-    handleFlowChange,
-    stepKeys,
-    activeStep,
-    activeStepKey,
-    isCompleted,
-    goToPreviousStep,
-    handleAdvance,
-    selectedSystem,
-    selectedSystemConfig,
-    handleSystemSelect,
-    annotateSystemIcon,
-    categories,
-    systems,
-    stepDefinitions,
-    flowDescription,
-    currentFormState,
-    formDefinitions,
-    formStatus,
-    formErrors,
-    attachFormRef,
-    onFormChange,
-    onFormSubmit,
-    requestFormDefinition,
-    result,
-    resetFlowState,
-    nextButtonDisabled,
-  }
+  // Memoize the full controller shape to prevent unnecessary downstream re-renders
+  return useMemo<UseEntityFlowStateResult>(
+    () => ({
+      config,
+      configStatus,
+      configError,
+      handleConfigRetry,
+      flow,
+      flowOptions,
+      handleFlowChange,
+      stepKeys,
+      activeStep,
+      activeStepKey,
+      isCompleted,
+      goToPreviousStep,
+      handleAdvance,
+      selectedSystem,
+      selectedSystemConfig,
+      handleSystemSelect,
+      annotateSystemIcon,
+      categories,
+      systems,
+      stepDefinitions,
+      flowDescription,
+      currentFormState,
+      formDefinitions,
+      formStatus,
+      formErrors,
+      attachFormRef,
+      onFormChange,
+      onFormSubmit,
+      requestFormDefinition,
+      result,
+      resetFlowState,
+      nextButtonDisabled,
+    }),
+    [
+      config,
+      configStatus,
+      configError,
+      handleConfigRetry,
+      flow,
+      flowOptions,
+      handleFlowChange,
+      stepKeys,
+      activeStep,
+      activeStepKey,
+      isCompleted,
+      goToPreviousStep,
+      handleAdvance,
+      selectedSystem,
+      selectedSystemConfig,
+      handleSystemSelect,
+      annotateSystemIcon,
+      categories,
+      systems,
+      stepDefinitions,
+      flowDescription,
+      currentFormState,
+      formDefinitions,
+      formStatus,
+      formErrors,
+      attachFormRef,
+      onFormChange,
+      onFormSubmit,
+      requestFormDefinition,
+      result,
+      resetFlowState,
+      nextButtonDisabled,
+    ]
+  )
 }

@@ -386,6 +386,167 @@ SPARK_MONITOR_FORM = {
 SPARK_FORMS = basic_forms("Spark on OCP4")
 SPARK_FORMS["monitor"] = SPARK_MONITOR_FORM
 
+AIRFLOW_MONITOR_FORM = {
+    "schema": {
+        "title": "Airflow monitoring",
+        "type": "object",
+        "required": ["network", "dc", "dag", "task", ],
+        "properties": {
+            "network": {"type": "string", "title": "Network"},
+            "dc": {"type": "string", "title": "DC"},
+            "dag": {"type": "string", "title": "DAG"},
+            "task": {"type": "string", "title": "Task"},
+            "isSparkDag": {"type": "boolean", "title": "Is Spark's DAG"},
+        },
+    },
+    "uiSchema": {
+        "network": {"ui:options": {"colSpan": 6}},
+        "dc": {"ui:options": {"colSpan": 6}},
+        "dag": {"ui:options": {"colSpan": 6}},
+        "task": {"ui:options": {"colSpan": 6}},
+        "isSparkDag": {"ui:options": {"colSpan": 6}},
+    },
+}
+
+AIRFLOW_FORMS = basic_forms("Airflow")
+AIRFLOW_FORMS["monitor"] = AIRFLOW_MONITOR_FORM
+
+NIFI_MONITOR_FORM = {
+    "schema": {
+        "title": "NiFi monitoring",
+        "type": "object",
+        "required": ["environment", "componentType", "componentId"],
+        "properties": {
+            "environment": {"type": "string", "title": "Environment"},
+            "componentType": {"type": "string", "title": "Component type"},
+            "componentId": {"type": "string", "title": "Component ID"},
+        },
+    },
+    "uiSchema": {
+        "environment": {"ui:options": {"colSpan": 4}},
+        "componentType": {"ui:options": {"colSpan": 4}},
+        "componentId": {"ui:options": {"colSpan": 4}},
+    },
+}
+
+NIFI_FORMS = basic_forms("NiFi")
+NIFI_FORMS["monitor"] = NIFI_MONITOR_FORM
+
+IBM_MQ_MONITOR_FORM = {
+    "schema": {
+        "title": "IBM MQ monitoring",
+        "type": "object",
+        "required": ["queueManagers", "queueName"],
+        "properties": {
+            "queueManagers": {"type": "string", "title": "Queue manager(s)"},
+            "queueName": {"type": "string", "title": "Queue name"},
+        },
+    },
+    "uiSchema": {
+        "queueManagers": {"ui:options": {"colSpan": 6}},
+        "queueName": {"ui:options": {"colSpan": 6}},
+    },
+}
+
+IBM_MQ_FORMS = basic_forms("IBM MQ")
+IBM_MQ_FORMS["monitor"] = IBM_MQ_MONITOR_FORM
+
+OS_MONITOR_FORM = {
+    "schema": {
+        "title": "OS monitoring",
+        "type": "object",
+        "required": ["environment", "namespace", "workland", "type"],
+        "properties": {
+            "environment": {"type": "string", "title": "Environment"},
+            "namespace": {"type": "string", "title": "Namespace"},
+            "workland": {"type": "string", "title": "Workland"},
+            "type": {"type": "string", "title": "Type"},
+        },
+    },
+    "uiSchema": {
+        "environment": {"ui:options": {"colSpan": 6}},
+        "namespace": {"ui:options": {"colSpan": 6}},
+        "workland": {"ui:options": {"colSpan": 6}},
+        "type": {"ui:options": {"colSpan": 6}},
+    },
+}
+
+OS_FORMS = basic_forms("Operating System")
+OS_FORMS["monitor"] = OS_MONITOR_FORM
+
+PVC_MONITOR_FORM = {
+    "schema": {
+        "title": "PVC monitoring",
+        "type": "object",
+        "required": ["environment", "namespace", "pvc"],
+        "properties": {
+            "environment": {"type": "string", "title": "Environment"},
+            "namespace": {"type": "string", "title": "Namespace"},
+            "pvc": {"type": "string", "title": "PVC"},
+        },
+    },
+    "uiSchema": {
+        "environment": {"ui:options": {"colSpan": 4}},
+        "namespace": {"ui:options": {"colSpan": 4}},
+        "pvc": {"ui:options": {"colSpan": 4}},
+    },
+}
+
+DNS_MONITOR_FORM = {
+    "schema": {
+        "title": "DNS monitoring",
+        "type": "object",
+        "required": ["dns"],
+        "properties": {
+            "dns": {"type": "string", "title": "DNS"},
+        },
+    },
+    "uiSchema": {
+        "dns": {"ui:options": {"colSpan": 6}},
+    },
+}
+
+GENERAL_PACKAGE_MONITOR_FORM = {
+    "schema": {
+        "title": "Package monitoring",
+        "type": "object",
+        "required": ["entityName", "identifier"],
+        "properties": {
+            "entityName": {"type": "string", "title": "שם יישות"},
+            "identifier": {"type": "string", "title": "מזהה"},
+        },
+    },
+    "uiSchema": {
+        "entityName": {"ui:options": {"colSpan": 6}},
+        "identifier": {"ui:options": {"colSpan": 6}},
+    },
+}
+
+RIBUA_MONITOR_FORM = {
+    "schema": {
+        "title": "ריבוע ניטור",
+        "type": "object",
+        "required": ["name", "identifier"],
+        "properties": {
+            "name": {"type": "string", "title": "שם"},
+            "identifier": {"type": "string", "title": "מזהה"},
+        },
+    },
+    "uiSchema": {
+        "name": {"ui:options": {"colSpan": 6}},
+        "identifier": {"ui:options": {"colSpan": 6}},
+    },
+}
+
+DNS_FORMS = basic_forms("DNS")
+DNS_FORMS["monitor"] = DNS_MONITOR_FORM
+
+CHEVILA_FORMS = basic_forms("חבילה")
+CHEVILA_FORMS["monitor"] = GENERAL_PACKAGE_MONITOR_FORM
+
+RIBUA_FORMS = basic_forms("ריבוע")
+RIBUA_FORMS["monitor"] = RIBUA_MONITOR_FORM
+
 
 SYSTEMS = {
 
@@ -427,7 +588,7 @@ SYSTEMS = {
         "category": "filesystems",
         "icon": "FiHardDrive",
         "description": "HDFS cluster",
-        "forms": basic_forms("HDFS"),
+        "forms": HDFS_FORMS,
     },
     "nifi": {
         "id": "nifi",
@@ -435,7 +596,7 @@ SYSTEMS = {
         "category": "transport",
         "icon": "FiWind",
         "description": "NiFi data flows",
-        "forms": basic_forms("NiFi"),
+        "forms": NIFI_FORMS,
     },
     "os": {
         "id": "os",
@@ -443,7 +604,7 @@ SYSTEMS = {
         "category": "virtualization",
         "icon": "FiCpu",
         "description": "Generic OS",
-        "forms": basic_forms("Operating System"),
+        "forms": OS_FORMS,
     },
     "chevila": {
         "id": "chevila",
@@ -451,7 +612,7 @@ SYSTEMS = {
         "category": "services",
         "icon": "FiPackage",
         "description": "חבילה שירותית",
-        "forms": basic_forms("חבילה"),
+        "forms": CHEVILA_FORMS,
     },
     "ribua": {
         "id": "ribua",
@@ -459,7 +620,7 @@ SYSTEMS = {
         "category": "services",
         "icon": "FiGrid",
         "description": "ריבוע שירותי",
-        "forms": basic_forms("ריבוע"),
+        "forms": RIBUA_FORMS,
     },
     "s3_db": {
         "id": "s3_db",
@@ -516,6 +677,22 @@ SYSTEMS = {
         "icon": "SiRedhat",
         "description": "Spark workloads on OpenShift",
         "forms": SPARK_FORMS,
+    },
+    "airflow": {
+        "id": "airflow",
+        "label": "Airflow",
+        "category": "transport",
+        "icon": "FiWind",
+        "description": "Workflow orchestration",
+        "forms": AIRFLOW_FORMS,
+    },
+    "ibm_mq": {
+        "id": "ibm_mq",
+        "label": "IBM MQ",
+        "category": "transport",
+        "icon": "FiInbox",
+        "description": "IBM MQ queues",
+        "forms": IBM_MQ_FORMS,
     },
 
     "general": {
@@ -600,14 +777,13 @@ SYSTEMS = {
                 "schema": {
                     "title": "Linux VM monitoring",
                     "type": "object",
+                    "required": ["dns"],
                     "properties": {
-                        "enableMetrics": {"type": "boolean", "title": "Enable metrics"},
-                        "backupPolicy": {"type": "string", "title": "Backup policy"},
+                        "dns": {"type": "string", "title": "DNS"},
                     },
                 },
                 "uiSchema": {
-                    "enableMetrics": {"ui:options": {"colSpan": 6}},
-                    "backupPolicy": {"ui:options": {"colSpan": 6}},
+                    "dns": {"ui:options": {"colSpan": 6}},
                 },
             },
         },
@@ -658,14 +834,13 @@ SYSTEMS = {
                 "schema": {
                     "title": "Windows VM monitoring",
                     "type": "object",
+                    "required": ["dns"],
                     "properties": {
-                        "enableEventViewer": {"type": "boolean", "title": "Collect Event Viewer logs"},
-                        "patchGroup": {"type": "string", "title": "Patch group"},
+                        "dns": {"type": "string", "title": "DNS"},
                     },
                 },
                 "uiSchema": {
-                    "enableEventViewer": {"ui:options": {"colSpan": 6}},
-                    "patchGroup": {"ui:options": {"colSpan": 6}},
+                    "dns": {"ui:options": {"colSpan": 6}},
                 },
             },
         },
@@ -772,14 +947,17 @@ SYSTEMS = {
                 "schema": {
                     "title": "PVC monitoring",
                     "type": "object",
+                    "required": ["environment", "namespace", "pvc"],
                     "properties": {
-                        "retentionDays": {"type": "integer", "title": "Snapshot retention (days)", "minimum": 1},
-                        "iopsAlert": {"type": "integer", "title": "IOPS alert threshold"},
+                        "environment": {"type": "string", "title": "Environment"},
+                        "namespace": {"type": "string", "title": "Namespace"},
+                        "pvc": {"type": "string", "title": "PVC"},
                     },
                 },
                 "uiSchema": {
-                    "retentionDays": {"ui:options": {"colSpan": 6}},
-                    "iopsAlert": {"ui:options": {"colSpan": 6}},
+                    "environment": {"ui:options": {"colSpan": 4}},
+                    "namespace": {"ui:options": {"colSpan": 4}},
+                    "pvc": {"ui:options": {"colSpan": 4}},
                 },
             },
         },
@@ -840,9 +1018,7 @@ SYSTEMS = {
             "forms": basic_forms(label),
         }
         for system_id, label, icon, desc in [
-            ("airflow", "Airflow", "FiWind", "Workflow orchestration"),
             ("tardis_xport", "Tardis-Xport", "FiShuffle", "Data export service"),
-            ("ibm_mq", "IBM MQ", "FiInbox", "IBM MQ queues"),
             ("s3_pipeline", "S3", "FiCloud", "S3 transport pipelines"),
         ]
     },
@@ -861,6 +1037,8 @@ SYSTEMS = {
         ]
     },
 }
+
+SYSTEMS["dns"]["forms"] = DNS_FORMS
 
 CATEGORIES = [
     {
@@ -925,3 +1103,11 @@ STEPS = {
     "general": {"label": " פרטים כלליים"},
     "monitor": {"label": " פרטי ניטור"},
 }
+DNS_FORMS = basic_forms("DNS")
+DNS_FORMS["monitor"] = DNS_MONITOR_FORM
+
+CHEVILA_FORMS = basic_forms("חבילה")
+CHEVILA_FORMS["monitor"] = GENERAL_PACKAGE_MONITOR_FORM
+
+RIBUA_FORMS = basic_forms("ריבוע")
+RIBUA_FORMS["monitor"] = RIBUA_MONITOR_FORM

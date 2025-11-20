@@ -1,91 +1,60 @@
+import { memo, useCallback, useMemo } from 'react'
 import { Alert, Box, Button, Center, Divider, Group, Loader, Stack, Text } from '@mantine/core'
 import type { IChangeEvent } from '@rjsf/core'
-import type {
-  CategoryDefinition,
-  EntityConfig,
-  FormDefinition,
-  StepDefinition,
-  StepKey,
-  SystemDefinition,
-} from '../../types/entity'
+import type { CategoryDefinition, FormDefinition, StepKey, SystemDefinition } from '../../types/entity'
 import { FlowStepper } from './FlowStepper'
 import { FormStepCard, type RjsfFormRef } from './FormStepCard'
 import { ResultSummary } from './ResultSummary'
 import { SystemStep } from './SystemStep'
 import { DisplayIconMenu } from './DisplayIconMenu'
 import { DISPLAY_FLOW_ID, DISPLAY_FLOW_SYSTEM_IDS, fallbackSystemIcon } from './iconRegistry'
-import type { AggregatedResult, FlowId, FlowOption, FormStatus } from './types'
+import type { UseEntityFlowStateResult } from './hooks/useEntityFlowState'
+import type { FlowId, FlowOption, FormStatus } from './types'
 
 interface EntityFlowContentProps {
-  configStatus: 'idle' | 'loading' | 'error' | 'success'
-  configError: string | null
-  config: EntityConfig | null
-  handleConfigRetry: () => void
-  flow: FlowId
-  flowOptions: FlowOption[]
-  handleFlowChange: (value: string) => void
-  activeStep: number
-  activeStepKey: StepKey | null
-  isCompleted: boolean
-  stepKeys: StepKey[]
-  stepDefinitions?: Record<StepKey, StepDefinition>
-  flowDescription?: string
-  selectedSystem: string | null
-  selectedSystemConfig: SystemDefinition | null
-  categories: CategoryDefinition[]
-  systems: Record<string, SystemDefinition>
-  nextButtonDisabled: boolean
-  goToPreviousStep: () => void
-  handleAdvance: () => void
-  result: AggregatedResult | null
+  controller: UseEntityFlowStateResult
   onClose: () => void
-  formDefinitions: Record<string, Partial<Record<StepKey, FormDefinition>>>
-  formStatus: Record<string, Partial<Record<StepKey, FormStatus>>>
-  formErrors: Record<string, Partial<Record<StepKey, string>>>
-  currentFormState: Record<StepKey, unknown>
-  attachFormRef: (key: StepKey, ref: RjsfFormRef | null) => void
-  onFormChange: (systemId: string, key: StepKey, change: IChangeEvent) => void
-  onFormSubmit: (key: StepKey, change: IChangeEvent) => void
-  requestFormDefinition: (systemId: string, stepKey: StepKey) => Promise<FormDefinition>
-  handleSystemSelect: (systemId: string) => void
-  annotateSystemIcon: (systemId: string, iconName?: string) => void
 }
 
-export function EntityFlowContent({
-  configStatus,
-  configError,
-  config,
-  handleConfigRetry,
-  flow,
-  flowOptions,
-  handleFlowChange,
-  activeStep,
-  activeStepKey,
-  isCompleted,
-  stepKeys,
-  stepDefinitions,
-  flowDescription,
-  selectedSystem,
-  selectedSystemConfig,
-  categories,
-  systems,
-  nextButtonDisabled,
-  goToPreviousStep,
-  handleAdvance,
-  result,
-  onClose,
-  formDefinitions,
-  formStatus,
-  formErrors,
-  currentFormState,
-  attachFormRef,
-  onFormChange,
-  onFormSubmit,
-  requestFormDefinition,
-  handleSystemSelect,
-  annotateSystemIcon,
-}: EntityFlowContentProps) {
-  if (configStatus === 'loading' && !config) {
+export function EntityFlowContent({ controller, onClose }: EntityFlowContentProps) {
+  // Destructure everything from the controller to keep this component declarative
+  const {
+    configStatus,
+    configError,
+    config,
+    handleConfigRetry,
+    flow,
+    flowOptions,
+    handleFlowChange,
+    activeStep,
+    activeStepKey,
+    isCompleted,
+    stepKeys,
+    stepDefinitions,
+    flowDescription,
+    selectedSystem,
+    selectedSystemConfig,
+    categories,
+    systems,
+    nextButtonDisabled,
+    goToPreviousStep,
+    handleAdvance,
+    result,
+    formDefinitions,
+    formStatus,
+    formErrors,
+    currentFormState,
+    attachFormRef,
+    onFormChange,
+    onFormSubmit,
+    requestFormDefinition,
+    handleSystemSelect,
+    annotateSystemIcon,
+  } = controller
+  const isInitialLoad = configStatus === 'loading' && !config
+  const hasBlockingError = configStatus === 'error' && !config
+
+  if (isInitialLoad) {
     return (
       <Center py='lg'>
         <Loader />
@@ -93,7 +62,7 @@ export function EntityFlowContent({
     )
   }
 
-  if (configStatus === 'error' && !config) {
+  if (hasBlockingError) {
     return <ConfigErrorNotice message={configError} onRetry={handleConfigRetry} />
   }
 
@@ -126,7 +95,7 @@ export function EntityFlowContent({
             activeStepKey={activeStepKey}
             flow={flow}
             flowOptions={flowOptions}
-            handleFlowChange={handleFlowChange}
+            onFlowChange={handleFlowChange}
             flowDescription={flowDescription}
             categories={categories}
             systems={systems}
@@ -174,7 +143,7 @@ interface StepContentProps {
   activeStepKey: StepKey | null
   flow: FlowId
   flowOptions: FlowOption[]
-  handleFlowChange: (value: string) => void
+  onFlowChange: (value: string) => void
   flowDescription?: string
   categories: CategoryDefinition[]
   systems: Record<string, SystemDefinition>
@@ -192,11 +161,11 @@ interface StepContentProps {
   requestFormDefinition: (systemId: string, stepKey: StepKey) => Promise<FormDefinition>
 }
 
-function StepContent({
+const StepContent = memo(function StepContent({
   activeStepKey,
   flow,
   flowOptions,
-  handleFlowChange,
+  onFlowChange,
   flowDescription,
   categories,
   systems,
@@ -213,14 +182,48 @@ function StepContent({
   onFormSubmit,
   requestFormDefinition,
 }: StepContentProps) {
+  const shouldShowGeneralIcons = useMemo(
+    () => flow === 'monitor' && selectedSystem === 'general' && activeStepKey === 'general',
+    [flow, selectedSystem, activeStepKey]
+  )
+
+  const selectedDisplayIconId = useMemo(() => {
+    if (!shouldShowGeneralIcons) {
+      return null
+    }
+    const systemState = currentFormState.system
+    if (typeof systemState !== 'object' || !systemState) {
+      return null
+    }
+    const currentIconName = (systemState as Record<string, unknown>).icon
+    if (typeof currentIconName !== 'string') {
+      return null
+    }
+    return (
+      DISPLAY_FLOW_SYSTEM_IDS.find((id) => systems[id]?.icon && systems[id]?.icon === currentIconName) ?? null
+    )
+  }, [currentFormState, shouldShowGeneralIcons, systems])
+
+  const handleGeneralIconSelect = useCallback(
+    (iconSystemId: string, iconName?: string) => {
+      if (!selectedSystem) {
+        return
+      }
+      annotateSystemIcon(selectedSystem, iconName ?? systems[iconSystemId]?.icon)
+    },
+    [annotateSystemIcon, selectedSystem, systems]
+  )
+
   if (!activeStepKey) {
     return null
   }
 
   if (activeStepKey === 'system') {
+    const showFlowSelector = flowOptions.length > 1
+    const showEntityTypeLabel = flow !== DISPLAY_FLOW_ID
     return (
       <Stack gap='lg'>
-        {flowOptions.length > 1 && (
+        {showFlowSelector && (
           <Stack gap={6}>
             <Box dir='rtl'>
               <Text size='sm' fw={700} c='gray.8'>
@@ -230,12 +233,12 @@ function StepContent({
             <FlowSelector
               flow={flow}
               flowOptions={flowOptions}
-              onFlowChange={handleFlowChange}
+              onFlowChange={onFlowChange}
               flowDescription={flowDescription}
             />
           </Stack>
         )}
-        {flow !== DISPLAY_FLOW_ID && (
+        {showEntityTypeLabel && (
           <Box dir='rtl'>
             <Text size='sm' fw={700} c='gray.8'>
               סוג יישות <Text component='span' c='red.6'>*</Text>
@@ -277,32 +280,16 @@ function StepContent({
     />
   )
 
-  const shouldShowGeneralIcons = flow === 'monitor' && selectedSystem === 'general' && activeStepKey === 'general'
-
   if (shouldShowGeneralIcons) {
-    const currentIconName =
-      typeof currentFormState.system === 'object' && currentFormState.system !== null
-        ? (currentFormState.system as Record<string, unknown>).icon
-        : undefined
-    const selectedDisplayIconId = DISPLAY_FLOW_SYSTEM_IDS.find(
-      (id) => systems[id]?.icon && systems[id]?.icon === currentIconName
-    )
-
     return (
       <Stack gap='md'>
         {formCard}
         <DisplayIconMenu
           systems={systems}
           allowedSystemIds={DISPLAY_FLOW_SYSTEM_IDS}
-          selectedSystem={selectedDisplayIconId ?? null}
-          selectedIconId={selectedDisplayIconId ?? null}
-          onSystemSelect={() => {}}
-          onIconSelect={(iconSystemId, iconName) => {
-            if (!selectedSystem) {
-              return
-            }
-            annotateSystemIcon(selectedSystem, iconName ?? systems[iconSystemId]?.icon)
-          }}
+          selectedSystem={selectedDisplayIconId}
+          selectedIconId={selectedDisplayIconId}
+          onIconSelect={handleGeneralIconSelect}
           fallbackSystemIcon={fallbackSystemIcon}
         />
       </Stack>
@@ -310,7 +297,9 @@ function StepContent({
   }
 
   return formCard
-}
+})
+
+StepContent.displayName = 'StepContent'
 
 interface FlowSelectorProps {
   flow: FlowId
@@ -319,12 +308,22 @@ interface FlowSelectorProps {
   flowDescription?: string
 }
 
-function FlowSelector({ flow, flowOptions, onFlowChange, flowDescription }: FlowSelectorProps) {
-  // Match label to the actual flow value (no visual inversion)
-  const labelTranslations: Record<string, string> = {
-    monitor: 'יישות מנוטרת',
-    display: 'יישות תצוגה',
-  }
+const FLOW_LABELS: Partial<Record<FlowId, string>> = {
+  monitor: 'יישות מנוטרת',
+  display: 'יישות תצוגה',
+  general: 'ישות כללית',
+}
+
+const FlowSelector = memo(function FlowSelector({
+  flow,
+  flowOptions,
+  onFlowChange,
+  flowDescription,
+}: FlowSelectorProps) {
+  const getButtonHandler = useCallback(
+    (value: string) => () => onFlowChange(value),
+    [onFlowChange]
+  )
 
   return (
     <Stack gap={4} align='flex-end'>
@@ -341,11 +340,14 @@ function FlowSelector({ flow, flowOptions, onFlowChange, flowDescription }: Flow
         {flowOptions.map((option, index) => {
           const isActive = option.value === flow
           const isLast = index === flowOptions.length - 1
+          const translatedLabel = FLOW_LABELS[option.value as FlowId] ?? option.label
+          const handleClick = getButtonHandler(option.value)
+
           return (
             <button
               key={option.value}
               type='button'
-              onClick={() => onFlowChange(option.value)}
+              onClick={handleClick}
               style={{
                 padding: '6px 20px',
                 border: 'none',
@@ -357,7 +359,7 @@ function FlowSelector({ flow, flowOptions, onFlowChange, flowDescription }: Flow
                 cursor: 'pointer',
               }}
             >
-              {labelTranslations[option.value] ?? option.label}
+              {translatedLabel}
             </button>
           )
         })}
@@ -369,14 +371,16 @@ function FlowSelector({ flow, flowOptions, onFlowChange, flowDescription }: Flow
       )}
     </Stack>
   )
-}
+})
+
+FlowSelector.displayName = 'FlowSelector'
 
 interface ConfigErrorNoticeProps {
   message: string | null
   onRetry: () => void
 }
 
-function ConfigErrorNotice({ message, onRetry }: ConfigErrorNoticeProps) {
+const ConfigErrorNotice = memo(function ConfigErrorNotice({ message, onRetry }: ConfigErrorNoticeProps) {
   return (
     <Alert color='red' title='Unable to load configuration'>
       <Stack gap='sm'>
@@ -389,12 +393,16 @@ function ConfigErrorNotice({ message, onRetry }: ConfigErrorNoticeProps) {
       </Stack>
     </Alert>
   )
-}
+})
 
-function SelectSystemPrompt() {
+ConfigErrorNotice.displayName = 'ConfigErrorNotice'
+
+const SelectSystemPrompt = memo(function SelectSystemPrompt() {
   return (
     <Alert color='blue' title='Select a system'>
       Choose one of the templates from the menu to unlock this step.
     </Alert>
   )
-}
+})
+
+SelectSystemPrompt.displayName = 'SelectSystemPrompt'

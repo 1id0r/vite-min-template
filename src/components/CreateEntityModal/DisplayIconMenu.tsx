@@ -8,7 +8,7 @@ interface DisplayIconMenuProps {
   allowedSystemIds: string[]
   selectedSystem: string | null
   selectedIconId?: string | null
-  onSystemSelect: (systemId: string) => void
+  onSystemSelect?: (systemId: string) => void
   onIconSelect?: (systemId: string, iconName?: string) => void
   fallbackSystemIcon: IconType
 }
@@ -67,7 +67,7 @@ export function DisplayIconMenu({
                       if (onIconSelect) {
                         onIconSelect(system.id, iconName)
                       } else {
-                        onSystemSelect(system.id)
+                        onSystemSelect?.(system.id)
                       }
                     }}
                     title={system.label}

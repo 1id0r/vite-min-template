@@ -1,7 +1,8 @@
 import { Button, Group, Menu, Stack, Text } from '@mantine/core'
+import { memo, useCallback, useEffect, useMemo } from 'react'
 import type { SystemSelectionPanelProps } from './types'
 
-export function SystemSelectionPanel({
+export const SystemSelectionPanel = memo(function SystemSelectionPanel({
   categories,
   systems,
   selectedSystem,
@@ -13,7 +14,57 @@ export function SystemSelectionPanel({
   prefixIcon: PrefixIcon,
   showGeneralOption = false,
 }: SystemSelectionPanelProps) {
-  const selectedSystemLabel = selectedSystem ? systems[selectedSystem]?.label ?? selectedSystem : null
+  const menuItemHoverClass = useMemo(() => 'system-selection-panel__item', [])
+
+  useEffect(() => {
+    if (typeof document === 'undefined') {
+      return
+    }
+
+    const styleId = `${menuItemHoverClass}-styles`
+    if (document.getElementById(styleId)) {
+      return
+    }
+
+    const style = document.createElement('style')
+    style.id = styleId
+    style.textContent = `
+      .${menuItemHoverClass}[data-hovered] {
+        background-color: rgba(11, 95, 255, 0.08);
+      }
+    `
+    document.head.appendChild(style)
+  }, [menuItemHoverClass])
+
+  const selectedSystemLabel = useMemo(() => {
+    if (!selectedSystem) {
+      return null
+    }
+    return systems[selectedSystem]?.label ?? selectedSystem
+  }, [selectedSystem, systems])
+
+  const handleGeneralSelect = useCallback(() => onSystemSelect('general'), [onSystemSelect])
+
+  const renderSystemItem = useCallback(
+    (systemId: string) => {
+      const system = systems[systemId]
+      if (!system) {
+        return null
+      }
+      const SystemIcon = resolveIcon(system.icon) ?? fallbackSystemIcon
+      return (
+        <Menu.Item
+          key={systemId}
+          onClick={() => onSystemSelect(systemId)}
+          leftSection={<SystemIcon size={16} />}
+          className={menuItemHoverClass}
+        >
+          {system.label}
+        </Menu.Item>
+      )
+    },
+    [fallbackSystemIcon, menuItemHoverClass, onSystemSelect, resolveIcon, systems]
+  )
 
   return (
     <Group align='flex-start' justify='space-between' gap='xl' wrap='nowrap'>
@@ -30,7 +81,7 @@ export function SystemSelectionPanel({
               variant='outline'
               color='black'
               radius='md'
-              onClick={() => onSystemSelect('general')}
+              onClick={handleGeneralSelect}
               styles={(theme) => ({
                 root: {
                   borderColor: 'rgb(11, 95, 255)',
@@ -53,24 +104,6 @@ export function SystemSelectionPanel({
           )}
           {categories.map((category) => {
             const CategoryIcon = resolveIcon(category.icon) ?? fallbackCategoryIcon
-
-            const renderSystemItem = (systemId: string) => {
-              const system = systems[systemId]
-              if (!system) {
-                return null
-              }
-              const SystemIcon = resolveIcon(system.icon) ?? fallbackSystemIcon
-              return (
-                <Menu.Item
-                  key={systemId}
-                  onClick={() => onSystemSelect(systemId)}
-                  leftSection={<SystemIcon size={16} />}
-                >
-                  {system.label}
-                </Menu.Item>
-              )
-            }
-
             return (
               <Menu
                 key={category.id}
@@ -78,16 +111,6 @@ export function SystemSelectionPanel({
                 position='left-start'
                 withinPortal
                 offset={8}
-                styles={{
-                  item: {
-                    '&[data-hovered]': {
-                      backgroundColor: 'rgba(11, 95, 255, 0.08)',
-                    },
-                  },
-                  dropdown: {
-                    overflow: 'hidden',
-                  },
-                }}
               >
                 <Menu.Target>
                   <Button
@@ -117,7 +140,7 @@ export function SystemSelectionPanel({
                     <CategoryIcon size={18} />
                   </Button>
                 </Menu.Target>
-                <Menu.Dropdown>
+                <Menu.Dropdown style={{ overflow: 'hidden' }}>
                   {category.systemIds.map((systemId) => renderSystemItem(systemId))}
                   {category.subMenus?.map((submenu) => (
                     <Menu
@@ -126,23 +149,18 @@ export function SystemSelectionPanel({
                       position='left-start'
                       withinPortal
                       offset={4}
-                      styles={{
-                        item: {
-                          '&[data-hovered]': {
-                            backgroundColor: 'rgba(11, 95, 255, 0.08)',
-                          },
-                        },
-                        dropdown: {
-                          overflow: 'hidden',
-                        },
-                      }}
                     >
                       <Menu.Target>
-                        <Menu.Item leftSection={<PrefixIcon size={14} color='rgb(11, 95, 255)' />}>
+                        <Menu.Item
+                          leftSection={<PrefixIcon size={14} color='rgb(11, 95, 255)' />}
+                          className={menuItemHoverClass}
+                        >
                           {submenu.label}
                         </Menu.Item>
                       </Menu.Target>
-                      <Menu.Dropdown>{submenu.systemIds.map((systemId) => renderSystemItem(systemId))}</Menu.Dropdown>
+                      <Menu.Dropdown style={{ overflow: 'hidden' }}>
+                        {submenu.systemIds.map((systemId) => renderSystemItem(systemId))}
+                      </Menu.Dropdown>
                     </Menu>
                   ))}
                 </Menu.Dropdown>
@@ -159,4 +177,6 @@ export function SystemSelectionPanel({
       </Stack>
     </Group>
   )
-}
+})
+
+SystemSelectionPanel.displayName = 'SystemSelectionPanel'
