@@ -2,10 +2,12 @@ import { memo, useCallback, useMemo } from 'react'
 import { Alert, Box, Button, Center, Divider, Group, Loader, Stack, Text } from '@mantine/core'
 import type { IChangeEvent } from '@rjsf/core'
 import type { CategoryDefinition, FormDefinition, StepKey, SystemDefinition } from '../../types/entity'
+import type { TreeSelection } from '../../types/tree'
 import { FlowStepper } from './FlowStepper'
 import { FormStepCard, type RjsfFormRef } from './FormStepCard'
 import { ResultSummary } from './ResultSummary'
 import { SystemStep } from './SystemStep'
+import { TreeStep } from './TreeStep'
 import { DisplayIconMenu } from './DisplayIconMenu'
 import { DISPLAY_FLOW_ID, DISPLAY_FLOW_SYSTEM_IDS, fallbackSystemIcon } from './iconRegistry'
 import type { UseEntityFlowStateResult } from './hooks/useEntityFlowState'
@@ -50,6 +52,8 @@ export function EntityFlowContent({ controller, onClose }: EntityFlowContentProp
     requestFormDefinition,
     handleSystemSelect,
     annotateSystemIcon,
+    handleTreeSelect,
+    treeSelection,
   } = controller
   const isInitialLoad = configStatus === 'loading' && !config
   const hasBlockingError = configStatus === 'error' && !config
@@ -111,6 +115,8 @@ export function EntityFlowContent({ controller, onClose }: EntityFlowContentProp
             onFormChange={onFormChange}
             onFormSubmit={onFormSubmit}
             requestFormDefinition={requestFormDefinition}
+            onTreeSelect={handleTreeSelect}
+            treeSelection={treeSelection}
           />
         </Box>
       )}
@@ -159,6 +165,8 @@ interface StepContentProps {
   onFormChange: (systemId: string, key: StepKey, change: IChangeEvent) => void
   onFormSubmit: (key: StepKey, change: IChangeEvent) => void
   requestFormDefinition: (systemId: string, stepKey: StepKey) => Promise<FormDefinition>
+  onTreeSelect: (selection: TreeSelection | null) => void
+  treeSelection: TreeSelection | null
 }
 
 const StepContent = memo(function StepContent({
@@ -181,6 +189,8 @@ const StepContent = memo(function StepContent({
   onFormChange,
   onFormSubmit,
   requestFormDefinition,
+  onTreeSelect,
+  treeSelection,
 }: StepContentProps) {
   const shouldShowGeneralIcons = useMemo(
     () => flow === 'monitor' && selectedSystem === 'general' && activeStepKey === 'general',
@@ -260,6 +270,10 @@ const StepContent = memo(function StepContent({
 
   if (!selectedSystem) {
     return <SelectSystemPrompt />
+  }
+
+  if (activeStepKey === 'tree') {
+    return <TreeStep selection={treeSelection} onSelect={onTreeSelect} />
   }
 
   const definition = formDefinitions[selectedSystem]?.[activeStepKey]

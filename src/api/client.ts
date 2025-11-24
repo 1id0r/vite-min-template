@@ -1,4 +1,5 @@
 import type { EntityConfig, FormDefinition, StepKey } from "../types/entity";
+import type { ApiTreeNode } from "../types/tree";
 
 const DEFAULT_BASE_URL = "http://127.0.0.1:8000";
 const baseUrl =
@@ -46,4 +47,21 @@ export async function fetchFormDefinition(
 
 export async function fetchOwningTeams(): Promise<string[]> {
   return request<string[]>("/owning-teams");
+}
+
+export async function fetchTreeNodes(
+  rootId: string,
+  depth = 3
+): Promise<ApiTreeNode[]> {
+  const params = new URLSearchParams({
+    rootId,
+    TreeDepth: String(depth),
+  });
+
+  return request<ApiTreeNode[]>(`/nodeApi/node?${params.toString()}`, {
+    headers: {
+      Accept: "text/plain",
+      AppToken: "123LIDOR",
+    },
+  });
 }

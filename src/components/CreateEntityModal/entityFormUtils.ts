@@ -13,6 +13,7 @@ export const createEmptyStepState = (): StepState => ({
   system: {},
   general: {},
   monitor: {},
+  tree: null,
 })
 
 export const buildAggregateResult = (
@@ -30,11 +31,20 @@ export const buildAggregateResult = (
     return acc
   }, {} as Record<StepKey, unknown>)
 
+  const treeSelection = data.tree
+  const hasTreeSelection = treeSelection && typeof treeSelection === 'object'
+
   if (data.monitor && typeof data.monitor === 'object' && data.monitor !== null) {
-    data.monitor = {
+    const monitorPayload: Record<string, unknown> = {
       type: selectedSystem,
       details: data.monitor,
     }
+
+    if (hasTreeSelection) {
+      monitorPayload['treeSelection'] = treeSelection
+    }
+
+    data.monitor = monitorPayload
   }
 
   return {
