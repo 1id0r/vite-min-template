@@ -10,7 +10,7 @@ import type {
   StepKey,
   SystemDefinition,
 } from '../../../types/entity'
-import type { AggregatedResult, FlowId, FlowOption, FormStatus } from '../types'
+import type { AggregatedResult, FlowId, FlowOption, FormStatus, TreeSelection } from '../types'
 import {
   applyFormChange,
   buildAggregateResult,
@@ -44,6 +44,7 @@ export interface UseEntityFlowStateResult {
   selectedSystemConfig: SystemDefinition | null
   handleSystemSelect: (systemId: string) => void
   annotateSystemIcon: (systemId: string, iconName?: string) => void
+  handleTreeSelection: (systemId: string, selection: TreeSelection | null) => void
   categories: CategoryDefinition[]
   systems: Record<string, SystemDefinition>
   stepDefinitions?: Record<StepKey, StepDefinition>
@@ -81,6 +82,7 @@ export function useEntityFlowState(): UseEntityFlowStateResult {
     system: null,
     general: null,
     monitor: null,
+    tree: null,
   })
 
   const handleConfigRetry = useCallback(() => {
@@ -138,7 +140,7 @@ export function useEntityFlowState(): UseEntityFlowStateResult {
       return []
     }
     if (flow === 'monitor' && selectedSystem === 'general') {
-      return currentFlow.steps.filter((key) => key !== 'monitor')
+      return currentFlow.steps.filter((key) => key !== 'monitor' && key !== 'tree')
     }
     return currentFlow.steps
   }, [currentFlow, flow, selectedSystem])
@@ -261,7 +263,7 @@ export function useEntityFlowState(): UseEntityFlowStateResult {
   )
 
   useEffect(() => {
-    if (!selectedSystem || !activeStepKey || activeStepKey === 'system') {
+    if (!selectedSystem || !activeStepKey || activeStepKey === 'system' || activeStepKey === 'tree') {
       return
     }
 
@@ -278,7 +280,7 @@ export function useEntityFlowState(): UseEntityFlowStateResult {
   }, [activeStepKey, formDefinitions, formStatus, requestFormDefinition, selectedSystem])
 
   useEffect(() => {
-    if (!selectedSystem || !activeStepKey || activeStepKey === 'system') {
+    if (!selectedSystem || !activeStepKey || activeStepKey === 'system' || activeStepKey === 'tree') {
       return
     }
 
@@ -357,6 +359,7 @@ export function useEntityFlowState(): UseEntityFlowStateResult {
       system: null,
       general: null,
       monitor: null,
+      tree: null,
     }
   }, [])
 
@@ -406,6 +409,23 @@ export function useEntityFlowState(): UseEntityFlowStateResult {
     })
   }, [])
 
+  const handleTreeSelection = useCallback(
+    (systemId: string, selection: TreeSelection | null) => {
+      ensureFormState(systemId)
+      setFormState((prev) => {
+        const existingState = prev[systemId] ?? createEmptyStepState()
+        return {
+          ...prev,
+          [systemId]: {
+            ...existingState,
+            tree: selection,
+          },
+        }
+      })
+    },
+    [ensureFormState]
+  )
+
   const onFormChange = useCallback((systemId: string, key: StepKey, change: IChangeEvent) => {
     applyFormChange(setFormState, systemId, key, change)
   }, [])
@@ -454,8 +474,16 @@ export function useEntityFlowState(): UseEntityFlowStateResult {
   )
   const stepDefinitions = useMemo(() => config?.steps, [config])
   const flowDescription = useMemo(() => currentFlow?.description?.trim(), [currentFlow])
+  const hasTreeSelection = useMemo(() => {
+    if (!currentFormState.tree || typeof currentFormState.tree !== 'object') {
+      return false
+    }
+    const treeValue = currentFormState.tree as Partial<TreeSelection>
+    return Boolean(treeValue.selectedVid)
+  }, [currentFormState.tree])
   const nextButtonDisabled =
     (activeStepKey === 'system' && !canMoveNext) ||
+    (activeStepKey === 'tree' && !hasTreeSelection) ||
     (activeStepKey !== null &&
       activeStepKey !== 'system' &&
       selectedSystem !== null &&
@@ -481,6 +509,7 @@ export function useEntityFlowState(): UseEntityFlowStateResult {
       selectedSystemConfig,
       handleSystemSelect,
       annotateSystemIcon,
+      handleTreeSelection,
       categories,
       systems,
       stepDefinitions,
@@ -515,6 +544,7 @@ export function useEntityFlowState(): UseEntityFlowStateResult {
       selectedSystemConfig,
       handleSystemSelect,
       annotateSystemIcon,
+      handleTreeSelection,
       categories,
       systems,
       stepDefinitions,

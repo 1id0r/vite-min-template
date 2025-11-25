@@ -9,7 +9,8 @@ import { SystemStep } from './SystemStep'
 import { DisplayIconMenu } from './DisplayIconMenu'
 import { DISPLAY_FLOW_ID, DISPLAY_FLOW_SYSTEM_IDS, fallbackSystemIcon } from './iconRegistry'
 import type { UseEntityFlowStateResult } from './hooks/useEntityFlowState'
-import type { FlowId, FlowOption, FormStatus } from './types'
+import type { FlowId, FlowOption, FormStatus, TreeSelection } from './types'
+import { TreeStep } from './TreeStep'
 
 interface EntityFlowContentProps {
   controller: UseEntityFlowStateResult
@@ -50,6 +51,7 @@ export function EntityFlowContent({ controller, onClose }: EntityFlowContentProp
     requestFormDefinition,
     handleSystemSelect,
     annotateSystemIcon,
+    handleTreeSelection,
   } = controller
   const isInitialLoad = configStatus === 'loading' && !config
   const hasBlockingError = configStatus === 'error' && !config
@@ -103,6 +105,7 @@ export function EntityFlowContent({ controller, onClose }: EntityFlowContentProp
             selectedSystemConfig={selectedSystemConfig}
             handleSystemSelect={handleSystemSelect}
             annotateSystemIcon={annotateSystemIcon}
+            handleTreeSelection={handleTreeSelection}
             formDefinitions={formDefinitions}
             formStatus={formStatus}
             formErrors={formErrors}
@@ -151,6 +154,7 @@ interface StepContentProps {
   selectedSystemConfig: SystemDefinition | null
   handleSystemSelect: (systemId: string) => void
   annotateSystemIcon: (systemId: string, iconName?: string) => void
+  handleTreeSelection: (systemId: string, selection: TreeSelection | null) => void
   formDefinitions: Record<string, Partial<Record<StepKey, FormDefinition>>>
   formStatus: Record<string, Partial<Record<StepKey, FormStatus>>>
   formErrors: Record<string, Partial<Record<StepKey, string>>>
@@ -173,6 +177,7 @@ const StepContent = memo(function StepContent({
   selectedSystemConfig,
   handleSystemSelect,
   annotateSystemIcon,
+  handleTreeSelection,
   formDefinitions,
   formStatus,
   formErrors,
@@ -203,6 +208,18 @@ const StepContent = memo(function StepContent({
       DISPLAY_FLOW_SYSTEM_IDS.find((id) => systems[id]?.icon && systems[id]?.icon === currentIconName) ?? null
     )
   }, [currentFormState, shouldShowGeneralIcons, systems])
+
+  const treeSelection = useMemo<TreeSelection | null>(() => {
+    const treeState = currentFormState.tree
+    if (!treeState || typeof treeState !== 'object') {
+      return null
+    }
+    const parsed = treeState as Partial<TreeSelection>
+    return {
+      selectedVid: parsed.selectedVid ?? null,
+      selectedLabel: parsed.selectedLabel ?? null,
+    }
+  }, [currentFormState.tree])
 
   const handleGeneralIconSelect = useCallback(
     (iconSystemId: string, iconName?: string) => {
@@ -260,6 +277,15 @@ const StepContent = memo(function StepContent({
 
   if (!selectedSystem) {
     return <SelectSystemPrompt />
+  }
+
+  if (activeStepKey === 'tree') {
+    return (
+      <TreeStep
+        selection={treeSelection}
+        onSelectionChange={(value) => handleTreeSelection(selectedSystem, value)}
+      />
+    )
   }
 
   const definition = formDefinitions[selectedSystem]?.[activeStepKey]

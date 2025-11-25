@@ -13,6 +13,7 @@ export const createEmptyStepState = (): StepState => ({
   system: {},
   general: {},
   monitor: {},
+  tree: {},
 })
 
 export const buildAggregateResult = (

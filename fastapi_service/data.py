@@ -1095,7 +1095,7 @@ FLOWS = {
         "id": "monitor",
         "label": "Monitor",
         "description": "",
-        "steps": ["system", "general", "monitor"],
+        "steps": ["system", "general", "monitor", "tree"],
     },
 }
 
@@ -1103,6 +1103,7 @@ STEPS = {
     "system": {"label": " בחירת יישות"},
     "general": {"label": " פרטים כלליים"},
     "monitor": {"label": " פרטי ניטור"},
+    "tree": {"label": " בחירת עץ"},
 }
 DNS_FORMS = basic_forms("DNS")
 DNS_FORMS["monitor"] = DNS_MONITOR_FORM

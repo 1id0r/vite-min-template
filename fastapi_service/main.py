@@ -1,6 +1,6 @@
 from typing import Dict, List
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
@@ -136,3 +136,47 @@ async def validate_display_name(payload: ValidationRequest) -> ValidationRespons
     exists = normalized in EXISTING_DISPLAY_NAMES_NORMALIZED
     message = "Display name already exists" if exists else None
     return ValidationResponse(exists=exists, valid=not exists, message=message)
+
+
+def _make_vid(prefix: str, parts: List[str | int]) -> str:
+    suffix = "-".join(str(part) for part in parts)
+    return f"{prefix}-{suffix}"
+
+
+def _generate_subtree(
+    root_vid: str | None,
+    depth: int = 3,
+    branching: int = 3,
+    current_depth: int = 1,
+) -> List[Dict]:
+    base = root_vid or "root"
+    nodes: List[Dict] = []
+
+    for index in range(branching):
+        vid = _make_vid(base, [current_depth, index])
+        node: Dict = {
+            "DisplayName": f"Node {vid}",
+            "VID": vid,
+            "children": [],
+        }
+
+        if current_depth < depth:
+            node["children"] = _generate_subtree(vid, depth, branching, current_depth + 1)
+
+        nodes.append(node)
+
+    return nodes
+
+
+@app.get("/tree")
+async def get_tree(
+    root_id: str = Query("root", alias="rootId"),
+    tree_depth: int = Query(3, alias="TreeDepth"),
+):
+    """
+    Mock tree endpoint used during development.
+
+    The real implementation can be swapped later without impacting the client.
+    """
+    data = _generate_subtree(None if root_id == "root" else root_id, tree_depth, 3, 1)
+    return data
