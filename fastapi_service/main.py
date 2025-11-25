@@ -1,4 +1,4 @@
-from typing import Dict, List
+from typing import Dict, List, Optional, Union
 
 from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
@@ -75,6 +75,37 @@ class ValidationResponse(BaseModel):
     message: str | None = None
 
 
+class TreeNode(BaseModel):
+    DisplayName: str
+    VID: str
+    children: List["TreeNode"] = []
+
+
+TreeNode.model_rebuild()
+
+
+def make_id(prefix: str, parts: List[Union[str, int]]) -> str:
+    return f"{prefix}-{'-'.join(str(part) for part in parts)}"
+
+
+def generate_subtree(
+    root_vid: Optional[str], depth: int = 3, branching: int = 3, current_depth: int = 1
+) -> List[TreeNode]:
+    base = root_vid or "root"
+    nodes: List[TreeNode] = []
+
+    for i in range(branching):
+        vid = make_id(base, [current_depth, i])
+        children: List[TreeNode] = []
+
+        if current_depth < depth:
+            children = generate_subtree(vid, depth, branching, current_depth + 1)
+
+        nodes.append(TreeNode(DisplayName=f"Node {vid}", VID=vid, children=children))
+
+    return nodes
+
+
 @app.get("/health")
 async def health() -> Dict[str, str]:
     return {"status": "ok"}
@@ -123,6 +154,20 @@ async def get_form(system_id: str, step_key: str) -> FormDefinition:
 @app.get("/owning-teams", response_model=List[str])
 async def get_owning_teams() -> List[str]:
     return OWNING_TEAMS
+
+
+@app.get("/tree", response_model=List[TreeNode])
+async def get_tree(
+    root_id: str = Query("root", alias="rootId"), tree_depth: int = Query(3, alias="TreeDepth")
+) -> List[TreeNode]:
+    return generate_subtree(None if root_id == "root" else root_id, depth=tree_depth, branching=3, current_depth=1)
+
+
+@app.get("/nodeApi/node", response_model=List[TreeNode])
+async def get_tree_compatible(
+    root_id: str = Query("root", alias="rootId"), tree_depth: int = Query(3, alias="TreeDepth")
+) -> List[TreeNode]:
+    return generate_subtree(None if root_id == "root" else root_id, depth=tree_depth, branching=3, current_depth=1)
 
 
 @app.get("/")

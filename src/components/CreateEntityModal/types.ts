@@ -18,11 +18,6 @@ export interface AggregatedResult {
   formData: Record<string, unknown>
 }
 
-export interface TreeSelection {
-  selectedVid: string | null
-  selectedLabel?: string | null
-}
-
 export interface SystemSelectionPanelProps {
   categories: CategoryDefinition[]
   systems: Record<string, SystemDefinition>

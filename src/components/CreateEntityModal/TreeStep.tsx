@@ -1,8 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Alert, Button, Group, Loader, Paper, Stack, Text, UnstyledButton } from '@mantine/core'
-import type { TreeApiNode } from '../../api/client'
 import { fetchTreeNodes } from '../../api/client'
-import type { TreeSelection } from './types'
+import type { TreeSelection, ApiTreeNode } from '../../types/tree'
 
 type MantineNode = {
   label: string
@@ -12,16 +11,14 @@ type MantineNode = {
 
 type LoadingState = Record<string, boolean>
 
-function apiToMantine(node: TreeApiNode): MantineNode {
-  return {
-    label: node.DisplayName,
-    value: node.VID,
-    children: node.children?.map(apiToMantine) ?? [],
-  }
-}
+const apiToMantine = (node: ApiTreeNode): MantineNode => ({
+  label: node.DisplayName,
+  value: node.VID,
+  children: node.children?.map(apiToMantine) ?? [],
+})
 
-function updateNodeChildren(nodes: MantineNode[], value: string, children: MantineNode[]): MantineNode[] {
-  return nodes.map((node) => {
+const updateNodeChildren = (nodes: MantineNode[], value: string, children: MantineNode[]): MantineNode[] =>
+  nodes.map((node) => {
     if (node.value === value) {
       return { ...node, children }
     }
@@ -30,7 +27,6 @@ function updateNodeChildren(nodes: MantineNode[], value: string, children: Manti
     }
     return node
   })
-}
 
 interface TreeStepProps {
   selection: TreeSelection | null
@@ -43,8 +39,8 @@ export function TreeStep({ selection, onSelectionChange }: TreeStepProps) {
   const [loading, setLoading] = useState<LoadingState>({})
   const [error, setError] = useState<string | null>(null)
 
-  const selectedId = selection?.selectedVid ?? null
-  const selectedLabel = selection?.selectedLabel
+  const selectedVid = selection?.vid ?? null
+  const selectedLabel = selection?.displayName ?? null
 
   const setLoadingForNode = useCallback((value: string, isLoading: boolean) => {
     setLoading((state) => ({
@@ -67,25 +63,28 @@ export function TreeStep({ selection, onSelectionChange }: TreeStepProps) {
     loadRoot()
   }, [loadRoot])
 
-  const fetchChildren = useCallback(async (vid: string) => {
-    setLoadingForNode(vid, true)
-    try {
-      const data = await fetchTreeNodes(vid, 3)
-      const mapped = data.map(apiToMantine)
-      setNodes((prev) => (prev ? updateNodeChildren(prev, vid, mapped) : prev))
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Unable to load children')
-    } finally {
-      setLoadingForNode(vid, false)
-    }
-  }, [setLoadingForNode])
+  const fetchChildren = useCallback(
+    async (vid: string) => {
+      setLoadingForNode(vid, true)
+      try {
+        const data = await fetchTreeNodes(vid, 3)
+        const mapped = data.map(apiToMantine)
+        setNodes((prev) => (prev ? updateNodeChildren(prev, vid, mapped) : prev))
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Unable to load children')
+      } finally {
+        setLoadingForNode(vid, false)
+      }
+    },
+    [setLoadingForNode]
+  )
 
   const handleSelection = useCallback(
     (node: MantineNode) => {
       const label = typeof node.label === 'string' ? node.label : node.value
       onSelectionChange({
-        selectedVid: node.value,
-        selectedLabel: label,
+        vid: node.value,
+        displayName: label,
       })
     },
     [onSelectionChange]
@@ -109,14 +108,14 @@ export function TreeStep({ selection, onSelectionChange }: TreeStepProps) {
   )
 
   const headerText = useMemo(() => {
-    if (selectedId && selectedLabel) {
-      return `בחרת צומת: ${selectedLabel} (${selectedId})`
+    if (selectedVid && selectedLabel) {
+      return `בחרת צומת: ${selectedLabel} (${selectedVid})`
     }
-    if (selectedId) {
-      return `בחרת צומת: ${selectedId}`
+    if (selectedVid) {
+      return `בחרת צומת: ${selectedVid}`
     }
     return 'בחר צומת מהרשימה כדי להמשיך'
-  }, [selectedId, selectedLabel])
+  }, [selectedLabel, selectedVid])
 
   if (error) {
     return (
@@ -158,7 +157,7 @@ export function TreeStep({ selection, onSelectionChange }: TreeStepProps) {
               expanded={expanded}
               loading={loading}
               onToggle={handleToggle}
-              selectedId={selectedId}
+              selectedId={selectedVid}
             />
           ))}
         </div>

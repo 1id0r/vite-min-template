@@ -1,6 +1,7 @@
 import type React from 'react'
 import type { IChangeEvent } from '@rjsf/core'
 import type { FormDefinition, StepKey } from '../../types/entity'
+import type { TreeSelection } from '../../types/tree'
 import type { AggregatedResult, FlowId, FormStatus } from './types'
 
 export type StepState = Record<StepKey, unknown>
@@ -13,7 +14,7 @@ export const createEmptyStepState = (): StepState => ({
   system: {},
   general: {},
   monitor: {},
-  tree: {},
+  tree: null,
 })
 
 export const buildAggregateResult = (
@@ -31,11 +32,20 @@ export const buildAggregateResult = (
     return acc
   }, {} as Record<StepKey, unknown>)
 
+  const treeSelection = data.tree as TreeSelection | null
+  const hasTreeSelection = Boolean(treeSelection && typeof treeSelection === 'object' && treeSelection.vid)
+
   if (data.monitor && typeof data.monitor === 'object' && data.monitor !== null) {
-    data.monitor = {
+    const monitorPayload: Record<string, unknown> = {
       type: selectedSystem,
       details: data.monitor,
     }
+
+    if (hasTreeSelection) {
+      monitorPayload['treeSelection'] = treeSelection
+    }
+
+    data.monitor = monitorPayload
   }
 
   return {

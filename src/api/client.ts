@@ -1,10 +1,7 @@
 import type { EntityConfig, FormDefinition, StepKey } from "../types/entity";
+import type { ApiTreeNode } from "../types/tree";
 
-export type TreeApiNode = {
-  DisplayName: string;
-  VID: string;
-  children: TreeApiNode[];
-};
+export type TreeApiNode = ApiTreeNode;
 
 const DEFAULT_BASE_URL = "http://127.0.0.1:8001";
 const baseUrl =

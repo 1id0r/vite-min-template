@@ -2,15 +2,16 @@ import { memo, useCallback, useMemo } from 'react'
 import { Alert, Box, Button, Center, Divider, Group, Loader, Stack, Text } from '@mantine/core'
 import type { IChangeEvent } from '@rjsf/core'
 import type { CategoryDefinition, FormDefinition, StepKey, SystemDefinition } from '../../types/entity'
+import type { TreeSelection } from '../../types/tree'
 import { FlowStepper } from './FlowStepper'
 import { FormStepCard, type RjsfFormRef } from './FormStepCard'
 import { ResultSummary } from './ResultSummary'
 import { SystemStep } from './SystemStep'
+import { TreeStep } from './TreeStep'
 import { DisplayIconMenu } from './DisplayIconMenu'
 import { DISPLAY_FLOW_ID, DISPLAY_FLOW_SYSTEM_IDS, fallbackSystemIcon } from './iconRegistry'
 import type { UseEntityFlowStateResult } from './hooks/useEntityFlowState'
-import type { FlowId, FlowOption, FormStatus, TreeSelection } from './types'
-import { TreeStep } from './TreeStep'
+import type { FlowId, FlowOption, FormStatus } from './types'
 
 interface EntityFlowContentProps {
   controller: UseEntityFlowStateResult
@@ -52,6 +53,7 @@ export function EntityFlowContent({ controller, onClose }: EntityFlowContentProp
     handleSystemSelect,
     annotateSystemIcon,
     handleTreeSelection,
+    treeSelection,
   } = controller
   const isInitialLoad = configStatus === 'loading' && !config
   const hasBlockingError = configStatus === 'error' && !config
@@ -114,6 +116,7 @@ export function EntityFlowContent({ controller, onClose }: EntityFlowContentProp
             onFormChange={onFormChange}
             onFormSubmit={onFormSubmit}
             requestFormDefinition={requestFormDefinition}
+            treeSelection={treeSelection}
           />
         </Box>
       )}
@@ -163,6 +166,7 @@ interface StepContentProps {
   onFormChange: (systemId: string, key: StepKey, change: IChangeEvent) => void
   onFormSubmit: (key: StepKey, change: IChangeEvent) => void
   requestFormDefinition: (systemId: string, stepKey: StepKey) => Promise<FormDefinition>
+  treeSelection: TreeSelection | null
 }
 
 const StepContent = memo(function StepContent({
@@ -186,6 +190,7 @@ const StepContent = memo(function StepContent({
   onFormChange,
   onFormSubmit,
   requestFormDefinition,
+  treeSelection,
 }: StepContentProps) {
   const shouldShowGeneralIcons = useMemo(
     () => flow === 'monitor' && selectedSystem === 'general' && activeStepKey === 'general',
@@ -204,22 +209,8 @@ const StepContent = memo(function StepContent({
     if (typeof currentIconName !== 'string') {
       return null
     }
-    return (
-      DISPLAY_FLOW_SYSTEM_IDS.find((id) => systems[id]?.icon && systems[id]?.icon === currentIconName) ?? null
-    )
+    return DISPLAY_FLOW_SYSTEM_IDS.find((id) => systems[id]?.icon && systems[id]?.icon === currentIconName) ?? null
   }, [currentFormState, shouldShowGeneralIcons, systems])
-
-  const treeSelection = useMemo<TreeSelection | null>(() => {
-    const treeState = currentFormState.tree
-    if (!treeState || typeof treeState !== 'object') {
-      return null
-    }
-    const parsed = treeState as Partial<TreeSelection>
-    return {
-      selectedVid: parsed.selectedVid ?? null,
-      selectedLabel: parsed.selectedLabel ?? null,
-    }
-  }, [currentFormState.tree])
 
   const handleGeneralIconSelect = useCallback(
     (iconSystemId: string, iconName?: string) => {
@@ -244,7 +235,10 @@ const StepContent = memo(function StepContent({
           <Stack gap={6}>
             <Box dir='rtl'>
               <Text size='sm' fw={700} c='gray.8'>
-                בחירת יישות <Text component='span' c='red.6'>*</Text>
+                בחירת יישות{' '}
+                <Text component='span' c='red.6'>
+                  *
+                </Text>
               </Text>
             </Box>
             <FlowSelector
@@ -258,7 +252,10 @@ const StepContent = memo(function StepContent({
         {showEntityTypeLabel && (
           <Box dir='rtl'>
             <Text size='sm' fw={700} c='gray.8'>
-              סוג יישות <Text component='span' c='red.6'>*</Text>
+              סוג יישות{' '}
+              <Text component='span' c='red.6'>
+                *
+              </Text>
             </Text>
           </Box>
         )}
@@ -281,10 +278,7 @@ const StepContent = memo(function StepContent({
 
   if (activeStepKey === 'tree') {
     return (
-      <TreeStep
-        selection={treeSelection}
-        onSelectionChange={(value) => handleTreeSelection(selectedSystem, value)}
-      />
+      <TreeStep selection={treeSelection} onSelectionChange={(value) => handleTreeSelection(selectedSystem, value)} />
     )
   }
 
@@ -346,10 +340,7 @@ const FlowSelector = memo(function FlowSelector({
   onFlowChange,
   flowDescription,
 }: FlowSelectorProps) {
-  const getButtonHandler = useCallback(
-    (value: string) => () => onFlowChange(value),
-    [onFlowChange]
-  )
+  const getButtonHandler = useCallback((value: string) => () => onFlowChange(value), [onFlowChange])
 
   return (
     <Stack gap={4} align='flex-end'>
