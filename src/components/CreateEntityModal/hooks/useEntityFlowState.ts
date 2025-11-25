@@ -43,6 +43,8 @@ export interface UseEntityFlowStateResult {
   selectedSystem: string | null
   selectedSystemConfig: SystemDefinition | null
   handleSystemSelect: (systemId: string) => void
+  selectedTreeNode: string | null
+  handleTreeNodeSelect: (nodeId: string) => void
   annotateSystemIcon: (systemId: string, iconName?: string) => void
   categories: CategoryDefinition[]
   systems: Record<string, SystemDefinition>
@@ -65,6 +67,7 @@ export function useEntityFlowState(): UseEntityFlowStateResult {
   const [flow, setFlow] = useState<FlowId>(DISPLAY_FLOW_ID)
   const [activeStep, setActiveStep] = useState(0)
   const [selectedSystem, setSelectedSystem] = useState<string | null>(null)
+  const [selectedTreeNode, setSelectedTreeNode] = useState<string | null>(null)
   const [formState, setFormState] = useState<FormState>({})
   const [result, setResult] = useState<AggregatedResult | null>(null)
 
@@ -81,6 +84,7 @@ export function useEntityFlowState(): UseEntityFlowStateResult {
     system: null,
     general: null,
     monitor: null,
+    tree: null,
   })
 
   const handleConfigRetry = useCallback(() => {
@@ -137,10 +141,14 @@ export function useEntityFlowState(): UseEntityFlowStateResult {
     if (!currentFlow) {
       return []
     }
+    let steps = currentFlow.steps
     if (flow === 'monitor' && selectedSystem === 'general') {
-      return currentFlow.steps.filter((key) => key !== 'monitor')
+      steps = currentFlow.steps.filter((key) => key !== 'monitor')
     }
-    return currentFlow.steps
+    if (flow === 'monitor') {
+      steps = [...steps, 'tree']
+    }
+    return steps
   }, [currentFlow, flow, selectedSystem])
   const totalSteps = stepKeys.length
   const isCompleted = currentFlow ? activeStep === totalSteps : false
@@ -261,7 +269,7 @@ export function useEntityFlowState(): UseEntityFlowStateResult {
   )
 
   useEffect(() => {
-    if (!selectedSystem || !activeStepKey || activeStepKey === 'system') {
+    if (!selectedSystem || !activeStepKey || activeStepKey === 'system' || activeStepKey === 'tree') {
       return
     }
 
@@ -278,7 +286,7 @@ export function useEntityFlowState(): UseEntityFlowStateResult {
   }, [activeStepKey, formDefinitions, formStatus, requestFormDefinition, selectedSystem])
 
   useEffect(() => {
-    if (!selectedSystem || !activeStepKey || activeStepKey === 'system') {
+    if (!selectedSystem || !activeStepKey || activeStepKey === 'system' || activeStepKey === 'tree') {
       return
     }
 
@@ -314,8 +322,8 @@ export function useEntityFlowState(): UseEntityFlowStateResult {
   const canMoveNext = Boolean(selectedSystem)
 
   const aggregateResult = useCallback(() => {
-    return buildAggregateResult(flow, stepKeys, currentFormState, selectedSystem)
-  }, [currentFormState, flow, selectedSystem, stepKeys])
+    return buildAggregateResult(flow, stepKeys, currentFormState, selectedSystem, selectedTreeNode)
+  }, [currentFormState, flow, selectedSystem, stepKeys, selectedTreeNode])
 
   const handleCreate = useCallback(() => {
     const aggregate = aggregateResult()
@@ -340,6 +348,10 @@ export function useEntityFlowState(): UseEntityFlowStateResult {
     if (currentKey === 'system' && !canMoveNext) {
       return
     }
+    if (currentKey === 'tree' && !selectedTreeNode) {
+      return
+    }
+
 
     const formRef = formRefs.current[currentKey]
 
@@ -350,19 +362,21 @@ export function useEntityFlowState(): UseEntityFlowStateResult {
     } else {
       goToNextStep()
     }
-  }, [activeStep, canMoveNext, goToNextStep, handleCreate, stepKeys])
+  }, [activeStep, canMoveNext, goToNextStep, handleCreate, stepKeys, selectedTreeNode])
 
   const resetRefs = useCallback(() => {
     formRefs.current = {
       system: null,
       general: null,
       monitor: null,
+      tree: null,
     }
   }, [])
 
   const resetFlowState = useCallback(() => {
     setActiveStep(0)
     setSelectedSystem(null)
+    setSelectedTreeNode(null)
     setResult(null)
     setFormState({})
     resetRefs()
@@ -384,6 +398,10 @@ export function useEntityFlowState(): UseEntityFlowStateResult {
     },
     [ensureFormState]
   )
+    
+  const handleTreeNodeSelect = useCallback((nodeId: string) => {
+    setSelectedTreeNode(nodeId)
+  }, [])
 
   const annotateSystemIcon = useCallback((systemId: string, iconName?: string) => {
     setFormState((prev) => {
@@ -456,8 +474,10 @@ export function useEntityFlowState(): UseEntityFlowStateResult {
   const flowDescription = useMemo(() => currentFlow?.description?.trim(), [currentFlow])
   const nextButtonDisabled =
     (activeStepKey === 'system' && !canMoveNext) ||
+    (activeStepKey === 'tree' && !selectedTreeNode) ||
     (activeStepKey !== null &&
       activeStepKey !== 'system' &&
+      activeStepKey !== 'tree' &&
       selectedSystem !== null &&
       formStatus[selectedSystem]?.[activeStepKey] === 'loading')
 
@@ -480,6 +500,8 @@ export function useEntityFlowState(): UseEntityFlowStateResult {
       selectedSystem,
       selectedSystemConfig,
       handleSystemSelect,
+      selectedTreeNode,
+      handleTreeNodeSelect,
       annotateSystemIcon,
       categories,
       systems,
@@ -514,6 +536,8 @@ export function useEntityFlowState(): UseEntityFlowStateResult {
       selectedSystem,
       selectedSystemConfig,
       handleSystemSelect,
+      selectedTreeNode,
+      handleTreeNodeSelect,
       annotateSystemIcon,
       categories,
       systems,

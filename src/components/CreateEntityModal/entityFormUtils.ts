@@ -13,13 +13,15 @@ export const createEmptyStepState = (): StepState => ({
   system: {},
   general: {},
   monitor: {},
+  tree: {},
 })
 
 export const buildAggregateResult = (
   flow: FlowId,
   stepKeys: StepKey[],
   currentFormState: StepState,
-  selectedSystem: string | null
+  selectedSystem: string | null,
+  selectedTreeNode: string | null
 ): AggregatedResult | null => {
   if (!selectedSystem) {
     return null
@@ -34,6 +36,12 @@ export const buildAggregateResult = (
     data.monitor = {
       type: selectedSystem,
       details: data.monitor,
+    }
+  }
+    
+  if (selectedTreeNode) {
+    data.tree = {
+        selectedNode: selectedTreeNode
     }
   }
 

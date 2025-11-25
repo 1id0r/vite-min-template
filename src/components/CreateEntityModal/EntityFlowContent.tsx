@@ -6,6 +6,7 @@ import { FlowStepper } from './FlowStepper'
 import { FormStepCard, type RjsfFormRef } from './FormStepCard'
 import { ResultSummary } from './ResultSummary'
 import { SystemStep } from './SystemStep'
+import TreeStep from './TreeStep'
 import { DisplayIconMenu } from './DisplayIconMenu'
 import { DISPLAY_FLOW_ID, DISPLAY_FLOW_SYSTEM_IDS, fallbackSystemIcon } from './iconRegistry'
 import type { UseEntityFlowStateResult } from './hooks/useEntityFlowState'
@@ -34,6 +35,8 @@ export function EntityFlowContent({ controller, onClose }: EntityFlowContentProp
     flowDescription,
     selectedSystem,
     selectedSystemConfig,
+    selectedTreeNode,
+    handleTreeNodeSelect,
     categories,
     systems,
     nextButtonDisabled,
@@ -101,6 +104,8 @@ export function EntityFlowContent({ controller, onClose }: EntityFlowContentProp
             systems={systems}
             selectedSystem={selectedSystem}
             selectedSystemConfig={selectedSystemConfig}
+            selectedTreeNode={selectedTreeNode}
+            handleTreeNodeSelect={handleTreeNodeSelect}
             handleSystemSelect={handleSystemSelect}
             annotateSystemIcon={annotateSystemIcon}
             formDefinitions={formDefinitions}
@@ -149,6 +154,8 @@ interface StepContentProps {
   systems: Record<string, SystemDefinition>
   selectedSystem: string | null
   selectedSystemConfig: SystemDefinition | null
+  selectedTreeNode: string | null
+  handleTreeNodeSelect: (nodeId: string) => void
   handleSystemSelect: (systemId: string) => void
   annotateSystemIcon: (systemId: string, iconName?: string) => void
   formDefinitions: Record<string, Partial<Record<StepKey, FormDefinition>>>
@@ -171,6 +178,8 @@ const StepContent = memo(function StepContent({
   systems,
   selectedSystem,
   selectedSystemConfig,
+  selectedTreeNode,
+  handleTreeNodeSelect,
   handleSystemSelect,
   annotateSystemIcon,
   formDefinitions,
@@ -256,6 +265,10 @@ const StepContent = memo(function StepContent({
         />
       </Stack>
     )
+  }
+    
+  if (activeStepKey === 'tree') {
+    return <TreeStep onSelectNode={handleTreeNodeSelect} selectedNode={selectedTreeNode} />
   }
 
   if (!selectedSystem) {
