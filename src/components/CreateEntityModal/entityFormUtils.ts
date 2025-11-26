@@ -13,6 +13,7 @@ export const createEmptyStepState = (): StepState => ({
   system: {},
   general: {},
   monitor: {},
+  tree: {},
 })
 
 export const buildAggregateResult = (
@@ -35,6 +36,11 @@ export const buildAggregateResult = (
       type: selectedSystem,
       details: data.monitor,
     }
+
+    if (data.tree && typeof data.tree === 'object' && data.tree !== null) {
+      monitorPayload['treeSelection'] = data.tree
+    }
+
     data.monitor = monitorPayload
   }
 

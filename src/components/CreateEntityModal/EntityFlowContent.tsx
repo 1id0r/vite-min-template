@@ -2,10 +2,12 @@ import { memo, useCallback, useMemo } from 'react'
 import { Alert, Box, Button, Center, Divider, Group, Loader, Stack, Text } from '@mantine/core'
 import type { IChangeEvent } from '@rjsf/core'
 import type { CategoryDefinition, FormDefinition, StepKey, SystemDefinition } from '../../types/entity'
+import type { TreeSelection } from '../../types/tree'
 import { FlowStepper } from './FlowStepper'
 import { FormStepCard, type RjsfFormRef } from './FormStepCard'
 import { ResultSummary } from './ResultSummary'
 import { SystemStep } from './SystemStep'
+import { TreeStep } from './TreeStep'
 import { DisplayIconMenu } from './DisplayIconMenu'
 import { DISPLAY_FLOW_ID, DISPLAY_FLOW_SYSTEM_IDS, fallbackSystemIcon } from './iconRegistry'
 import type { UseEntityFlowStateResult } from './hooks/useEntityFlowState'
@@ -50,6 +52,8 @@ export function EntityFlowContent({ controller, onClose }: EntityFlowContentProp
     requestFormDefinition,
     handleSystemSelect,
     annotateSystemIcon,
+    handleTreeSelection,
+    treeSelection,
   } = controller
   const isInitialLoad = configStatus === 'loading' && !config
   const hasBlockingError = configStatus === 'error' && !config
@@ -111,6 +115,8 @@ export function EntityFlowContent({ controller, onClose }: EntityFlowContentProp
             onFormChange={onFormChange}
             onFormSubmit={onFormSubmit}
             requestFormDefinition={requestFormDefinition}
+            handleTreeSelection={handleTreeSelection}
+            treeSelection={treeSelection}
           />
         </Box>
       )}
@@ -151,6 +157,7 @@ interface StepContentProps {
   selectedSystemConfig: SystemDefinition | null
   handleSystemSelect: (systemId: string) => void
   annotateSystemIcon: (systemId: string, iconName?: string) => void
+  handleTreeSelection: (systemId: string, selection: TreeSelection | null) => void
   formDefinitions: Record<string, Partial<Record<StepKey, FormDefinition>>>
   formStatus: Record<string, Partial<Record<StepKey, FormStatus>>>
   formErrors: Record<string, Partial<Record<StepKey, string>>>
@@ -159,6 +166,7 @@ interface StepContentProps {
   onFormChange: (systemId: string, key: StepKey, change: IChangeEvent) => void
   onFormSubmit: (key: StepKey, change: IChangeEvent) => void
   requestFormDefinition: (systemId: string, stepKey: StepKey) => Promise<FormDefinition>
+  treeSelection: TreeSelection | null
 }
 
 const StepContent = memo(function StepContent({
@@ -173,6 +181,7 @@ const StepContent = memo(function StepContent({
   selectedSystemConfig,
   handleSystemSelect,
   annotateSystemIcon,
+  handleTreeSelection,
   formDefinitions,
   formStatus,
   formErrors,
@@ -181,6 +190,7 @@ const StepContent = memo(function StepContent({
   onFormChange,
   onFormSubmit,
   requestFormDefinition,
+  treeSelection,
 }: StepContentProps) {
   const shouldShowGeneralIcons = useMemo(
     () => flow === 'monitor' && selectedSystem === 'general' && activeStepKey === 'general',
@@ -264,6 +274,15 @@ const StepContent = memo(function StepContent({
 
   if (!selectedSystem) {
     return <SelectSystemPrompt />
+  }
+
+  if (activeStepKey === 'tree') {
+    return (
+      <TreeStep
+        selection={treeSelection}
+        onSelectionChange={(value) => handleTreeSelection(selectedSystem, value)}
+      />
+    )
   }
 
   const definition = formDefinitions[selectedSystem]?.[activeStepKey]

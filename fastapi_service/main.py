@@ -1,4 +1,4 @@
-from typing import Dict, List
+from typing import Dict, List, Optional, Union
 
 from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
@@ -75,6 +75,37 @@ class ValidationResponse(BaseModel):
     message: str | None = None
 
 
+class TreeNode(BaseModel):
+    DisplayName: str
+    VID: str
+    children: List["TreeNode"] = []
+
+
+TreeNode.model_rebuild()
+
+
+def _make_vid(prefix: str, parts: List[Union[str, int]]) -> str:
+    return f"{prefix}-{'-'.join(str(part) for part in parts)}"
+
+
+def _generate_subtree(
+    root_vid: Optional[str], depth: int = 3, branching: int = 3, current_depth: int = 1
+) -> List[TreeNode]:
+    base = root_vid or "root"
+    nodes: List[TreeNode] = []
+
+    for i in range(branching):
+        vid = _make_vid(base, [current_depth, i])
+        children: List[TreeNode] = []
+
+        if current_depth < depth:
+            children = _generate_subtree(vid, depth, branching, current_depth + 1)
+
+        nodes.append(TreeNode(DisplayName=f"Node {vid}", VID=vid, children=children))
+
+    return nodes
+
+
 @app.get("/health")
 async def health() -> Dict[str, str]:
     return {"status": "ok"}
@@ -136,6 +167,16 @@ async def validate_display_name(payload: ValidationRequest) -> ValidationRespons
     exists = normalized in EXISTING_DISPLAY_NAMES_NORMALIZED
     message = "Display name already exists" if exists else None
     return ValidationResponse(exists=exists, valid=not exists, message=message)
+
+
+@app.get("/tree", response_model=List[TreeNode])
+async def get_tree(
+    root_id: str = Query("root", alias="rootId"), tree_depth: int = Query(3, alias="TreeDepth")
+) -> List[TreeNode]:
+    """
+    Mock tree endpoint for the lazy-load step. Swap to the real API route when integrating.
+    """
+    return _generate_subtree(None if root_id == "root" else root_id, depth=tree_depth, branching=3, current_depth=1)
 
 
 def _make_vid(prefix: str, parts: List[str | int]) -> str:

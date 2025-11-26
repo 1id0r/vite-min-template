@@ -11,6 +11,7 @@ import type {
   SystemDefinition,
 } from '../../../types/entity'
 import type { AggregatedResult, FlowId, FlowOption, FormStatus } from '../types'
+import type { TreeSelection } from '../../../types/tree'
 import {
   applyFormChange,
   buildAggregateResult,
@@ -44,6 +45,7 @@ export interface UseEntityFlowStateResult {
   selectedSystemConfig: SystemDefinition | null
   handleSystemSelect: (systemId: string) => void
   annotateSystemIcon: (systemId: string, iconName?: string) => void
+  handleTreeSelection: (systemId: string, selection: TreeSelection | null) => void
   categories: CategoryDefinition[]
   systems: Record<string, SystemDefinition>
   stepDefinitions?: Record<StepKey, StepDefinition>
@@ -56,6 +58,7 @@ export interface UseEntityFlowStateResult {
   onFormChange: (systemId: string, key: StepKey, change: IChangeEvent) => void
   onFormSubmit: (key: StepKey, change: IChangeEvent) => void
   requestFormDefinition: (systemId: string, stepKey: StepKey) => Promise<FormDefinition>
+  treeSelection: TreeSelection | null
   result: AggregatedResult | null
   resetFlowState: () => void
   nextButtonDisabled: boolean
@@ -81,6 +84,7 @@ export function useEntityFlowState(): UseEntityFlowStateResult {
     system: null,
     general: null,
     monitor: null,
+    tree: null,
   })
 
   const handleConfigRetry = useCallback(() => {
@@ -138,7 +142,7 @@ export function useEntityFlowState(): UseEntityFlowStateResult {
       return []
     }
     if (flow === 'monitor' && selectedSystem === 'general') {
-      return currentFlow.steps.filter((key) => key !== 'monitor')
+      return currentFlow.steps.filter((key) => key !== 'monitor' && key !== 'tree')
     }
     return currentFlow.steps
   }, [currentFlow, flow, selectedSystem])
@@ -261,7 +265,7 @@ export function useEntityFlowState(): UseEntityFlowStateResult {
   )
 
   useEffect(() => {
-    if (!selectedSystem || !activeStepKey || activeStepKey === 'system') {
+    if (!selectedSystem || !activeStepKey || activeStepKey === 'system' || activeStepKey === 'tree') {
       return
     }
 
@@ -278,7 +282,7 @@ export function useEntityFlowState(): UseEntityFlowStateResult {
   }, [activeStepKey, formDefinitions, formStatus, requestFormDefinition, selectedSystem])
 
   useEffect(() => {
-    if (!selectedSystem || !activeStepKey || activeStepKey === 'system') {
+    if (!selectedSystem || !activeStepKey || activeStepKey === 'system' || activeStepKey === 'tree') {
       return
     }
 
@@ -311,6 +315,19 @@ export function useEntityFlowState(): UseEntityFlowStateResult {
     }
     return formState[selectedSystem] ?? createEmptyStepState()
   }, [formState, selectedSystem])
+  const treeSelection = useMemo<TreeSelection | null>(() => {
+    if (!selectedSystem) {
+      return null
+    }
+    const treeState = (formState[selectedSystem] ?? createEmptyStepState()).tree
+    if (treeState && typeof treeState === 'object') {
+      const candidate = treeState as Partial<TreeSelection>
+      if (typeof candidate.vid === 'string' && typeof candidate.displayName === 'string') {
+        return { vid: candidate.vid, displayName: candidate.displayName }
+      }
+    }
+    return null
+  }, [formState, selectedSystem])
   const canMoveNext = Boolean(selectedSystem)
 
   const aggregateResult = useCallback(() => {
@@ -341,6 +358,10 @@ export function useEntityFlowState(): UseEntityFlowStateResult {
       return
     }
 
+    if (currentKey === 'tree' && !treeSelection) {
+      return
+    }
+
     const formRef = formRefs.current[currentKey]
 
     if (formRef && typeof formRef.submit === 'function') {
@@ -350,13 +371,14 @@ export function useEntityFlowState(): UseEntityFlowStateResult {
     } else {
       goToNextStep()
     }
-  }, [activeStep, canMoveNext, goToNextStep, handleCreate, stepKeys])
+  }, [activeStep, canMoveNext, goToNextStep, handleCreate, stepKeys, treeSelection])
 
   const resetRefs = useCallback(() => {
     formRefs.current = {
       system: null,
       general: null,
       monitor: null,
+      tree: null,
     }
   }, [])
 
@@ -405,6 +427,23 @@ export function useEntityFlowState(): UseEntityFlowStateResult {
       }
     })
   }, [])
+
+  const handleTreeSelection = useCallback(
+    (systemId: string, selection: TreeSelection | null) => {
+      ensureFormState(systemId)
+      setFormState((prev) => {
+        const existingState = prev[systemId] ?? createEmptyStepState()
+        return {
+          ...prev,
+          [systemId]: {
+            ...existingState,
+            tree: selection,
+          },
+        }
+      })
+    },
+    [ensureFormState]
+  )
 
   const onFormChange = useCallback((systemId: string, key: StepKey, change: IChangeEvent) => {
     applyFormChange(setFormState, systemId, key, change)
@@ -456,6 +495,7 @@ export function useEntityFlowState(): UseEntityFlowStateResult {
   const flowDescription = useMemo(() => currentFlow?.description?.trim(), [currentFlow])
   const nextButtonDisabled =
     (activeStepKey === 'system' && !canMoveNext) ||
+    (activeStepKey === 'tree' && !treeSelection) ||
     (activeStepKey !== null &&
       activeStepKey !== 'system' &&
       selectedSystem !== null &&
@@ -481,6 +521,7 @@ export function useEntityFlowState(): UseEntityFlowStateResult {
       selectedSystemConfig,
       handleSystemSelect,
       annotateSystemIcon,
+      handleTreeSelection,
       categories,
       systems,
       stepDefinitions,
@@ -493,6 +534,7 @@ export function useEntityFlowState(): UseEntityFlowStateResult {
       onFormChange,
       onFormSubmit,
       requestFormDefinition,
+      treeSelection,
       result,
       resetFlowState,
       nextButtonDisabled,
@@ -515,6 +557,7 @@ export function useEntityFlowState(): UseEntityFlowStateResult {
       selectedSystemConfig,
       handleSystemSelect,
       annotateSystemIcon,
+      handleTreeSelection,
       categories,
       systems,
       stepDefinitions,
@@ -527,6 +570,7 @@ export function useEntityFlowState(): UseEntityFlowStateResult {
       onFormChange,
       onFormSubmit,
       requestFormDefinition,
+      treeSelection,
       result,
       resetFlowState,
       nextButtonDisabled,
