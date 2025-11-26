@@ -1,6 +1,6 @@
 import type { RJSFSchema, UiSchema } from "@rjsf/utils";
 
-export type StepKey = "system" | "general" | "monitor" | "tree";
+export type StepKey = "system" | "general" | "monitor";
 
 export interface StepDefinition {
   label: string;
