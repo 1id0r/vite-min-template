@@ -93,7 +93,7 @@ function Connector({ state }: { state: StepState }) {
         height: 2,
         borderRadius: 2,
         backgroundColor: color,
-        width: 140,
+        width: 'clamp(10px, 60px, 100px)',
         marginTop: 18,
       }}
     />
