@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
-import { ActionIcon, Badge, Box, Flex, Group, Loader, Paper, Stack, Text } from '@mantine/core'
-import type { ApiTreeNode, TreeSelectionList } from '../../types/tree'
-import { fetchTreeNodes } from '../../api/client'
+import { ActionIcon, Badge, Box, Flex, Group, Loader, Paper, Stack, Text, TextInput } from '@mantine/core'
+import type { TreeSelectionList } from '../../types/tree'
+import { fetchTreeNodes, searchTreeNodesByName } from '../../api/client'
 
 type MantineNode = {
   label: React.ReactNode
@@ -42,6 +42,13 @@ export function TreeStep({ selection, onSelectionChange }: TreeStepProps) {
   const [expanded, setExpanded] = useState<string[]>([])
   const [loading, setLoading] = useState<Record<string, boolean>>({})
   const selectedIds = useMemo(() => new Set(selection.map((item) => item.vid)), [selection])
+  const [searchTerm, setSearchTerm] = useState('')
+  const [searchResults, setSearchResults] = useState<MantineNode[]>([])
+  const [searching, setSearching] = useState(false)
+  const [searchError, setSearchError] = useState<string | null>(null)
+
+  const trimmedSearch = searchTerm.trim()
+  const isSearching = trimmedSearch.length > 0
 
   useEffect(() => {
     ;(async () => {
@@ -60,6 +67,42 @@ export function TreeStep({ selection, onSelectionChange }: TreeStepProps) {
       setLoading((s) => ({ ...s, [vid]: false }))
     }
   }
+
+  const fetchSearchResults = async (term: string, signal?: AbortSignal): Promise<MantineNode[]> => {
+    const results = await searchTreeNodesByName(term, { headers: { Accept: 'application/json' }, signal })
+    return results.map(apiToMantine)
+  }
+
+  useEffect(() => {
+    if (!isSearching) {
+      setSearchResults([])
+      setSearchError(null)
+      return
+    }
+
+    const controller = new AbortController()
+    const timeout = setTimeout(async () => {
+      setSearching(true)
+      try {
+        const results = await fetchSearchResults(trimmedSearch, controller.signal)
+        setSearchResults(results)
+        setSearchError(null)
+      } catch (error) {
+        if (controller.signal.aborted) {
+          return
+        }
+        setSearchResults([])
+        setSearchError(error instanceof Error ? error.message : 'Search failed')
+      } finally {
+        setSearching(false)
+      }
+    }, 350)
+
+    return () => {
+      clearTimeout(timeout)
+      controller.abort()
+    }
+  }, [isSearching, trimmedSearch])
 
   const addSelection = (node: MantineNode) => {
     if (selectedIds.has(node.value)) {
@@ -173,6 +216,14 @@ export function TreeStep({ selection, onSelectionChange }: TreeStepProps) {
 
   return (
     <Stack gap='md' style={{ direction: 'rtl' }}>
+      <TextInput
+        value={searchTerm}
+        onChange={(e) => setSearchTerm(e.currentTarget.value)}
+        placeholder='חיפוש'
+        radius='lg'
+        size='md'
+      />
+
       <Stack gap={6}>
         <Text size='sm' fw={600}>
           בחירות
@@ -213,16 +264,42 @@ export function TreeStep({ selection, onSelectionChange }: TreeStepProps) {
         </Paper>
       </Stack>
 
-      <Stack gap={8}>
-        <Text size='sm' c='dimmed'>
-          הרחיבו ענפים ובחרו באמצעות +
-        </Text>
-        <Box>
-          {data.map((n) => (
-            <TreeNodeView key={n.value} node={n} />
-          ))}
-        </Box>
-      </Stack>
+      {isSearching ? (
+        <Stack gap={8}>
+          <Group gap='xs' align='center'>
+            <Text size='sm' fw={600}>
+              תוצאות חיפוש
+            </Text>
+            {searching && <Loader size='xs' />}
+          </Group>
+          {searchError && (
+            <Text size='sm' c='red.6'>
+              {searchError}
+            </Text>
+          )}
+          {!searching && searchResults.length === 0 && !searchError && (
+            <Text size='sm' c='dimmed'>
+              אין תוצאות לחיפוש
+            </Text>
+          )}
+          <Box>
+            {searchResults.map((n) => (
+              <TreeNodeView key={n.value} node={n} />
+            ))}
+          </Box>
+        </Stack>
+      ) : (
+        <Stack gap={8}>
+          <Text size='sm' c='dimmed'>
+            הרחיבו ענפים ובחרו באמצעות +
+          </Text>
+          <Box>
+            {data.map((n) => (
+              <TreeNodeView key={n.value} node={n} />
+            ))}
+          </Box>
+        </Stack>
+      )}
     </Stack>
   )
 }
