@@ -81,33 +81,6 @@ export async function fetchTreeNodes(
   }
 }
 
-export async function searchTreeNodesByName(
-  name: string,
-  options?: { headers?: Record<string, string>; signal?: AbortSignal }
-): Promise<ApiTreeNode[]> {
-  const params = new URLSearchParams({
-    name,
-  })
-
-  try {
-    const headers: Record<string, string> = {
-      accept: 'text/plain',
-      AppToken: treeAppToken,
-      ...(options?.headers ?? {}),
-    }
-
-    const url = resolveTreeUrl(params)
-    const response = await fetch(url, { headers, signal: options?.signal })
-    if (!response.ok) {
-      throw new Error(`Tree search failed with status ${response.status}`)
-    }
-    return (await response.json()) as ApiTreeNode[]
-  } catch (error) {
-    console.warn('Falling back to generated mock search tree data', error)
-    return generateMockTree(`search-${name || 'root'}`, 3)
-  }
-}
-
 function makeVid(prefix: string, parts: Array<string | number>) {
   return `${prefix}-${parts.join("-")}`;
 }

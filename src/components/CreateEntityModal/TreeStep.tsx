@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { ActionIcon, Badge, Box, Flex, Group, Loader, Paper, Stack, Text, TextInput } from '@mantine/core'
-import type { TreeSelectionList } from '../../types/tree'
-import { fetchTreeNodes, searchTreeNodesByName } from '../../api/client'
+import type { ApiTreeNode, TreeSelectionList } from '../../types/tree'
+import { fetchTreeNodes } from '../../api/client'
 
 type MantineNode = {
   label: React.ReactNode
@@ -67,10 +67,20 @@ export function TreeStep({ selection, onSelectionChange }: TreeStepProps) {
       setLoading((s) => ({ ...s, [vid]: false }))
     }
   }
+  const SEARCH_ENDPOINT = 'https://replace-with-real-api/tree-search'
+  const APP_TOKEN = 'REPLACE_WITH_APP_TOKEN'
 
   const fetchSearchResults = async (term: string, signal?: AbortSignal): Promise<MantineNode[]> => {
-    const results = await searchTreeNodesByName(term, { headers: { Accept: 'application/json' }, signal })
-    return results.map(apiToMantine)
+    const url = new URL(SEARCH_ENDPOINT)
+    url.searchParams.set('name', term)
+    url.searchParams.set('apptoken', APP_TOKEN)
+
+    const response = await fetch(url.toString(), { signal })
+    if (!response.ok) {
+      throw new Error('Search failed')
+    }
+    const json = (await response.json()) as ApiTreeNode[]
+    return json.map(apiToMantine)
   }
 
   useEffect(() => {
