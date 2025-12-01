@@ -11,7 +11,7 @@ import type {
   SystemDefinition,
 } from '../../../types/entity'
 import type { AggregatedResult, FlowId, FlowOption, FormStatus } from '../types'
-import type { TreeSelection } from '../../../types/tree'
+import type { TreeSelectionList } from '../../../types/tree'
 import {
   applyFormChange,
   buildAggregateResult,
@@ -45,7 +45,7 @@ export interface UseEntityFlowStateResult {
   selectedSystemConfig: SystemDefinition | null
   handleSystemSelect: (systemId: string) => void
   annotateSystemIcon: (systemId: string, iconName?: string) => void
-  handleTreeSelection: (systemId: string, selection: TreeSelection | null) => void
+  handleTreeSelection: (systemId: string, selection: TreeSelectionList) => void
   categories: CategoryDefinition[]
   systems: Record<string, SystemDefinition>
   stepDefinitions?: Record<StepKey, StepDefinition>
@@ -58,7 +58,7 @@ export interface UseEntityFlowStateResult {
   onFormChange: (systemId: string, key: StepKey, change: IChangeEvent) => void
   onFormSubmit: (key: StepKey, change: IChangeEvent) => void
   requestFormDefinition: (systemId: string, stepKey: StepKey) => Promise<FormDefinition>
-  treeSelection: TreeSelection | null
+  treeSelection: TreeSelectionList
   result: AggregatedResult | null
   resetFlowState: () => void
   nextButtonDisabled: boolean
@@ -315,18 +315,17 @@ export function useEntityFlowState(): UseEntityFlowStateResult {
     }
     return formState[selectedSystem] ?? createEmptyStepState()
   }, [formState, selectedSystem])
-  const treeSelection = useMemo<TreeSelection | null>(() => {
+  const treeSelection = useMemo<TreeSelectionList>(() => {
     if (!selectedSystem) {
-      return null
+      return []
     }
     const treeState = (formState[selectedSystem] ?? createEmptyStepState()).tree
-    if (treeState && typeof treeState === 'object') {
-      const candidate = treeState as Partial<TreeSelection>
-      if (typeof candidate.vid === 'string' && typeof candidate.displayName === 'string') {
-        return { vid: candidate.vid, displayName: candidate.displayName }
-      }
+    if (Array.isArray(treeState)) {
+      return treeState.filter(
+        (item) => item && typeof item.vid === 'string' && typeof item.displayName === 'string'
+      ) as TreeSelectionList
     }
-    return null
+    return []
   }, [formState, selectedSystem])
   const canMoveNext = Boolean(selectedSystem)
 
@@ -358,7 +357,7 @@ export function useEntityFlowState(): UseEntityFlowStateResult {
       return
     }
 
-    if (currentKey === 'tree' && !treeSelection) {
+    if (currentKey === 'tree' && treeSelection.length === 0) {
       return
     }
 
@@ -429,7 +428,7 @@ export function useEntityFlowState(): UseEntityFlowStateResult {
   }, [])
 
   const handleTreeSelection = useCallback(
-    (systemId: string, selection: TreeSelection | null) => {
+    (systemId: string, selection: TreeSelectionList) => {
       ensureFormState(systemId)
       setFormState((prev) => {
         const existingState = prev[systemId] ?? createEmptyStepState()
@@ -495,7 +494,7 @@ export function useEntityFlowState(): UseEntityFlowStateResult {
   const flowDescription = useMemo(() => currentFlow?.description?.trim(), [currentFlow])
   const nextButtonDisabled =
     (activeStepKey === 'system' && !canMoveNext) ||
-    (activeStepKey === 'tree' && !treeSelection) ||
+    (activeStepKey === 'tree' && treeSelection.length === 0) ||
     (activeStepKey !== null &&
       activeStepKey !== 'system' &&
       selectedSystem !== null &&

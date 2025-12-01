@@ -2,7 +2,7 @@ import { memo, useCallback, useMemo } from 'react'
 import { Alert, Box, Button, Center, Divider, Group, Loader, Stack, Text } from '@mantine/core'
 import type { IChangeEvent } from '@rjsf/core'
 import type { CategoryDefinition, FormDefinition, StepKey, SystemDefinition } from '../../types/entity'
-import type { TreeSelection } from '../../types/tree'
+import type { TreeSelectionList } from '../../types/tree'
 import { FlowStepper } from './FlowStepper'
 import { FormStepCard, type RjsfFormRef } from './FormStepCard'
 import { ResultSummary } from './ResultSummary'
@@ -157,7 +157,7 @@ interface StepContentProps {
   selectedSystemConfig: SystemDefinition | null
   handleSystemSelect: (systemId: string) => void
   annotateSystemIcon: (systemId: string, iconName?: string) => void
-  handleTreeSelection: (systemId: string, selection: TreeSelection | null) => void
+  handleTreeSelection: (systemId: string, selection: TreeSelectionList) => void
   formDefinitions: Record<string, Partial<Record<StepKey, FormDefinition>>>
   formStatus: Record<string, Partial<Record<StepKey, FormStatus>>>
   formErrors: Record<string, Partial<Record<StepKey, string>>>
@@ -166,7 +166,7 @@ interface StepContentProps {
   onFormChange: (systemId: string, key: StepKey, change: IChangeEvent) => void
   onFormSubmit: (key: StepKey, change: IChangeEvent) => void
   requestFormDefinition: (systemId: string, stepKey: StepKey) => Promise<FormDefinition>
-  treeSelection: TreeSelection | null
+  treeSelection: TreeSelectionList
 }
 
 const StepContent = memo(function StepContent({

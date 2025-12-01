@@ -8,3 +8,5 @@ export interface TreeSelection {
   vid: string
   displayName: string
 }
+
+export type TreeSelectionList = TreeSelection[]

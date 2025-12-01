@@ -1,6 +1,6 @@
-import { useEffect, useState } from 'react'
-import { Loader, Text, UnstyledButton, Group } from '@mantine/core'
-import type { ApiTreeNode, TreeSelection } from '../../types/tree'
+import { useEffect, useMemo, useState } from 'react'
+import { ActionIcon, Badge, Box, Flex, Group, Loader, Paper, Stack, Text } from '@mantine/core'
+import type { ApiTreeNode, TreeSelectionList } from '../../types/tree'
 import { fetchTreeNodes } from '../../api/client'
 
 type MantineNode = {
@@ -33,14 +33,15 @@ function updateNodeChildren(nodes: MantineNode[], value: string, children: Manti
 }
 
 interface TreeStepProps {
-  selection: TreeSelection | null
-  onSelectionChange: (selection: TreeSelection) => void
+  selection: TreeSelectionList
+  onSelectionChange: (selection: TreeSelectionList) => void
 }
 
 export function TreeStep({ selection, onSelectionChange }: TreeStepProps) {
   const [data, setData] = useState<MantineNode[] | null>(null)
   const [expanded, setExpanded] = useState<string[]>([])
   const [loading, setLoading] = useState<Record<string, boolean>>({})
+  const selectedIds = useMemo(() => new Set(selection.map((item) => item.vid)), [selection])
 
   useEffect(() => {
     ;(async () => {
@@ -60,77 +61,96 @@ export function TreeStep({ selection, onSelectionChange }: TreeStepProps) {
     }
   }
 
+  const addSelection = (node: MantineNode) => {
+    if (selectedIds.has(node.value)) {
+      return
+    }
+    onSelectionChange([...selection, { vid: node.value, displayName: String(node.label) }])
+  }
+
+  const removeSelection = (vid: string) => {
+    onSelectionChange(selection.filter((item) => item.vid !== vid))
+  }
+
+  const toggleSelection = (node: MantineNode) => {
+    if (selectedIds.has(node.value)) {
+      removeSelection(node.value)
+    } else {
+      addSelection(node)
+    }
+  }
+
   const TreeNodeView: React.FC<{ node: MantineNode; depth?: number }> = ({ node, depth = 0 }) => {
     const isOpen = expanded.includes(node.value)
-    const isSelected = selection?.vid === node.value
+    const isSelected = selectedIds.has(node.value)
+
+    const handleExpandToggle = async () => {
+      if (!isOpen) {
+        if (!node.children || node.children.length === 0) {
+          await fetchChildren(node.value)
+        }
+        setExpanded((s) => (s.includes(node.value) ? s : [...s, node.value]))
+      } else {
+        setExpanded((s) => s.filter((v) => v !== node.value))
+      }
+    }
 
     return (
-      <div style={{ marginBottom: 8 }}>
-        <UnstyledButton
-          onClick={async () => {
-            if (!isOpen) {
-              if (!node.children || node.children.length === 0) {
-                await fetchChildren(node.value)
-              }
-              setExpanded((s) => (s.includes(node.value) ? s : [...s, node.value]))
-            } else {
-              setExpanded((s) => s.filter((v) => v !== node.value))
-            }
-            onSelectionChange({ vid: node.value, displayName: String(node.label) })
-          }}
+      <Box style={{ marginBottom: 8 }}>
+        <Flex
+          align='center'
+          gap='sm'
           style={{
-            width: 'auto',
-            padding: '10px 14px',
-            border: '1.5px solid',
-            borderColor: isSelected ? '#4c6ef5' : '#e0e0e0',
-            borderRadius: 8,
-            backgroundColor: isOpen ? '#f8f9fa' : '#ffffff',
-            transition: 'all 0.2s ease',
-            cursor: 'pointer',
-            boxShadow: isSelected ? '0 2px 6px rgba(76, 110, 245, 0.15)' : '0 1px 3px rgba(0, 0, 0, 0.05)',
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.borderColor = '#4c6ef5'
-            e.currentTarget.style.boxShadow = '0 2px 6px rgba(76, 110, 245, 0.15)'
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.borderColor = isSelected ? '#4c6ef5' : '#e0e0e0'
-            e.currentTarget.style.boxShadow = isSelected
-              ? '0 2px 6px rgba(76, 110, 245, 0.15)'
-              : '0 1px 3px rgba(0, 0, 0, 0.05)'
+            width: '100%',
+            padding: '10px 12px',
+            borderRadius: 10,
+            border: isSelected ? '1.5px solid #4c6ef5' : '1px solid #e9ecef',
+            backgroundColor: isSelected ? '#f0f4ff' : isOpen ? '#f9fafb' : '#ffffff',
+            transition: 'all 0.15s ease',
+            boxShadow: isSelected ? '0 2px 6px rgba(76, 110, 245, 0.12)' : '0 1px 3px rgba(0,0,0,0.04)',
           }}
         >
-          <Group>
-            <div
-              style={{
-                width: 18,
-                height: 18,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                fontSize: 14,
-                color: '#4c6ef5',
-                fontWeight: 'bold',
-              }}
-            >
+          <ActionIcon
+            variant='subtle'
+            radius='xl'
+            color='indigo'
+            onClick={handleExpandToggle}
+            aria-label={isOpen ? 'Collapse' : 'Expand'}
+          >
+            <Text fw={700} size='sm'>
               {isOpen ? '▾' : '▸'}
-            </div>
-            <div
-              style={{
-                flex: 1,
-                fontSize: 14,
-                fontWeight: 500,
-                color: '#212529',
-              }}
-            >
+            </Text>
+          </ActionIcon>
+
+          <Flex
+            align='center'
+            gap='xs'
+            style={{ flex: 1, cursor: 'pointer', minWidth: 0 }}
+            onClick={() => toggleSelection(node)}
+          >
+            <Text size='sm' fw={500} c='gray.9' style={{ wordBreak: 'break-word' }}>
               {node.label}
-            </div>
+            </Text>
+          </Flex>
+
+          <Group gap={6} wrap='nowrap'>
             {loading[node.value] && <Loader size='xs' />}
+            <ActionIcon
+              variant={isSelected ? 'filled' : 'light'}
+              color='indigo'
+              radius='xl'
+              aria-label={isSelected ? 'Remove from selection' : 'Add to selection'}
+              onClick={() => toggleSelection(node)}
+            >
+              <Text fw={800} size='sm'>
+                {isSelected ? '-' : '+'}
+              </Text>
+            </ActionIcon>
           </Group>
-        </UnstyledButton>
+        </Flex>
 
         {isOpen && node.children && node.children.length > 0 && (
-          <div
+          <Box
             style={{
               marginLeft: 24,
               marginTop: 8,
@@ -141,9 +161,9 @@ export function TreeStep({ selection, onSelectionChange }: TreeStepProps) {
             {node.children.map((c) => (
               <TreeNodeView key={c.value} node={c} depth={depth + 1} />
             ))}
-          </div>
+          </Box>
         )}
-      </div>
+      </Box>
     )
   }
 
@@ -152,17 +172,57 @@ export function TreeStep({ selection, onSelectionChange }: TreeStepProps) {
   }
 
   return (
-    <div>
-      <Text size='sm' color='dimmed' mb='sm'>
-        Expand nodes. If a node has empty children, the client will request 3 more layers from the mock API using the
-        node's `vid`.
-      </Text>
+    <Stack gap='md' style={{ direction: 'rtl' }}>
+      <Stack gap={6}>
+        <Text size='sm' fw={600}>
+          בחירות
+        </Text>
+        <Paper withBorder radius='md' p='sm'>
+          {selection.length === 0 ? (
+            <Text size='sm' c='dimmed'>
+              הוסיפו פריטים באמצעות הסימן +
+            </Text>
+          ) : (
+            <Group gap='xs'>
+              {selection.map((item) => (
+                <Badge
+                  key={item.vid}
+                  radius='xl'
+                  variant='light'
+                  color='indigo'
+                  rightSection={
+                    <ActionIcon
+                      size='xs'
+                      variant='subtle'
+                      color='indigo'
+                      radius='xl'
+                      aria-label='הסר'
+                      onClick={() => removeSelection(item.vid)}
+                    >
+                      <Text fw={800} size={'sm'}>
+                        x
+                      </Text>
+                    </ActionIcon>
+                  }
+                >
+                  {item.displayName}
+                </Badge>
+              ))}
+            </Group>
+          )}
+        </Paper>
+      </Stack>
 
-      <div>
-        {data.map((n) => (
-          <TreeNodeView key={n.value} node={n} />
-        ))}
-      </div>
-    </div>
+      <Stack gap={8}>
+        <Text size='sm' c='dimmed'>
+          הרחיבו ענפים ובחרו באמצעות +
+        </Text>
+        <Box>
+          {data.map((n) => (
+            <TreeNodeView key={n.value} node={n} />
+          ))}
+        </Box>
+      </Stack>
+    </Stack>
   )
 }
