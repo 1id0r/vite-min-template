@@ -1,231 +1,82 @@
-import { useEffect, useMemo, useState } from 'react'
-import { ActionIcon, Badge, Box, Flex, Group, Loader, Paper, Stack, Text, TextInput } from '@mantine/core'
+import { useCallback, useMemo } from 'react'
+import { ActionIcon, Badge, Box, Group, Loader, Paper, Stack, Text, TextInput } from '@mantine/core'
 import { FiSearch } from 'react-icons/fi'
-import type { ApiTreeNode, TreeSelectionList } from '../../types/tree'
-import { fetchTreeNodes } from '../../api/client'
-
-type MantineNode = {
-  label: React.ReactNode
-  value: string
-  children?: MantineNode[]
-}
-
-function apiToMantine(node: ApiTreeNode): MantineNode {
-  return {
-    label: node.DisplayName,
-    value: node.VID,
-    children: node.children?.map(apiToMantine) ?? [],
-  }
-}
-
-function updateNodeChildren(nodes: MantineNode[], value: string, children: MantineNode[]): MantineNode[] {
-  return nodes.map((n) => {
-    if (n.value === value) {
-      return { ...n, children }
-    }
-    if (n.children) {
-      return {
-        ...n,
-        children: updateNodeChildren(n.children, value, children),
-      }
-    }
-    return n
-  })
-}
+import type { TreeSelectionList, MantineNode } from '../../types/tree'
+import { TREE_SEARCH_ENDPOINT, TREE_SEARCH_APP_TOKEN, TREE_SEARCH_DEBOUNCE_MS } from './constants/treeConfig'
+import { TreeNodeView } from './components/TreeNodeView'
+import { useTreeData } from './hooks/useTreeData'
+import { useTreeSearch } from './hooks/useTreeSearch'
 
 interface TreeStepProps {
   selection: TreeSelectionList
   onSelectionChange: (selection: TreeSelectionList) => void
 }
 
+/**
+ * TreeStep - Hierarchical tree navigation with search
+ *
+ * Provides a tree view with:
+ * - Lazy loading of child nodes on expansion
+ * - Debounced search with result display
+ * - Multi-selection via + buttons
+ * - Visual feedback for selected/expanded states
+ */
 export function TreeStep({ selection, onSelectionChange }: TreeStepProps) {
-  const [data, setData] = useState<MantineNode[] | null>(null)
-  const [expanded, setExpanded] = useState<string[]>([])
-  const [loading, setLoading] = useState<Record<string, boolean>>({})
+  // Tree data management hook
+  const { data, expanded, loading, setExpanded, fetchChildren } = useTreeData()
+
+  // Tree search hook (the main big hook - handles debouncing and request cancellation)
+  const { searchTerm, setSearchTerm, isSearching, searchResults, searching, searchError } = useTreeSearch({
+    searchEndpoint: TREE_SEARCH_ENDPOINT,
+    appToken: TREE_SEARCH_APP_TOKEN,
+    debounceMs: TREE_SEARCH_DEBOUNCE_MS,
+  })
+
+  // Selection helpers
   const selectedIds = useMemo(() => new Set(selection.map((item) => item.vid)), [selection])
-  const [searchTerm, setSearchTerm] = useState('')
-  const [searchResults, setSearchResults] = useState<MantineNode[]>([])
-  const [searching, setSearching] = useState(false)
-  const [searchError, setSearchError] = useState<string | null>(null)
 
-  const trimmedSearch = searchTerm.trim()
-  const isSearching = trimmedSearch.length > 0
-
-  useEffect(() => {
-    ;(async () => {
-      const json = await fetchTreeNodes('root', 3)
-      setData(json.map(apiToMantine))
-    })()
-  }, [])
-
-  async function fetchChildren(vid: string) {
-    setLoading((s) => ({ ...s, [vid]: true }))
-    try {
-      const json = await fetchTreeNodes(vid, 1)
-      const mapped = json.map(apiToMantine)
-      setData((prev) => (prev ? updateNodeChildren(prev, vid, mapped) : prev))
-    } finally {
-      setLoading((s) => ({ ...s, [vid]: false }))
-    }
-  }
-  const SEARCH_ENDPOINT = 'https://replace-with-real-api/tree-search'
-  const APP_TOKEN = '123lidor'
-
-  const fetchSearchResults = async (term: string, signal?: AbortSignal): Promise<MantineNode[]> => {
-    const url = new URL(SEARCH_ENDPOINT)
-    url.searchParams.set('name', term)
-
-    const response = await fetch(url.toString(), {
-      signal,
-      headers: {
-        accept: 'text/plain',
-        AppToken: APP_TOKEN,
-      },
-    })
-    if (!response.ok) {
-      throw new Error('Search failed')
-    }
-    const json = (await response.json()) as ApiTreeNode[]
-    return json.map(apiToMantine)
-  }
-
-  useEffect(() => {
-    if (!isSearching) {
-      setSearchResults([])
-      setSearchError(null)
-      return
-    }
-
-    const controller = new AbortController()
-    const timeout = setTimeout(async () => {
-      setSearching(true)
-      try {
-        const results = await fetchSearchResults(trimmedSearch, controller.signal)
-        setSearchResults(results)
-        setSearchError(null)
-      } catch (error) {
-        if (controller.signal.aborted) {
-          return
-        }
-        setSearchResults([])
-        setSearchError(error instanceof Error ? error.message : 'Search failed')
-      } finally {
-        setSearching(false)
+  const addSelection = useCallback(
+    (node: MantineNode) => {
+      if (selectedIds.has(node.value)) {
+        return
       }
-    }, 350)
+      onSelectionChange([...selection, { vid: node.value, displayName: String(node.label) }])
+    },
+    [selectedIds, selection, onSelectionChange]
+  )
 
-    return () => {
-      clearTimeout(timeout)
-      controller.abort()
-    }
-  }, [isSearching, trimmedSearch])
+  const removeSelection = useCallback(
+    (vid: string) => {
+      onSelectionChange(selection.filter((item) => item.vid !== vid))
+    },
+    [selection, onSelectionChange]
+  )
 
-  const addSelection = (node: MantineNode) => {
-    if (selectedIds.has(node.value)) {
-      return
-    }
-    onSelectionChange([...selection, { vid: node.value, displayName: String(node.label) }])
-  }
-
-  const removeSelection = (vid: string) => {
-    onSelectionChange(selection.filter((item) => item.vid !== vid))
-  }
-
-  const toggleSelection = (node: MantineNode) => {
-    if (selectedIds.has(node.value)) {
-      removeSelection(node.value)
-    } else {
-      addSelection(node)
-    }
-  }
-
-  const TreeNodeView: React.FC<{ node: MantineNode; depth?: number }> = ({ node, depth = 0 }) => {
-    const isOpen = expanded.includes(node.value)
-    const isSelected = selectedIds.has(node.value)
-
-    const handleExpandToggle = async () => {
-      if (!isOpen) {
-        if (!node.children || node.children.length === 0) {
-          await fetchChildren(node.value)
-        }
-        setExpanded((s) => (s.includes(node.value) ? s : [...s, node.value]))
+  const toggleSelection = useCallback(
+    (node: MantineNode) => {
+      if (selectedIds.has(node.value)) {
+        removeSelection(node.value)
       } else {
-        setExpanded((s) => s.filter((v) => v !== node.value))
+        addSelection(node)
       }
-    }
+    },
+    [selectedIds, addSelection, removeSelection]
+  )
 
-    return (
-      <Box style={{ marginBottom: 8, direction: 'rtl' }}>
-        <Flex
-          align='center'
-          gap='sm'
-          style={{
-            width: '100%',
-            padding: '10px 12px',
-            borderRadius: 10,
-            border: isSelected ? '1.5px solid #4c6ef5' : '1px solid #e9ecef',
-            backgroundColor: isSelected ? '#f0f4ff' : isOpen ? '#f9fafb' : '#ffffff',
-            transition: 'all 0.15s ease',
-            boxShadow: isSelected ? '0 2px 6px rgba(76, 110, 245, 0.12)' : '0 1px 3px rgba(0,0,0,0.04)',
-          }}
-        >
-          <ActionIcon
-            variant='subtle'
-            radius='xl'
-            color='indigo'
-            onClick={handleExpandToggle}
-            aria-label={isOpen ? 'Collapse' : 'Expand'}
-          >
-            <Text fw={700} size='sm'>
-              {isOpen ? '▾' : '▸'}
-            </Text>
-          </ActionIcon>
-
-          <Flex
-            align='center'
-            gap='xs'
-            style={{ flex: 1, cursor: 'pointer', minWidth: 0 }}
-            onClick={() => toggleSelection(node)}
-          >
-            <Text size='sm' fw={500} c='gray.9' style={{ wordBreak: 'break-word' }}>
-              {node.label}
-            </Text>
-          </Flex>
-
-          <Group gap={6} wrap='nowrap'>
-            {loading[node.value] && <Loader size='xs' />}
-            <ActionIcon
-              variant={isSelected ? 'filled' : 'light'}
-              color='indigo'
-              radius='xl'
-              aria-label={isSelected ? 'Remove from selection' : 'Add to selection'}
-              onClick={() => toggleSelection(node)}
-            >
-              <Text fw={800} size='sm'>
-                {isSelected ? '-' : '+'}
-              </Text>
-            </ActionIcon>
-          </Group>
-        </Flex>
-
-        {isOpen && node.children && node.children.length > 0 && (
-          <Box
-            style={{
-              marginRight: 24,
-              marginTop: 8,
-              paddingRight: 16,
-              borderRight: '2px solid #e9ecef',
-              direction: 'rtl',
-            }}
-          >
-            {node.children.map((c) => (
-              <TreeNodeView key={c.value} node={c} depth={depth + 1} />
-            ))}
-          </Box>
-        )}
-      </Box>
-    )
-  }
+  const toggleExpansion = useCallback(
+    async (nodeValue: string, hasChildren: boolean) => {
+      const isOpen = expanded.includes(nodeValue)
+      if (!isOpen) {
+        if (!hasChildren) {
+          await fetchChildren(nodeValue)
+        }
+        setExpanded((s) => (s.includes(nodeValue) ? s : [...s, nodeValue]))
+      } else {
+        setExpanded((s) => s.filter((v) => v !== nodeValue))
+      }
+    },
+    [expanded, fetchChildren, setExpanded]
+  )
 
   if (!data) {
     return <Loader />
@@ -307,7 +158,18 @@ export function TreeStep({ selection, onSelectionChange }: TreeStepProps) {
           )}
           <Box>
             {searchResults.map((n) => (
-              <TreeNodeView key={n.value} node={n} />
+              <TreeNodeView
+                key={n.value}
+                node={n}
+                isSelected={selectedIds.has(n.value)}
+                isExpanded={expanded.includes(n.value)}
+                isLoading={loading[n.value] || false}
+                onToggleExpansion={toggleExpansion}
+                onToggleSelection={toggleSelection}
+                expandedNodes={expanded}
+                selectedIds={selectedIds}
+                loadingStates={loading}
+              />
             ))}
           </Box>
         </Stack>
@@ -318,7 +180,18 @@ export function TreeStep({ selection, onSelectionChange }: TreeStepProps) {
           </Text>
           <Box>
             {data.map((n) => (
-              <TreeNodeView key={n.value} node={n} />
+              <TreeNodeView
+                key={n.value}
+                node={n}
+                isSelected={selectedIds.has(n.value)}
+                isExpanded={expanded.includes(n.value)}
+                isLoading={loading[n.value] || false}
+                onToggleExpansion={toggleExpansion}
+                onToggleSelection={toggleSelection}
+                expandedNodes={expanded}
+                selectedIds={selectedIds}
+                loadingStates={loading}
+              />
             ))}
           </Box>
         </Stack>
