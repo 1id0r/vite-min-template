@@ -75,14 +75,15 @@ export function EntityFlowContent({ controller, onClose }: EntityFlowContentProp
   }
 
   return (
-    <Stack
+    <Box
       style={{
-        minHeight: 640,
-        flex: 1,
         display: 'flex',
+        flexDirection: 'column',
+        flex: 1,
+        minHeight: 0,
       }}
     >
-      <Stack gap='md'>
+      <Stack gap='md' style={{ position: 'sticky', top: 0, zIndex: 2, backgroundColor: '#fff', paddingTop: 12 }}>
         <FlowStepper stepKeys={stepKeys} activeStep={activeStep} definitions={stepDefinitions} />
         <Divider />
       </Stack>
@@ -93,40 +94,60 @@ export function EntityFlowContent({ controller, onClose }: EntityFlowContentProp
             flex: 1,
             display: 'flex',
             flexDirection: 'column',
+            overflow: 'hidden',
           }}
         >
-          <StepContent
-            activeStepKey={activeStepKey}
-            flow={flow}
-            flowOptions={flowOptions}
-            onFlowChange={handleFlowChange}
-            flowDescription={flowDescription}
-            categories={categories}
-            systems={systems}
-            selectedSystem={selectedSystem}
-            selectedSystemConfig={selectedSystemConfig}
-            handleSystemSelect={handleSystemSelect}
-            annotateSystemIcon={annotateSystemIcon}
-            formDefinitions={formDefinitions}
-            formStatus={formStatus}
-            formErrors={formErrors}
-            currentFormState={currentFormState}
-            attachFormRef={attachFormRef}
-            onFormChange={onFormChange}
-            onFormSubmit={onFormSubmit}
-            requestFormDefinition={requestFormDefinition}
-            handleTreeSelection={handleTreeSelection}
-            treeSelection={treeSelection}
-          />
+          <Box
+            style={{
+              flex: 1,
+              minHeight: 0,
+              overflowY: 'auto',
+              paddingRight: 4,
+              paddingTop: 4,
+              paddingLeft: 4,
+            }}
+          >
+            <StepContent
+              activeStepKey={activeStepKey}
+              flow={flow}
+              flowOptions={flowOptions}
+              onFlowChange={handleFlowChange}
+              flowDescription={flowDescription}
+              categories={categories}
+              systems={systems}
+              selectedSystem={selectedSystem}
+              selectedSystemConfig={selectedSystemConfig}
+              handleSystemSelect={handleSystemSelect}
+              annotateSystemIcon={annotateSystemIcon}
+              formDefinitions={formDefinitions}
+              formStatus={formStatus}
+              formErrors={formErrors}
+              currentFormState={currentFormState}
+              attachFormRef={attachFormRef}
+              onFormChange={onFormChange}
+              onFormSubmit={onFormSubmit}
+              requestFormDefinition={requestFormDefinition}
+              handleTreeSelection={handleTreeSelection}
+              treeSelection={treeSelection}
+            />
+          </Box>
         </Box>
       )}
 
       {isCompleted && <ResultSummary result={result} onClose={onClose} />}
 
       {!isCompleted && (
-        <>
+        <Box
+          style={{
+            position: 'sticky',
+            bottom: 0,
+            backgroundColor: '#fff',
+            paddingTop: 12,
+            paddingBottom: 12,
+          }}
+        >
           <Divider />
-          <Group dir='rtl' justify='space-between'>
+          <Group dir='rtl' justify='space-between' mt='sm'>
             <Button variant='default' onClick={goToPreviousStep} disabled={activeStep === 0}>
               חזור
             </Button>
@@ -139,9 +160,9 @@ export function EntityFlowContent({ controller, onClose }: EntityFlowContentProp
               </Button>
             </Group>
           </Group>
-        </>
+        </Box>
       )}
-    </Stack>
+    </Box>
   )
 }
 
@@ -278,10 +299,7 @@ const StepContent = memo(function StepContent({
 
   if (activeStepKey === 'tree') {
     return (
-      <TreeStep
-        selection={treeSelection}
-        onSelectionChange={(value) => handleTreeSelection(selectedSystem, value)}
-      />
+      <TreeStep selection={treeSelection} onSelectionChange={(value) => handleTreeSelection(selectedSystem, value)} />
     )
   }
 

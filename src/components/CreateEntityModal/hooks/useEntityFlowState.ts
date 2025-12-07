@@ -142,7 +142,7 @@ export function useEntityFlowState(): UseEntityFlowStateResult {
       return []
     }
     if (flow === 'monitor' && selectedSystem === 'general') {
-      return currentFlow.steps.filter((key) => key !== 'monitor' && key !== 'tree')
+      return currentFlow.steps.filter((key) => key !== 'monitor')
     }
     return currentFlow.steps
   }, [currentFlow, flow, selectedSystem])

@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { ActionIcon, Badge, Box, Flex, Group, Loader, Paper, Stack, Text, TextInput } from '@mantine/core'
+import { FiSearch } from 'react-icons/fi'
 import type { ApiTreeNode, TreeSelectionList } from '../../types/tree'
 import { fetchTreeNodes } from '../../api/client'
 
@@ -68,14 +69,19 @@ export function TreeStep({ selection, onSelectionChange }: TreeStepProps) {
     }
   }
   const SEARCH_ENDPOINT = 'https://replace-with-real-api/tree-search'
-  const APP_TOKEN = 'REPLACE_WITH_APP_TOKEN'
+  const APP_TOKEN = '123lidor'
 
   const fetchSearchResults = async (term: string, signal?: AbortSignal): Promise<MantineNode[]> => {
     const url = new URL(SEARCH_ENDPOINT)
     url.searchParams.set('name', term)
-    url.searchParams.set('apptoken', APP_TOKEN)
 
-    const response = await fetch(url.toString(), { signal })
+    const response = await fetch(url.toString(), {
+      signal,
+      headers: {
+        accept: 'text/plain',
+        AppToken: APP_TOKEN,
+      },
+    })
     if (!response.ok) {
       throw new Error('Search failed')
     }
@@ -149,7 +155,7 @@ export function TreeStep({ selection, onSelectionChange }: TreeStepProps) {
     }
 
     return (
-      <Box style={{ marginBottom: 8 }}>
+      <Box style={{ marginBottom: 8, direction: 'rtl' }}>
         <Flex
           align='center'
           gap='sm'
@@ -205,10 +211,11 @@ export function TreeStep({ selection, onSelectionChange }: TreeStepProps) {
         {isOpen && node.children && node.children.length > 0 && (
           <Box
             style={{
-              marginLeft: 24,
+              marginRight: 24,
               marginTop: 8,
-              paddingLeft: 16,
-              borderLeft: '2px solid #e9ecef',
+              paddingRight: 16,
+              borderRight: '2px solid #e9ecef',
+              direction: 'rtl',
             }}
           >
             {node.children.map((c) => (
@@ -232,6 +239,12 @@ export function TreeStep({ selection, onSelectionChange }: TreeStepProps) {
         placeholder='חיפוש'
         radius='lg'
         size='md'
+        rightSection={<FiSearch size={16} color='#6B7280' />}
+        styles={{
+          input: {
+            textAlign: 'right',
+          },
+        }}
       />
 
       <Stack gap={6}>

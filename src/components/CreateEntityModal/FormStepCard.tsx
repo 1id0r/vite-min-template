@@ -1,9 +1,11 @@
-import { useMemo, type ReactElement } from 'react'
-import { Alert, Box, Button, Center, Grid, Group, Loader, Paper, Stack, Text } from '@mantine/core'
+import { useMemo, type ReactElement, type ReactNode } from 'react'
+import { Alert, Box, Button, Center, Grid, Group, Loader, Paper, Stack, Text, ActionIcon, Flex } from '@mantine/core'
 import FormComponent, { withTheme, type IChangeEvent } from '@rjsf/core'
 import { Theme as MantineTheme } from '@rjsf/mantine'
 import validator from '@rjsf/validator-ajv8'
-import type { ObjectFieldTemplateProps, RJSFSchema, UiSchema } from '@rjsf/utils'
+import type { ArrayFieldTemplateProps, ObjectFieldTemplateProps, RJSFSchema, UiSchema } from '@rjsf/utils'
+import { getTemplate, getUiOptions } from '@rjsf/utils'
+import { FiPlus, FiTrash2 } from 'react-icons/fi'
 import type { FormDefinition } from '../../types/entity'
 import { AsyncSelectWidget } from '../form-widgets/AsyncSelectWidget'
 import type { FormStatus } from './types'
@@ -134,6 +136,67 @@ const ArrayFieldTitle = ({ title }: { title?: string }) => {
   )
 }
 
+const CustomArrayTemplate = (props: ArrayFieldTemplateProps) => {
+  const { registry, uiSchema, canAdd, onAddClick } = props
+  const uiOptions = getUiOptions(uiSchema)
+  const DefaultArrayTemplate = getTemplate<'ArrayFieldTemplate', any, any, any>('ArrayFieldTemplate', registry, uiOptions)
+  const idValue = (props as { idSchema?: { $id?: string } }).idSchema?.$id
+  const isLinks = typeof idValue === 'string' && idValue.toLowerCase().includes('links')
+  const items = (props.items as unknown as Array<
+    ArrayFieldTemplateProps['items'][number] & {
+      children: ReactNode
+      hasRemove?: boolean
+      onDropIndexClick?: (index: number) => (() => void) | undefined
+      index: number
+    }
+  >)
+
+  if (!isLinks) {
+    return <DefaultArrayTemplate {...props} />
+  }
+
+  const renderAddButton = (variant: 'outlined' | 'light' = 'outlined') => (
+    <ActionIcon
+      variant={variant === 'outlined' ? 'outline' : 'light'}
+      color='indigo'
+      radius='md'
+      size={44}
+      onClick={onAddClick}
+      disabled={!canAdd}
+      aria-label='הוסף לינק'
+    >
+      <FiPlus size={18} />
+    </ActionIcon>
+  )
+
+  return (
+    <Stack gap='xs'>
+      {items.length === 0 && canAdd && <Group justify='flex-start'>{renderAddButton()}</Group>}
+
+      {items.map((item) => (
+        <Group key={item.key} gap='xs' wrap='nowrap' align='center'>
+          {canAdd && renderAddButton('light')}
+          <Flex gap='xs' style={{ flex: 1, minWidth: 0 }}>
+            {item.children}
+          </Flex>
+          {item.hasRemove && item.onDropIndexClick && (
+            <ActionIcon
+              variant='subtle'
+              color='gray'
+              radius='md'
+              size={36}
+              onClick={item.onDropIndexClick(item.index)}
+              aria-label='הסר לינק'
+            >
+              <FiTrash2 size={16} />
+            </ActionIcon>
+          )}
+        </Group>
+      ))}
+    </Stack>
+  )
+}
+
 interface FormStepCardProps {
   status?: FormStatus
   definition?: FormDefinition
@@ -224,6 +287,7 @@ export function FormStepCard({
             ObjectFieldTemplate: FormObjectFieldTemplate,
             ErrorListTemplate: HiddenErrorList,
             ArrayFieldTitleTemplate: ArrayFieldTitle,
+            ArrayFieldTemplate: CustomArrayTemplate,
           }}
           onChange={onChange}
           onSubmit={onSubmit}
