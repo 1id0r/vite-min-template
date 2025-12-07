@@ -75,58 +75,71 @@ export function EntityFlowContent({ controller, onClose }: EntityFlowContentProp
   }
 
   return (
-    <Stack
+    <Box
       style={{
         minHeight: 640,
-        flex: 1,
+        height: 640,
         display: 'flex',
+        flexDirection: 'column',
       }}
     >
-      <Stack gap='md'>
+      {/* Fixed header with stepper */}
+      <Stack gap='md' style={{ flexShrink: 0 }}>
         <FlowStepper stepKeys={stepKeys} activeStep={activeStep} definitions={stepDefinitions} />
         <Divider />
       </Stack>
 
-      {!isCompleted && (
-        <Box
-          style={{
-            flex: 1,
-            display: 'flex',
-            flexDirection: 'column',
-          }}
-        >
-          <StepContent
-            activeStepKey={activeStepKey}
-            flow={flow}
-            flowOptions={flowOptions}
-            onFlowChange={handleFlowChange}
-            flowDescription={flowDescription}
-            categories={categories}
-            systems={systems}
-            selectedSystem={selectedSystem}
-            selectedSystemConfig={selectedSystemConfig}
-            handleSystemSelect={handleSystemSelect}
-            annotateSystemIcon={annotateSystemIcon}
-            formDefinitions={formDefinitions}
-            formStatus={formStatus}
-            formErrors={formErrors}
-            currentFormState={currentFormState}
-            attachFormRef={attachFormRef}
-            onFormChange={onFormChange}
-            onFormSubmit={onFormSubmit}
-            requestFormDefinition={requestFormDefinition}
-            handleTreeSelection={handleTreeSelection}
-            treeSelection={treeSelection}
-          />
-        </Box>
-      )}
+      {/* Scrollable content area */}
+      <Box
+        style={{
+          flex: 1,
+          overflowY: 'auto',
+          overflowX: 'hidden',
+          minHeight: 0,
+        }}
+      >
+        {!isCompleted && (
+          <Box
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              padding: '16px 0',
+            }}
+          >
+            <StepContent
+              activeStepKey={activeStepKey}
+              flow={flow}
+              flowOptions={flowOptions}
+              onFlowChange={handleFlowChange}
+              flowDescription={flowDescription}
+              categories={categories}
+              systems={systems}
+              selectedSystem={selectedSystem}
+              selectedSystemConfig={selectedSystemConfig}
+              handleSystemSelect={handleSystemSelect}
+              annotateSystemIcon={annotateSystemIcon}
+              formDefinitions={formDefinitions}
+              formStatus={formStatus}
+              formErrors={formErrors}
+              currentFormState={currentFormState}
+              attachFormRef={attachFormRef}
+              onFormChange={onFormChange}
+              onFormSubmit={onFormSubmit}
+              requestFormDefinition={requestFormDefinition}
+              handleTreeSelection={handleTreeSelection}
+              treeSelection={treeSelection}
+            />
+          </Box>
+        )}
 
-      {isCompleted && <ResultSummary result={result} onClose={onClose} />}
+        {isCompleted && <ResultSummary result={result} onClose={onClose} />}
+      </Box>
 
+      {/* Fixed footer with buttons */}
       {!isCompleted && (
-        <>
+        <Box style={{ flexShrink: 0 }}>
           <Divider />
-          <Group dir='rtl' justify='space-between'>
+          <Group dir='rtl' justify='space-between' style={{ paddingTop: 16 }}>
             <Button variant='default' onClick={goToPreviousStep} disabled={activeStep === 0}>
               חזור
             </Button>
@@ -139,9 +152,9 @@ export function EntityFlowContent({ controller, onClose }: EntityFlowContentProp
               </Button>
             </Group>
           </Group>
-        </>
+        </Box>
       )}
-    </Stack>
+    </Box>
   )
 }
 

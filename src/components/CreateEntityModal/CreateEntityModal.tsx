@@ -1,5 +1,5 @@
-import { useCallback, useMemo, useState } from 'react'
-import { Button, Modal, Stack } from '@mantine/core'
+import { useCallback, useState } from 'react'
+import { Button, Modal } from '@mantine/core'
 import { EntityFlowContent } from './EntityFlowContent'
 import { useEntityFlowState } from './hooks/useEntityFlowState'
 
@@ -15,31 +15,11 @@ export function CreateEntityModal() {
     resetFlowState()
   }, [resetFlowState])
 
-  const modalBodyStyles = useMemo(
-    () => ({
-      body: {
-        minHeight: 640,
-        display: 'flex',
-        flexDirection: 'column' as const,
-      },
-    }),
-    []
-  )
-
   return (
     <>
       <Button onClick={handleOpen}>Create entity</Button>
-      <Modal
-        opened={opened}
-        onClose={handleClose}
-        title='Create new entity'
-        size='xl'
-        radius='md'
-        styles={modalBodyStyles}
-      >
-        <Stack style={{ flex: 1 }}>
-          <EntityFlowContent controller={controller} onClose={handleClose} />
-        </Stack>
+      <Modal opened={opened} onClose={handleClose} title='Create new entity' size='xl' radius='md'>
+        <EntityFlowContent controller={controller} onClose={handleClose} />
       </Modal>
     </>
   )
