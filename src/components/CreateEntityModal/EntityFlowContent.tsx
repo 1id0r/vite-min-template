@@ -75,15 +75,14 @@ export function EntityFlowContent({ controller, onClose }: EntityFlowContentProp
   }
 
   return (
-    <Box
+    <Stack
       style={{
-        display: 'flex',
-        flexDirection: 'column',
+        minHeight: 640,
         flex: 1,
-        minHeight: 0,
+        display: 'flex',
       }}
     >
-      <Stack gap='md' style={{ position: 'sticky', top: 0, zIndex: 2, backgroundColor: '#fff', paddingTop: 12 }}>
+      <Stack gap='md'>
         <FlowStepper stepKeys={stepKeys} activeStep={activeStep} definitions={stepDefinitions} />
         <Divider />
       </Stack>
@@ -94,60 +93,40 @@ export function EntityFlowContent({ controller, onClose }: EntityFlowContentProp
             flex: 1,
             display: 'flex',
             flexDirection: 'column',
-            overflow: 'hidden',
           }}
         >
-          <Box
-            style={{
-              flex: 1,
-              minHeight: 0,
-              overflowY: 'auto',
-              paddingRight: 4,
-              paddingTop: 4,
-              paddingLeft: 4,
-            }}
-          >
-            <StepContent
-              activeStepKey={activeStepKey}
-              flow={flow}
-              flowOptions={flowOptions}
-              onFlowChange={handleFlowChange}
-              flowDescription={flowDescription}
-              categories={categories}
-              systems={systems}
-              selectedSystem={selectedSystem}
-              selectedSystemConfig={selectedSystemConfig}
-              handleSystemSelect={handleSystemSelect}
-              annotateSystemIcon={annotateSystemIcon}
-              formDefinitions={formDefinitions}
-              formStatus={formStatus}
-              formErrors={formErrors}
-              currentFormState={currentFormState}
-              attachFormRef={attachFormRef}
-              onFormChange={onFormChange}
-              onFormSubmit={onFormSubmit}
-              requestFormDefinition={requestFormDefinition}
-              handleTreeSelection={handleTreeSelection}
-              treeSelection={treeSelection}
-            />
-          </Box>
+          <StepContent
+            activeStepKey={activeStepKey}
+            flow={flow}
+            flowOptions={flowOptions}
+            onFlowChange={handleFlowChange}
+            flowDescription={flowDescription}
+            categories={categories}
+            systems={systems}
+            selectedSystem={selectedSystem}
+            selectedSystemConfig={selectedSystemConfig}
+            handleSystemSelect={handleSystemSelect}
+            annotateSystemIcon={annotateSystemIcon}
+            formDefinitions={formDefinitions}
+            formStatus={formStatus}
+            formErrors={formErrors}
+            currentFormState={currentFormState}
+            attachFormRef={attachFormRef}
+            onFormChange={onFormChange}
+            onFormSubmit={onFormSubmit}
+            requestFormDefinition={requestFormDefinition}
+            handleTreeSelection={handleTreeSelection}
+            treeSelection={treeSelection}
+          />
         </Box>
       )}
 
       {isCompleted && <ResultSummary result={result} onClose={onClose} />}
 
       {!isCompleted && (
-        <Box
-          style={{
-            position: 'sticky',
-            bottom: 0,
-            backgroundColor: '#fff',
-            paddingTop: 12,
-            paddingBottom: 12,
-          }}
-        >
+        <>
           <Divider />
-          <Group dir='rtl' justify='space-between' mt='sm'>
+          <Group dir='rtl' justify='space-between'>
             <Button variant='default' onClick={goToPreviousStep} disabled={activeStep === 0}>
               חזור
             </Button>
@@ -160,9 +139,9 @@ export function EntityFlowContent({ controller, onClose }: EntityFlowContentProp
               </Button>
             </Group>
           </Group>
-        </Box>
+        </>
       )}
-    </Box>
+    </Stack>
   )
 }
 

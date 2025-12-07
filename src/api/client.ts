@@ -1,7 +1,7 @@
 import type { EntityConfig, FormDefinition, StepKey } from "../types/entity";
 import type { ApiTreeNode } from "../types/tree";
 
-const DEFAULT_BASE_URL = "http://127.0.0.1:8001";
+const DEFAULT_BASE_URL = "http://127.0.0.1:8000";
 const baseUrl =
   (import.meta.env.VITE_API_BASE_URL as string | undefined)?.replace(/\/$/, "") ||
   DEFAULT_BASE_URL;
