@@ -1,37 +1,53 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+/**
+ * useEntityFlowState - Central State Manager for Entity Creation Flow
+ * 
+ * This hook composes multiple focused hooks to manage the complete state machine
+ * for the multi-step entity creation wizard.
+ * 
+ * COMPOSED HOOKS:
+ * - useEntityConfig     - Configuration loading from API
+ * - useFlowNavigation   - Flow selection and step navigation
+ * - useSystemSelection  - System/template selection
+ * - useFormManager      - Form state, definitions, and submission
+ * 
+ * @returns UseEntityFlowStateResult - Complete controller object for the flow
+ * 
+ * @example
+ * const controller = useEntityFlowState();
+ * <EntityFlowContent controller={controller} onClose={handleClose} />
+ */
+
+import { useCallback, useMemo, useState } from 'react'
 import type { IChangeEvent } from '@rjsf/core'
-import { fetchEntityConfig, fetchFormDefinition } from '../../../api/client'
 import type {
   CategoryDefinition,
-  EntityConfig,
-  FlowDefinition,
   FormDefinition,
   StepDefinition,
   StepKey,
   SystemDefinition,
 } from '../../../types/entity'
-import type { AggregatedResult, FlowId, FlowOption, FormStatus } from '../types'
+import type { AggregatedResult, FlowId, FlowOption } from '../types'
 import type { TreeSelectionList } from '../../../types/tree'
-import {
-  applyFormChange,
-  buildAggregateResult,
-  createEmptyStepState,
-  type FormDefinitionsState,
-  type FormErrorState,
-  type FormState,
-  type FormStatusState,
-  shouldApplyInitialData,
-} from '../entityFormUtils'
+import { buildAggregateResult, type FormDefinitionsState, type FormErrorState, type FormStatusState } from '../entityFormUtils'
 import type { RjsfFormRef } from '../FormStepCard'
-import { DISPLAY_FLOW_ID, fallbackSystemIconName } from '../iconRegistry'
 
-type ConfigStatus = 'idle' | 'loading' | 'error' | 'success'
+// Import sub-hooks
+import { useEntityConfig, type ConfigStatus } from './useEntityConfig'
+import { useFlowNavigation } from './useFlowNavigation'
+import { useSystemSelection } from './useSystemSelection'
+import { useFormManager } from './useFormManager'
 
 export interface UseEntityFlowStateResult {
-  config: EntityConfig | null
+  // Config
+  config: ReturnType<typeof useEntityConfig>['config']
   configStatus: ConfigStatus
   configError: string | null
   handleConfigRetry: () => void
+  categories: CategoryDefinition[]
+  systems: Record<string, SystemDefinition>
+  stepDefinitions?: Record<StepKey, StepDefinition>
+
+  // Flow & Navigation
   flow: FlowId
   flowOptions: FlowOption[]
   handleFlowChange: (value: string) => void
@@ -41,15 +57,15 @@ export interface UseEntityFlowStateResult {
   isCompleted: boolean
   goToPreviousStep: () => void
   handleAdvance: () => void
+  flowDescription?: string
+
+  // System Selection
   selectedSystem: string | null
   selectedSystemConfig: SystemDefinition | null
   handleSystemSelect: (systemId: string) => void
   annotateSystemIcon: (systemId: string, iconName?: string) => void
-  handleTreeSelection: (systemId: string, selection: TreeSelectionList) => void
-  categories: CategoryDefinition[]
-  systems: Record<string, SystemDefinition>
-  stepDefinitions?: Record<StepKey, StepDefinition>
-  flowDescription?: string
+
+  // Form State
   currentFormState: Record<StepKey, unknown>
   formDefinitions: FormDefinitionsState
   formStatus: FormStatusState
@@ -59,517 +75,194 @@ export interface UseEntityFlowStateResult {
   onFormSubmit: (key: StepKey, change: IChangeEvent) => void
   requestFormDefinition: (systemId: string, stepKey: StepKey) => Promise<FormDefinition>
   treeSelection: TreeSelectionList
+  handleTreeSelection: (systemId: string, selection: TreeSelectionList) => void
+
+  // Result
   result: AggregatedResult | null
   resetFlowState: () => void
   nextButtonDisabled: boolean
 }
 
 export function useEntityFlowState(): UseEntityFlowStateResult {
-  const [flow, setFlow] = useState<FlowId>(DISPLAY_FLOW_ID)
-  const [activeStep, setActiveStep] = useState(0)
-  const [selectedSystem, setSelectedSystem] = useState<string | null>(null)
-  const [formState, setFormState] = useState<FormState>({})
   const [result, setResult] = useState<AggregatedResult | null>(null)
 
-  const [config, setConfig] = useState<EntityConfig | null>(null)
-  const [configStatus, setConfigStatus] = useState<ConfigStatus>('idle')
-  const [configError, setConfigError] = useState<string | null>(null)
-  const [configReloadKey, setConfigReloadKey] = useState(0)
+  // ─────────────────────────────────────────────────────────────────────────
+  // Compose Sub-Hooks
+  // ─────────────────────────────────────────────────────────────────────────
 
-  const [formDefinitions, setFormDefinitions] = useState<FormDefinitionsState>({})
-  const [formStatus, setFormStatus] = useState<FormStatusState>({})
-  const [formErrors, setFormErrors] = useState<FormErrorState>({})
+  const entityConfig = useEntityConfig()
 
-  const formRefs = useRef<Record<StepKey, RjsfFormRef | null>>({
-    system: null,
-    general: null,
-    monitor: null,
-    tree: null,
+  const systemSelection = useSystemSelection({
+    config: entityConfig.config,
   })
 
-  const handleConfigRetry = useCallback(() => {
-    setConfigReloadKey((key) => key + 1)
-  }, [])
+  const flowNavigation = useFlowNavigation({
+    config: entityConfig.config,
+    selectedSystem: systemSelection.selectedSystem,
+  })
 
-  useEffect(() => {
-    let cancelled = false
-
-    const loadConfig = async () => {
-      setConfigStatus('loading')
-      setConfigError(null)
-
-      try {
-        const data = await fetchEntityConfig()
-        if (!cancelled) {
-          setConfig(data)
-          setConfigStatus('success')
-        }
-      } catch (error) {
-        if (!cancelled) {
-          setConfigStatus('error')
-          setConfigError(error instanceof Error ? error.message : 'Failed to load configuration')
-        }
+  const formManager = useFormManager({
+    flow: flowNavigation.flow,
+    selectedSystem: systemSelection.selectedSystem,
+    activeStepKey: flowNavigation.activeStepKey,
+    stepKeys: flowNavigation.stepKeys,
+    activeStep: flowNavigation.activeStep,
+    onStepComplete: flowNavigation.goToNextStep,
+    onFinalSubmit: useCallback(() => {
+      const aggregate = buildAggregateResult(
+        flowNavigation.flow,
+        flowNavigation.stepKeys,
+        formManager.currentFormState,
+        systemSelection.selectedSystem
+      )
+      if (aggregate) {
+        setResult(aggregate)
+        flowNavigation.setActiveStep(flowNavigation.stepKeys.length)
       }
-    }
+    }, [flowNavigation.flow, flowNavigation.stepKeys, flowNavigation.setActiveStep, systemSelection.selectedSystem]),
+  })
 
-    loadConfig()
+  // ─────────────────────────────────────────────────────────────────────────
+  // Coordinated Handlers
+  // ─────────────────────────────────────────────────────────────────────────
 
-    return () => {
-      cancelled = true
-    }
-  }, [configReloadKey])
+  /** Handle flow change (resets navigation and system selection) */
+  const handleFlowChange = useCallback((value: string) => {
+    flowNavigation.handleFlowChange(value)
+    systemSelection.clearSystemSelection()
+    setResult(null)
+  }, [flowNavigation, systemSelection])
 
-  useEffect(() => {
-    if (!config) {
-      return
-    }
-
-    if (config.flows[flow]) {
-      return
-    }
-
-    const [firstFlow] = Object.values<FlowDefinition>(config.flows)
-    if (firstFlow) {
-      setFlow(firstFlow.id as FlowId)
-      setActiveStep(0)
-      setSelectedSystem(null)
-    }
-  }, [config, flow])
-
-  const currentFlow = config ? config.flows[flow] ?? null : null
-  const stepKeys = useMemo<StepKey[]>(() => {
-    if (!currentFlow) {
-      return []
-    }
-    if (flow === 'monitor' && selectedSystem === 'general') {
-      return currentFlow.steps.filter((key) => key !== 'monitor')
-    }
-    return currentFlow.steps
-  }, [currentFlow, flow, selectedSystem])
-  const totalSteps = stepKeys.length
-  const isCompleted = currentFlow ? activeStep === totalSteps : false
-  const activeStepKey = useMemo<StepKey | null>(() => {
-    if (isCompleted) {
-      return null
-    }
-    return stepKeys[activeStep] ?? null
-  }, [activeStep, isCompleted, stepKeys])
-
-  useEffect(() => {
-    const stepCount = currentFlow?.steps.length ?? 0
-    if (stepCount && activeStep > stepCount) {
-      setActiveStep(0)
-    }
-  }, [currentFlow, activeStep])
-
-  const ensureFormState = useCallback((systemId: string) => {
-    setFormState((prev) => {
-      if (prev[systemId]) {
-        return prev
-      }
-
-      return {
-        ...prev,
-        [systemId]: createEmptyStepState(),
-      }
+  /** Handle system selection (ensures form state) */
+  const handleSystemSelect = useCallback((systemId: string) => {
+    systemSelection.handleSystemSelect(systemId, () => {
+      formManager.ensureFormState(systemId)
     })
-  }, [])
+    setResult(null)
+  }, [systemSelection, formManager])
 
-  const applyInitialData = useCallback(
-    (systemId: string, stepKey: StepKey, definition: FormDefinition) => {
-      const rawInitialData = definition.initialData
-      const initialData =
-        flow === DISPLAY_FLOW_ID && stepKey === 'general'
-          ? {
-              ...(rawInitialData ?? {}),
-              entityType: 'תצוגה',
-            }
-          : rawInitialData;
-
-      setFormState((prev) => {
-        const existingSystemState = prev[systemId] ?? createEmptyStepState()
-        const currentValue = existingSystemState[stepKey]
-
-        if (!shouldApplyInitialData(currentValue, initialData)) {
-          return prev
-        }
-
-        return {
-          ...prev,
-          [systemId]: {
-            ...existingSystemState,
-            [stepKey]: initialData,
-          },
-        }
-      })
-    },
-    [flow]
-  )
-
-  const requestFormDefinition = useCallback(
-    async (systemId: string, stepKey: StepKey) => {
-      ensureFormState(systemId)
-
-      setFormStatus((prev) => ({
-        ...prev,
-        [systemId]: {
-          ...prev[systemId],
-          [stepKey]: 'loading',
-        },
-      }))
-      setFormErrors((prev) => ({
-        ...prev,
-        [systemId]: {
-          ...prev[systemId],
-          [stepKey]: undefined,
-        },
-      }))
-
-      try {
-        const definition = await fetchFormDefinition(systemId, stepKey)
-        setFormDefinitions((prev) => ({
-          ...prev,
-          [systemId]: {
-            ...prev[systemId],
-            [stepKey]: definition,
-          },
-        }))
-        setFormStatus((prev) => ({
-          ...prev,
-          [systemId]: {
-            ...prev[systemId],
-            [stepKey]: 'success',
-          },
-        }))
-        applyInitialData(systemId, stepKey, definition)
-        return definition
-      } catch (error) {
-        setFormStatus((prev) => ({
-          ...prev,
-          [systemId]: {
-            ...prev[systemId],
-            [stepKey]: 'error',
-          },
-        }))
-        setFormErrors((prev) => ({
-          ...prev,
-          [systemId]: {
-            ...prev[systemId],
-            [stepKey]: error instanceof Error ? error.message : 'Failed to load form definition',
-          },
-        }))
-        throw error
-      }
-    },
-    [applyInitialData, ensureFormState]
-  )
-
-  useEffect(() => {
-    if (!selectedSystem || !activeStepKey || activeStepKey === 'system' || activeStepKey === 'tree') {
-      return
-    }
-
-    const definition = formDefinitions[selectedSystem]?.[activeStepKey]
-    const status: FormStatus | undefined = formStatus[selectedSystem]?.[activeStepKey]
-
-    if (definition || status === 'loading') {
-      return
-    }
-
-    requestFormDefinition(selectedSystem, activeStepKey).catch(() => {
-      // error handled via state
-    })
-  }, [activeStepKey, formDefinitions, formStatus, requestFormDefinition, selectedSystem])
-
-  useEffect(() => {
-    if (!selectedSystem || !activeStepKey || activeStepKey === 'system' || activeStepKey === 'tree') {
-      return
-    }
-
-    const definition = formDefinitions[selectedSystem]?.[activeStepKey]
-    if (definition) {
-      applyInitialData(selectedSystem, activeStepKey, definition)
-    }
-  }, [activeStepKey, applyInitialData, formDefinitions, selectedSystem])
-
-  const goToNextStep = useCallback(() => {
-    setActiveStep((step) => {
-      const next = step + 1
-      return Math.min(next, stepKeys.length)
-    })
-  }, [stepKeys.length])
-
-  const goToPreviousStep = useCallback(() => {
-    setActiveStep((step) => Math.max(step - 1, 0))
-  }, [])
-
-  const selectedSystemConfig = useMemo<SystemDefinition | null>(() => {
-    if (!selectedSystem || !config) {
-      return null
-    }
-    return config.systems[selectedSystem] ?? null
-  }, [config, selectedSystem])
-  const currentFormState = useMemo(() => {
-    if (!selectedSystem) {
-      return createEmptyStepState()
-    }
-    return formState[selectedSystem] ?? createEmptyStepState()
-  }, [formState, selectedSystem])
-  const treeSelection = useMemo<TreeSelectionList>(() => {
-    if (!selectedSystem) {
-      return []
-    }
-    const treeState = (formState[selectedSystem] ?? createEmptyStepState()).tree
-    if (Array.isArray(treeState)) {
-      return treeState.filter(
-        (item) => item && typeof item.vid === 'string' && typeof item.displayName === 'string'
-      ) as TreeSelectionList
-    }
-    return []
-  }, [formState, selectedSystem])
-  const canMoveNext = Boolean(selectedSystem)
-
-  const aggregateResult = useCallback(() => {
-    return buildAggregateResult(flow, stepKeys, currentFormState, selectedSystem)
-  }, [currentFormState, flow, selectedSystem, stepKeys])
-
-  const handleCreate = useCallback(() => {
-    const aggregate = aggregateResult()
-    if (!aggregate) {
-      return
-    }
-
-    setResult(aggregate)
-    setActiveStep(stepKeys.length)
-  }, [aggregateResult, stepKeys.length])
-
+  /** Handle "Next" button click */
   const handleAdvance = useCallback(() => {
-    if (!stepKeys.length) {
-      return
+    const { stepKeys, activeStep, goToNextStep, isCompleted } = flowNavigation
+    const { selectedSystem, treeSelection, getFormRef } = { 
+      selectedSystem: systemSelection.selectedSystem,
+      treeSelection: formManager.treeSelection,
+      getFormRef: formManager.getFormRef,
     }
+
+    if (!stepKeys.length || isCompleted) return
 
     const currentKey = stepKeys[activeStep]
-    if (!currentKey) {
-      return
-    }
+    if (!currentKey) return
 
-    if (currentKey === 'system' && !canMoveNext) {
-      return
-    }
+    // Validation: system step requires selection
+    if (currentKey === 'system' && !selectedSystem) return
 
-    if (currentKey === 'tree' && treeSelection.length === 0) {
-      return
-    }
+    // Validation: tree step requires at least one selection
+    if (currentKey === 'tree' && treeSelection.length === 0) return
 
-    const formRef = formRefs.current[currentKey]
+    const formRef = getFormRef(currentKey)
 
     if (formRef && typeof formRef.submit === 'function') {
       formRef.submit()
     } else if (activeStep === stepKeys.length - 1) {
-      handleCreate()
+      // Final step - trigger submission
+      const aggregate = buildAggregateResult(
+        flowNavigation.flow,
+        stepKeys,
+        formManager.currentFormState,
+        selectedSystem
+      )
+      if (aggregate) {
+        setResult(aggregate)
+        flowNavigation.setActiveStep(stepKeys.length)
+      }
     } else {
       goToNextStep()
     }
-  }, [activeStep, canMoveNext, goToNextStep, handleCreate, stepKeys, treeSelection])
+  }, [flowNavigation, systemSelection.selectedSystem, formManager])
 
-  const resetRefs = useCallback(() => {
-    formRefs.current = {
-      system: null,
-      general: null,
-      monitor: null,
-      tree: null,
-    }
-  }, [])
-
+  /** Reset all flow state */
   const resetFlowState = useCallback(() => {
-    setActiveStep(0)
-    setSelectedSystem(null)
+    flowNavigation.resetNavigation()
+    systemSelection.clearSystemSelection()
+    formManager.resetFormState()
+    formManager.resetFormRefs()
     setResult(null)
-    setFormState({})
-    resetRefs()
-  }, [resetRefs])
+  }, [flowNavigation, systemSelection, formManager])
 
-  const handleFlowChange = useCallback((value: string) => {
-    const nextFlow = value as FlowId
-    setFlow(nextFlow)
-    setActiveStep(0)
-    setResult(null)
-    setSelectedSystem(null)
-  }, [])
+  // ─────────────────────────────────────────────────────────────────────────
+  // Derived State
+  // ─────────────────────────────────────────────────────────────────────────
 
-  const handleSystemSelect = useCallback(
-    (systemId: string) => {
-      setSelectedSystem(systemId)
-      ensureFormState(systemId)
-      setResult(null)
-    },
-    [ensureFormState]
-  )
+  const canMoveNext = Boolean(systemSelection.selectedSystem)
 
-  const annotateSystemIcon = useCallback((systemId: string, iconName?: string) => {
-    setFormState((prev) => {
-      const existingState = prev[systemId] ?? createEmptyStepState()
-      const currentSystemState =
-        typeof existingState.system === 'object' && existingState.system !== null
-          ? (existingState.system as Record<string, unknown>)
-          : {}
-
-      return {
-        ...prev,
-        [systemId]: {
-          ...existingState,
-          system: {
-            ...currentSystemState,
-            icon: iconName ?? fallbackSystemIconName,
-          },
-        },
-      }
-    })
-  }, [])
-
-  const handleTreeSelection = useCallback(
-    (systemId: string, selection: TreeSelectionList) => {
-      ensureFormState(systemId)
-      setFormState((prev) => {
-        const existingState = prev[systemId] ?? createEmptyStepState()
-        return {
-          ...prev,
-          [systemId]: {
-            ...existingState,
-            tree: selection,
-          },
-        }
-      })
-    },
-    [ensureFormState]
-  )
-
-  const onFormChange = useCallback((systemId: string, key: StepKey, change: IChangeEvent) => {
-    applyFormChange(setFormState, systemId, key, change)
-  }, [])
-
-  const onFormSubmit = useCallback(
-    (key: StepKey, change: IChangeEvent) => {
-      if (!selectedSystem) {
-        return
-      }
-
-      applyFormChange(setFormState, selectedSystem, key, change)
-
-      if (stepKeys[activeStep] === key) {
-        if (activeStep === stepKeys.length - 1) {
-          handleCreate()
-        } else {
-          goToNextStep()
-        }
-      }
-    },
-    [activeStep, goToNextStep, handleCreate, selectedSystem, stepKeys]
-  )
-
-  const attachFormRef = useCallback((key: StepKey, ref: RjsfFormRef | null) => {
-    formRefs.current[key] = ref
-  }, [])
-
-  const flowOptions = useMemo<FlowOption[]>(() => {
-    if (!config) {
-      return []
-    }
-
-    return Object.values<FlowDefinition>(config.flows).map((item) => ({
-      label: item.label,
-      value: item.id,
-    }))
-  }, [config])
-
-  const categories = useMemo(
-    () => (config?.categories ?? []) as CategoryDefinition[],
-    [config]
-  )
-  const systems = useMemo(
-    () => (config?.systems ?? {}) as Record<string, SystemDefinition>,
-    [config]
-  )
-  const stepDefinitions = useMemo(() => config?.steps, [config])
-  const flowDescription = useMemo(() => currentFlow?.description?.trim(), [currentFlow])
   const nextButtonDisabled =
-    (activeStepKey === 'system' && !canMoveNext) ||
-    (activeStepKey === 'tree' && treeSelection.length === 0) ||
-    (activeStepKey !== null &&
-      activeStepKey !== 'system' &&
-      selectedSystem !== null &&
-      formStatus[selectedSystem]?.[activeStepKey] === 'loading')
+    (flowNavigation.activeStepKey === 'system' && !canMoveNext) ||
+    (flowNavigation.activeStepKey === 'tree' && formManager.treeSelection.length === 0) ||
+    (flowNavigation.activeStepKey !== null &&
+      flowNavigation.activeStepKey !== 'system' &&
+      systemSelection.selectedSystem !== null &&
+      formManager.formStatus[systemSelection.selectedSystem]?.[flowNavigation.activeStepKey] === 'loading')
 
-  // Memoize the full controller shape to prevent unnecessary downstream re-renders
+  // ─────────────────────────────────────────────────────────────────────────
+  // Return Controller Object
+  // ─────────────────────────────────────────────────────────────────────────
+
   return useMemo<UseEntityFlowStateResult>(
     () => ({
-      config,
-      configStatus,
-      configError,
-      handleConfigRetry,
-      flow,
-      flowOptions,
+      // Config
+      config: entityConfig.config,
+      configStatus: entityConfig.configStatus,
+      configError: entityConfig.configError,
+      handleConfigRetry: entityConfig.handleConfigRetry,
+      categories: entityConfig.categories,
+      systems: entityConfig.systems,
+      stepDefinitions: entityConfig.stepDefinitions,
+
+      // Flow & Navigation
+      flow: flowNavigation.flow,
+      flowOptions: flowNavigation.flowOptions,
       handleFlowChange,
-      stepKeys,
-      activeStep,
-      activeStepKey,
-      isCompleted,
-      goToPreviousStep,
+      stepKeys: flowNavigation.stepKeys,
+      activeStep: flowNavigation.activeStep,
+      activeStepKey: flowNavigation.activeStepKey,
+      isCompleted: flowNavigation.isCompleted,
+      goToPreviousStep: flowNavigation.goToPreviousStep,
       handleAdvance,
-      selectedSystem,
-      selectedSystemConfig,
+      flowDescription: flowNavigation.flowDescription,
+
+      // System Selection
+      selectedSystem: systemSelection.selectedSystem,
+      selectedSystemConfig: systemSelection.selectedSystemConfig,
       handleSystemSelect,
-      annotateSystemIcon,
-      handleTreeSelection,
-      categories,
-      systems,
-      stepDefinitions,
-      flowDescription,
-      currentFormState,
-      formDefinitions,
-      formStatus,
-      formErrors,
-      attachFormRef,
-      onFormChange,
-      onFormSubmit,
-      requestFormDefinition,
-      treeSelection,
+      annotateSystemIcon: formManager.annotateSystemIcon,
+
+      // Form State
+      currentFormState: formManager.currentFormState,
+      formDefinitions: formManager.formDefinitions,
+      formStatus: formManager.formStatus,
+      formErrors: formManager.formErrors,
+      attachFormRef: formManager.attachFormRef,
+      onFormChange: formManager.onFormChange,
+      onFormSubmit: formManager.onFormSubmit,
+      requestFormDefinition: formManager.requestFormDefinition,
+      treeSelection: formManager.treeSelection,
+      handleTreeSelection: formManager.handleTreeSelection,
+
+      // Result
       result,
       resetFlowState,
       nextButtonDisabled,
     }),
     [
-      config,
-      configStatus,
-      configError,
-      handleConfigRetry,
-      flow,
-      flowOptions,
+      entityConfig,
+      flowNavigation,
       handleFlowChange,
-      stepKeys,
-      activeStep,
-      activeStepKey,
-      isCompleted,
-      goToPreviousStep,
       handleAdvance,
-      selectedSystem,
-      selectedSystemConfig,
+      systemSelection,
       handleSystemSelect,
-      annotateSystemIcon,
-      handleTreeSelection,
-      categories,
-      systems,
-      stepDefinitions,
-      flowDescription,
-      currentFormState,
-      formDefinitions,
-      formStatus,
-      formErrors,
-      attachFormRef,
-      onFormChange,
-      onFormSubmit,
-      requestFormDefinition,
-      treeSelection,
+      formManager,
       result,
       resetFlowState,
       nextButtonDisabled,
