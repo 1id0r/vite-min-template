@@ -19,8 +19,11 @@ CreateEntityModal/
 │   ├── useFlowNavigation.ts     # Flow & step navigation (~140 lines)
 │   ├── useSystemSelection.ts    # System selection (~55 lines)
 │   └── useFormManager.ts        # Form state management (~300 lines)
-├── CreateEntityModal.tsx         # Main component (Modal wrapper)
-├── EntityFlowContent.tsx         # Flow content and step rendering
+├── stepRegistry.ts              # Step configuration registry (~140 lines)
+├── StepRenderer.tsx             # Dynamic step renderer (~310 lines)
+├── FlowSelector.tsx             # Flow type selector (~75 lines)
+├── EntityFlowContent.tsx        # Main content container (~175 lines)
+├── CreateEntityModal.tsx        # Modal wrapper
 ├── FlowStepper.tsx              # Progress stepper UI
 ├── FormStepCard.tsx             # RJSF form wrapper
 ├── SystemStep.tsx               # System/template selection step
