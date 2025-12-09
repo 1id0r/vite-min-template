@@ -6,11 +6,15 @@ GENERAL_FORM_DEFINITION = {
         "type": "object",
         "required": ["displayName", "description", "entityType"],
         "properties": {
-            "displayName": {"type": "string", "title": "שם תצוגה"},
+            "displayName": {"type": "string", "title": "שם תצוגה", "maxLength": 50},
             "entityType": {"type": "string", "title": "סוג יישות", "readOnly": True},
-            "description": {"type": "string", "title": "תיאור"},
-            "contactInfo": {"type": "string", "title": "פרטי התקשרות"},
-            "responsibleParty": {"type": "string", "title": "גורם אחראי"},
+            "description": {"type": "string", "title": "תיאור", "maxLength": 200},
+            "contactInfo": {
+                "type": "string",
+                "title": "פרטי התקשרות",
+                "pattern": "^[0-9\\-+()\\s]*$"
+            },
+            "responsibleParty": {"type": "string", "title": "גורם אחראי", "maxLength": 50},
             "links": {
                 "type": "array",
                 "title": "",
@@ -19,8 +23,8 @@ GENERAL_FORM_DEFINITION = {
                     "type": "object",
                     "required": [],
                     "properties": {
-                        "label": {"type": "string", "title": "שם תצוגה"},
-                        "url": {"type": "string", "title": "לינק"},
+                        "label": {"type": "string", "title": "שם תצוגה", "maxLength": 30},
+                        "url": {"type": "string", "title": "לינק", "format": "uri"},
                     },
                 },
             },

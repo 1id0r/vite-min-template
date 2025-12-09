@@ -173,10 +173,11 @@ export function TreeStep({ selection, onSelectionChange }: TreeStepProps) {
             variant='subtle'
             radius='xl'
             color='indigo'
+            size='lg'
             onClick={handleExpandToggle}
             aria-label={isOpen ? 'Collapse' : 'Expand'}
           >
-            <Text fw={700} size='sm'>
+            <Text fw={700} size='lg'>
               {isOpen ? '▾' : '▸'}
             </Text>
           </ActionIcon>
@@ -198,10 +199,11 @@ export function TreeStep({ selection, onSelectionChange }: TreeStepProps) {
               variant={isSelected ? 'filled' : 'light'}
               color='indigo'
               radius='xl'
+              size='lg'
               aria-label={isSelected ? 'Remove from selection' : 'Add to selection'}
               onClick={() => toggleSelection(node)}
             >
-              <Text fw={800} size='sm'>
+              <Text fw={800} size='lg'>
                 {isSelected ? '-' : '+'}
               </Text>
             </ActionIcon>
@@ -253,7 +255,7 @@ export function TreeStep({ selection, onSelectionChange }: TreeStepProps) {
         </Text>
         <Paper withBorder radius='md' p='sm'>
           {selection.length === 0 ? (
-            <Text size='sm' c='dimmed'>
+            <Text size='xs' c='dimmed'>
               הוסיפו פריטים באמצעות הסימן +
             </Text>
           ) : (
