@@ -59,7 +59,7 @@ const FormObjectFieldTemplate = (props: ObjectFieldTemplateProps) => {
 
   return (
     <>
-      <Stack gap='sm' align='flex-end'>
+      <Stack gap='sm' align='stretch'>
         {title && (
           <Text fw={600} size='sm'>
             {title}
@@ -83,8 +83,9 @@ const FormObjectFieldTemplate = (props: ObjectFieldTemplateProps) => {
             const uiSchema = (contentProps.uiSchema ?? meta.uiSchema ?? {}) as UiSchema
             const options = (uiSchema['ui:options'] ?? {}) as Record<string, unknown>
             const spanOption = typeof options.colSpan === 'number' ? options.colSpan : undefined
+            const isInnerLinkField = property.name === 'label' || property.name === 'url'
             const shouldFull = shouldSpanFullWidth(schema, uiSchema)
-            const desiredSpan = spanOption ?? (shouldFull ? 12 : 6)
+            const desiredSpan = isInnerLinkField ? 6 : spanOption ?? (shouldFull ? 12 : 6)
             const span = Math.min(12, Math.max(1, desiredSpan))
 
             return (
