@@ -146,7 +146,7 @@ export function EntityFlowContent({ controller, onClose }: EntityFlowContentProp
       {!isCompleted && (
         <Box style={{ flexShrink: 0 }}>
           <Divider />
-          <Group dir='rtl' justify='space-between' style={{ paddingTop: 16 }}>
+          <Group justify='space-between' style={{ paddingTop: 16 }}>
             <Button variant='default' onClick={goToPreviousStep} disabled={activeStep === 0}>
               חזור
             </Button>

@@ -18,7 +18,7 @@ export function CreateEntityModal() {
   return (
     <>
       <Button onClick={handleOpen}>Create entity</Button>
-      <Modal opened={opened} onClose={handleClose} title='Create new entity' size='xl' radius='md'>
+      <Modal opened={opened} onClose={handleClose} title='יצירת יישות חדשה' size='xl' radius='md'>
         <EntityFlowContent controller={controller} onClose={handleClose} />
       </Modal>
     </>

@@ -217,7 +217,7 @@ export function TreeStep({ selection, onSelectionChange }: TreeStepProps) {
               marginTop: 8,
               paddingRight: 16,
               borderRight: '2px solid #e9ecef',
-              direction: 'rtl',
+              direction: 'ltr',
             }}
           >
             {node.children.map((c) => (

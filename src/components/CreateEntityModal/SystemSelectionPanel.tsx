@@ -67,7 +67,7 @@ export const SystemSelectionPanel = memo(function SystemSelectionPanel({
   )
 
   return (
-    <Group align='flex-start' justify='space-between' gap='xl' wrap='nowrap'>
+    <Group align='flex-start' dir='ltr' justify='space-between' gap='xl' wrap='nowrap'>
       <Stack gap='xs' style={{ flex: 1 }}>
         <Text size='sm' c='dimmed'>
           {selectedSystemConfig ? selectedSystemConfig.description : 'בחר מערכת כדי להמשיך'}
@@ -93,7 +93,7 @@ export const SystemSelectionPanel = memo(function SystemSelectionPanel({
                 label: {
                   flex: 1,
                   display: 'flex',
-                  justifyContent: 'flex-end',
+                  justifyContent: 'flex-start',
                   alignItems: 'center',
                   gap: theme.spacing.xs,
                 },
@@ -164,7 +164,7 @@ export const SystemSelectionPanel = memo(function SystemSelectionPanel({
         </Stack>
 
         {selectedSystemLabel && (
-          <Text size='sm' dir='rtl' fw={600} c='rgb(11, 95, 255)'>
+          <Text size='sm' dir='ltr' fw={600} c='rgb(11, 95, 255)'>
             יישות נבחרת: {selectedSystemLabel}
           </Text>
         )}

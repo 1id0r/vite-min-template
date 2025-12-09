@@ -191,7 +191,7 @@ const SystemStepRenderer = memo(function SystemStepRenderer(props: SystemStepRen
     <Stack gap='lg'>
       {showFlowSelector && (
         <Stack gap={6}>
-          <Box dir='rtl'>
+          <Box>
             <Text size='sm' fw={700} c='gray.8'>
               בחירת יישות{' '}
               <Text component='span' c='red.6'>

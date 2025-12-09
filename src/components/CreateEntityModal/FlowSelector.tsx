@@ -30,9 +30,8 @@ export const FlowSelector = memo(function FlowSelector({
   const getButtonHandler = useCallback((value: string) => () => onFlowChange(value), [onFlowChange])
 
   return (
-    <Stack gap={4} align='flex-end'>
+    <Stack gap={4} align='flex-start'>
       <Box
-        dir='rtl'
         style={{
           display: 'flex',
           border: '1px solid #E5E7EB',
