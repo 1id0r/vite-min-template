@@ -1,4 +1,4 @@
-import type { RJSFSchema, UiSchema } from "@rjsf/utils";
+import type { z } from 'zod'
 
 export type StepKey = "system" | "general" | "monitor" | "tree";
 
@@ -8,8 +8,7 @@ export interface StepDefinition {
 }
 
 export interface FormDefinition {
-  schema: RJSFSchema;
-  uiSchema?: UiSchema;
+  schema: z.ZodObject<any>;
   initialData?: Record<string, unknown>;
 }
 

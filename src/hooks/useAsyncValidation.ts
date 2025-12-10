@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useState } from 'react'
-import type { ErrorSchema } from '@rjsf/utils'
 import { request } from '../api/client'
+
+// Custom error schema type (replacing RJSF ErrorSchema)
+type CustomErrorSchema = Record<string, { __errors: string[] }>
 
 export type AsyncValidationStatus = 'idle' | 'loading' | 'success' | 'error'
 
@@ -150,13 +152,13 @@ export function useAsyncValidation(
     }
   }, [configSignature, formData, configs])
 
-  const extraErrors = useMemo<ErrorSchema>(() => {
-    const schema: ErrorSchema = {}
+  const extraErrors = useMemo<CustomErrorSchema>(() => {
+    const schema: CustomErrorSchema = {}
     Object.entries(fieldState).forEach(([field, meta]) => {
       if (meta.message) {
         schema[field] = {
           __errors: [meta.message],
-        } as ErrorSchema
+        }
       }
     })
     return schema

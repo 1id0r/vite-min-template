@@ -1,4 +1,4 @@
-import type { EntityConfig, FormDefinition, StepKey } from "../types/entity";
+import type { EntityConfig } from "../types/entity";
 import type { ApiTreeNode } from "../types/tree";
 
 const DEFAULT_BASE_URL = "http://127.0.0.1:8000";
@@ -39,13 +39,6 @@ export async function request<T>(path: string, init?: RequestInit): Promise<T> {
 
 export async function fetchEntityConfig(): Promise<EntityConfig> {
   return request<EntityConfig>("/config");
-}
-
-export async function fetchFormDefinition(
-  systemId: string,
-  stepKey: StepKey
-): Promise<FormDefinition> {
-  return request<FormDefinition>(`/systems/${systemId}/forms/${stepKey}`);
 }
 
 export async function fetchOwningTeams(): Promise<string[]> {

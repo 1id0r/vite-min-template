@@ -1,5 +1,4 @@
 import type React from 'react'
-import type { IChangeEvent } from '@rjsf/core'
 import type { FormDefinition, StepKey } from '../../types/entity'
 import type { AggregatedResult, FlowId, FormStatus } from './types'
 
@@ -47,17 +46,18 @@ export const buildAggregateResult = (
   }
 }
 
-export const applyFormChange = (
+/** Apply form data change (used with React Hook Form) */
+export const applyFormDataChange = (
   setFormState: React.Dispatch<React.SetStateAction<FormState>>,
   systemId: string,
   key: StepKey,
-  change: IChangeEvent
+  data: unknown
 ) => {
   setFormState((prev) => ({
     ...prev,
     [systemId]: {
       ...(prev[systemId] ?? {}),
-      [key]: change.formData,
+      [key]: data,
     },
   }))
 }

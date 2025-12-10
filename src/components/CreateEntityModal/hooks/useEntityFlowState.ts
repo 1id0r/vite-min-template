@@ -18,7 +18,6 @@
  */
 
 import { useCallback, useMemo, useState } from 'react'
-import type { IChangeEvent } from '@rjsf/core'
 import type {
   CategoryDefinition,
   FormDefinition,
@@ -26,10 +25,11 @@ import type {
   StepKey,
   SystemDefinition,
 } from '../../../types/entity'
-import type { AggregatedResult, FlowId, FlowOption } from '../types'
 import type { TreeSelectionList } from '../../../types/tree'
+import type { AggregatedResult, FlowId, FlowOption } from '../types'
+import type { UseFormManagerResult } from './useFormManager'
 import { buildAggregateResult, type FormDefinitionsState, type FormErrorState, type FormStatusState } from '../entityFormUtils'
-import type { RjsfFormRef } from '../FormStepCard'
+import type { FormStepRef } from '../FormStepCard'
 
 // Import sub-hooks
 import { useEntityConfig, type ConfigStatus } from './useEntityConfig'
@@ -66,13 +66,13 @@ export interface UseEntityFlowStateResult {
   annotateSystemIcon: (systemId: string, iconName?: string) => void
 
   // Form State
-  currentFormState: Record<StepKey, unknown>
+  currentFormState: ReturnType<typeof useFormManager>['currentFormState']
   formDefinitions: FormDefinitionsState
   formStatus: FormStatusState
   formErrors: FormErrorState
-  attachFormRef: (key: StepKey, ref: RjsfFormRef | null) => void
-  onFormChange: (systemId: string, key: StepKey, change: IChangeEvent) => void
-  onFormSubmit: (key: StepKey, change: IChangeEvent) => void
+  attachFormRef: (key: StepKey, ref: FormStepRef | null) => void
+  onFormChange: UseFormManagerResult['onFormChange']
+  onFormSubmit: UseFormManagerResult['onFormSubmit']
   requestFormDefinition: (systemId: string, stepKey: StepKey) => Promise<FormDefinition>
   treeSelection: TreeSelectionList
   handleTreeSelection: (systemId: string, selection: TreeSelectionList) => void
@@ -104,6 +104,7 @@ export function useEntityFlowState(): UseEntityFlowStateResult {
   const formManager = useFormManager({
     flow: flowNavigation.flow,
     selectedSystem: systemSelection.selectedSystem,
+    systems: entityConfig.systems,
     activeStepKey: flowNavigation.activeStepKey,
     stepKeys: flowNavigation.stepKeys,
     activeStep: flowNavigation.activeStep,
@@ -163,10 +164,28 @@ export function useEntityFlowState(): UseEntityFlowStateResult {
 
     const formRef = getFormRef(currentKey)
 
-    if (formRef && typeof formRef.submit === 'function') {
-      formRef.submit()
+    // For form steps (general, monitor)
+    if (currentKey === 'general' || currentKey === 'monitor') {
+      if (formRef && typeof formRef.handleSubmit === 'function') {
+        // Trigger React Hook Form submission with validation
+        formRef.handleSubmit(
+          // Success callback - only runs if validation passes
+          (data) => {
+            // onFormSubmit already handles step advancement, so we don't call goToNextStep here
+            formManager.onFormSubmit(currentKey, data)
+          },
+          // Error callback - runs if validation fails
+          (errors) => {
+            console.log('Form validation failed:', errors)
+            // Do nothing - stay on current step
+          }
+        )()
+      } else {
+        // Form ref not attached yet - don't advance
+        console.warn(`Form ref not attached for step: ${currentKey}`)
+      }
     } else if (activeStep === stepKeys.length - 1) {
-      // Final step - trigger submission
+      // Final step (tree) - trigger submission for non-form steps
       const aggregate = buildAggregateResult(
         flowNavigation.flow,
         stepKeys,
@@ -178,6 +197,7 @@ export function useEntityFlowState(): UseEntityFlowStateResult {
         flowNavigation.setActiveStep(stepKeys.length)
       }
     } else {
+      // Non-form step (system, tree) - just advance
       goToNextStep()
     }
   }, [flowNavigation, systemSelection.selectedSystem, formManager])

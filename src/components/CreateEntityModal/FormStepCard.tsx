@@ -1,148 +1,22 @@
-import { useMemo, type ReactElement } from 'react'
-import { Alert, Box, Button, Center, Grid, Group, Loader, Paper, Stack, Text } from '@mantine/core'
-import FormComponent, { withTheme, type IChangeEvent } from '@rjsf/core'
-import { Theme as MantineTheme } from '@rjsf/mantine'
-import validator from '@rjsf/validator-ajv8'
-import type { ObjectFieldTemplateProps, RJSFSchema, UiSchema } from '@rjsf/utils'
+import { useEffect } from 'react'
+import { Alert, Box, Button, Center, Grid, Loader, Paper, Stack, Text } from '@mantine/core'
+import { useForm, type UseFormReturn } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
 import type { FormDefinition } from '../../types/entity'
-import { AsyncSelectWidget } from '../form-widgets/AsyncSelectWidget'
 import type { FormStatus } from './types'
-import {
-  useAsyncValidation,
-  type AsyncValidationFieldConfig,
-  type AsyncValidationStatus,
-} from '../../hooks/useAsyncValidation'
+import { FormField } from '../FormFields/FormField'
+import type { FormFieldsConfig } from '../../schemas/fieldConfigs'
 
-const RjsfForm = withTheme(MantineTheme)
-
-export type RjsfFormRef = InstanceType<typeof FormComponent>
-
-const shouldSpanFullWidth = (schema: RJSFSchema, uiSchema: UiSchema) => {
-  const typeValue = schema.type
-  const types = Array.isArray(typeValue) ? typeValue : typeValue ? [typeValue] : []
-  const widget = uiSchema['ui:widget']
-  const options = (uiSchema['ui:options'] ?? {}) as Record<string, unknown>
-  const colSpanOption = options.colSpan
-
-  if (typeof colSpanOption === 'number') {
-    return colSpanOption >= 12
-  }
-
-  if (widget === 'textarea') {
-    return true
-  }
-
-  if (types.includes('array') || types.includes('object')) {
-    return true
-  }
-
-  return false
-}
-
-type TemplatePropsWithContext = ObjectFieldTemplateProps & {
-  formContext?: {
-    asyncValidationStatus?: Record<string, AsyncValidationStatus>
-  }
-}
-
-type FieldContentProps = {
-  schema?: RJSFSchema
-  uiSchema?: UiSchema
-}
-
-const FormObjectFieldTemplate = (props: ObjectFieldTemplateProps) => {
-  const { properties, title, description } = props
-  const formContext = (props as TemplatePropsWithContext).formContext
-  const asyncStatusMap = (formContext?.asyncValidationStatus ?? {}) as Record<string, AsyncValidationStatus>
-  const visible = properties.filter((property) => !property.hidden)
-  const hidden = properties.filter((property) => property.hidden)
-
-  return (
-    <>
-      <Stack gap='sm' align='stretch'>
-        {title && (
-          <Text fw={600} size='sm'>
-            {title}
-          </Text>
-        )}
-        {description && (
-          <Text size='sm' c='dimmed'>
-            {description}
-          </Text>
-        )}
-        <Grid gutter='md'>
-          {visible.map((property) => {
-            type PropertyMeta = {
-              schema?: RJSFSchema
-              uiSchema?: UiSchema
-            }
-            const meta = property as PropertyMeta
-            const contentProps =
-              ((property.content as ReactElement<FieldContentProps>)?.props as FieldContentProps | undefined) ?? {}
-            const schema = (contentProps.schema ?? meta.schema ?? {}) as RJSFSchema
-            const uiSchema = (contentProps.uiSchema ?? meta.uiSchema ?? {}) as UiSchema
-            const options = (uiSchema['ui:options'] ?? {}) as Record<string, unknown>
-            const spanOption = typeof options.colSpan === 'number' ? options.colSpan : undefined
-            const isInnerLinkField = property.name === 'label' || property.name === 'url'
-            const shouldFull = shouldSpanFullWidth(schema, uiSchema)
-            const desiredSpan = isInnerLinkField ? 6 : spanOption ?? (shouldFull ? 12 : 6)
-            const span = Math.min(12, Math.max(1, desiredSpan))
-
-            return (
-              <Grid.Col key={property.name} span={{ base: 12, sm: span }}>
-                <Stack gap={4}>
-                  {property.content}
-                  {asyncStatusMap[property.name] === 'loading' && (
-                    <Group justify='flex-end' gap='xs'>
-                      <Loader size='xs' />
-                      <Text size='xs' c='dimmed'>
-                        בודק זמינות...
-                      </Text>
-                    </Group>
-                  )}
-                </Stack>
-              </Grid.Col>
-            )
-          })}
-        </Grid>
-      </Stack>
-      {hidden.map((property) => (
-        <Box key={property.name} style={{ display: 'none' }}>
-          {property.content}
-        </Box>
-      ))}
-    </>
-  )
-}
-
-const formWidgets = {
-  AsyncSelect: AsyncSelectWidget,
-}
-
-const HiddenErrorList = () => null
-
-const ArrayFieldTitle = ({ title }: { title?: string }) => {
-  if (!title || title.toLowerCase() === 'links') {
-    return null
-  }
-
-  return (
-    <div style={{ width: '100%', display: 'flex', justifyContent: 'flex-end' }}>
-      <Text fw={600} size='sm'>
-        {title}
-      </Text>
-    </div>
-  )
-}
+export type FormStepRef = UseFormReturn<any>
 
 interface FormStepCardProps {
   status?: FormStatus
   definition?: FormDefinition
+  fieldConfig?: FormFieldsConfig
   error?: string
   formData: unknown
-  attachRef: (ref: RjsfFormRef | null) => void
-  onChange: (change: IChangeEvent) => void
-  onSubmit: (change: IChangeEvent) => void
+  attachRef: (ref: FormStepRef | null) => void
+  onChange: (data: unknown) => void
   onRetry: () => void
   fullHeight?: boolean
 }
@@ -150,18 +24,14 @@ interface FormStepCardProps {
 export function FormStepCard({
   status,
   definition,
+  fieldConfig,
   error,
   formData,
   attachRef,
   onChange,
-  onSubmit,
   onRetry,
   fullHeight = false,
 }: FormStepCardProps) {
-  const asyncConfigs = useMemo(() => extractAsyncValidationConfigs(definition?.uiSchema), [definition?.uiSchema])
-  const stepFormData = (formData as Record<string, unknown>) ?? undefined
-  const { extraErrors, statusMap } = useAsyncValidation(stepFormData, asyncConfigs)
-
   const containerStyle = fullHeight
     ? {
         height: '100%',
@@ -170,16 +40,37 @@ export function FormStepCard({
       }
     : {}
 
-  const combinedUiSchema = useMemo(
-    () => ({
-      'ui:submitButtonOptions': {
-        norender: true,
-      },
-      ...(definition?.uiSchema ?? {}),
-    }),
-    [definition?.uiSchema]
-  )
-  const formContextValue = useMemo(() => ({ asyncValidationStatus: statusMap }), [statusMap])
+  // Initialize form with schema and resolver
+  const form = useForm({
+    resolver: definition?.schema ? zodResolver(definition.schema) : undefined,
+    defaultValues: formData ?? definition?.initialData ?? {},
+    mode: 'onSubmit', // Only validate when user submits
+    reValidateMode: 'onChange', // Re-validate on change after first submit
+  })
+
+  const { control, watch, reset } = form
+
+  // Attach form ref for parent access
+  useEffect(() => {
+    attachRef(form)
+    return () => attachRef(null)
+  }, [form, attachRef])
+
+  // Watch form values and notify parent using watch's callback (avoids render loop)
+  useEffect(() => {
+    const subscription = watch((value) => {
+      onChange(value)
+    })
+    return () => subscription.unsubscribe()
+  }, [watch, onChange])
+
+  // Reset form only when schema/definition changes (not when formData changes from user input)
+  // This prevents reset loops while still allowing external data updates
+  useEffect(() => {
+    if (definition) {
+      reset(formData ?? definition.initialData ?? {})
+    }
+  }, [definition?.schema, reset]) // Only depend on schema, not formData
 
   if (status === 'error' && !definition) {
     return (
@@ -196,7 +87,7 @@ export function FormStepCard({
     )
   }
 
-  if (!definition) {
+  if (!definition || !fieldConfig) {
     return (
       <Paper p='md' shadow='none' withBorder={false} style={containerStyle}>
         <Center style={fullHeight ? { flex: 1 } : undefined}>
@@ -206,73 +97,25 @@ export function FormStepCard({
     )
   }
 
-  const ensuredDefinition = definition
-
   return (
     <Paper p='md' shadow='none' withBorder={false} style={containerStyle}>
       <Box style={fullHeight ? { display: 'flex', flexDirection: 'column', flex: 1 } : undefined}>
-        <RjsfForm
-          schema={ensuredDefinition.schema}
-          uiSchema={combinedUiSchema}
-          formData={formData}
-          validator={validator}
-          extraErrors={extraErrors}
-          liveValidate
-          ref={attachRef}
-          widgets={formWidgets}
-          formContext={formContextValue}
-          templates={{
-            ObjectFieldTemplate: FormObjectFieldTemplate,
-            ErrorListTemplate: HiddenErrorList,
-            ArrayFieldTitleTemplate: ArrayFieldTitle,
-          }}
-          onChange={onChange}
-          onSubmit={onSubmit}
-        />
+        {/* Removed onSubmit handler to prevent Enter key from auto-submitting */}
+        <form onSubmit={(e) => e.preventDefault()}>
+          <Stack gap='sm' align='stretch'>
+            {fieldConfig.title && (
+              <Text fw={600} size='sm'>
+                {fieldConfig.title}
+              </Text>
+            )}
+            <Grid gutter='md'>
+              {fieldConfig.fields.map((field) => (
+                <FormField key={field.name} config={field} control={control} />
+              ))}
+            </Grid>
+          </Stack>
+        </form>
       </Box>
     </Paper>
   )
-}
-
-function extractAsyncValidationConfigs(uiSchema?: UiSchema): AsyncValidationFieldConfig[] {
-  if (!uiSchema) {
-    return []
-  }
-
-  return Object.entries(uiSchema).reduce<AsyncValidationFieldConfig[]>((acc, [fieldKey, config]) => {
-    if (!config || typeof config !== 'object') {
-      return acc
-    }
-
-    const options = (config as Record<string, unknown>)['ui:options']
-    if (!options || typeof options !== 'object') {
-      return acc
-    }
-
-    const asyncOptions = (options as Record<string, unknown>).asyncValidation as
-      | {
-          validationRoute?: string
-          debounceMs?: number
-          duplicateMessage?: string
-          serverMessage?: string
-          field?: string
-        }
-      | undefined
-
-    if (!asyncOptions?.validationRoute) {
-      return acc
-    }
-
-    acc.push({
-      field: asyncOptions.field ?? fieldKey,
-      validationRoute: asyncOptions.validationRoute,
-      debounceMs: asyncOptions.debounceMs,
-      messages: {
-        duplicate: asyncOptions.duplicateMessage,
-        server: asyncOptions.serverMessage,
-      },
-    })
-
-    return acc
-  }, [])
 }

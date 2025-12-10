@@ -10,14 +10,12 @@
  */
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import type { IChangeEvent } from '@rjsf/core'
-import { fetchFormDefinition } from '../../../api/client'
-import type { FormDefinition, StepKey } from '../../../types/entity'
+import type { FormDefinition, StepKey, SystemDefinition } from '../../../types/entity'
 import type { TreeSelectionList } from '../../../types/tree'
 import type { FlowId, FormStatus } from '../types'
-import type { RjsfFormRef } from '../FormStepCard'
+import type { FormStepRef } from '../FormStepCard'
 import {
-  applyFormChange,
+  applyFormDataChange,
   createEmptyStepState,
   type FormDefinitionsState,
   type FormErrorState,
@@ -26,6 +24,7 @@ import {
   shouldApplyInitialData,
 } from '../entityFormUtils'
 import { DISPLAY_FLOW_ID, fallbackSystemIconName } from '../iconRegistry'
+import { GeneralFormSchema, getMonitorSchema } from '../../../schemas/formSchemas'
 
 export interface UseFormManagerResult {
   formState: FormState
@@ -33,10 +32,10 @@ export interface UseFormManagerResult {
   formDefinitions: FormDefinitionsState
   formStatus: FormStatusState
   formErrors: FormErrorState
-  attachFormRef: (key: StepKey, ref: RjsfFormRef | null) => void
-  getFormRef: (key: StepKey) => RjsfFormRef | null
-  onFormChange: (systemId: string, key: StepKey, change: IChangeEvent) => void
-  onFormSubmit: (key: StepKey, change: IChangeEvent) => void
+  attachFormRef: (key: StepKey, ref: FormStepRef | null) => void
+  getFormRef: (key: StepKey) => FormStepRef | null
+  onFormChange: (systemId: string, key: StepKey, data: unknown) => void
+  onFormSubmit: (key: StepKey, data: unknown) => void
   requestFormDefinition: (systemId: string, stepKey: StepKey) => Promise<FormDefinition>
   treeSelection: TreeSelectionList
   handleTreeSelection: (systemId: string, selection: TreeSelectionList) => void
@@ -49,6 +48,7 @@ export interface UseFormManagerResult {
 interface UseFormManagerParams {
   flow: FlowId
   selectedSystem: string | null
+  systems: Record<string, SystemDefinition>
   activeStepKey: StepKey | null
   stepKeys: StepKey[]
   activeStep: number
@@ -59,6 +59,7 @@ interface UseFormManagerParams {
 export function useFormManager({
   flow,
   selectedSystem,
+  systems,
   activeStepKey,
   stepKeys,
   activeStep,
@@ -74,7 +75,7 @@ export function useFormManager({
   const [formErrors, setFormErrors] = useState<FormErrorState>({})
 
   // Form refs for programmatic submission
-  const formRefs = useRef<Record<StepKey, RjsfFormRef | null>>({
+  const formRefs = useRef<Record<StepKey, FormStepRef | null>>({
     system: null,
     general: null,
     monitor: null,
@@ -121,7 +122,7 @@ export function useFormManager({
   // Form Definition Loading
   // ─────────────────────────────────────────────────────────────────────────
 
-  /** Fetch form definition from API and cache it */
+  /** Get or create form definition with schema based on step type */
   const requestFormDefinition = useCallback(
     async (systemId: string, stepKey: StepKey) => {
       ensureFormState(systemId)
@@ -136,7 +137,20 @@ export function useFormManager({
       }))
 
       try {
-        const definition = await fetchFormDefinition(systemId, stepKey)
+        // Create form definition with appropriate schema
+        const schema = stepKey === 'general' ? GeneralFormSchema: getMonitorSchema(systemId)
+        
+        // Set initial data for general form
+        let initialData: Record<string, unknown> = {}
+        if (stepKey === 'general') {
+          const systemLabel = systems[systemId]?.label ?? systemId
+          initialData = {
+            entityType: flow === DISPLAY_FLOW_ID ? 'תצוגה' : systemLabel
+          }
+        }
+        
+        const definition: FormDefinition = { schema, initialData }
+        
         setFormDefinitions((prev) => ({
           ...prev,
           [systemId]: { ...prev[systemId], [stepKey]: definition },
@@ -162,7 +176,7 @@ export function useFormManager({
         throw error
       }
     },
-    [applyInitialData, ensureFormState]
+    [applyInitialData, ensureFormState, flow]
   )
 
   // Auto-fetch form definition when step changes
@@ -198,16 +212,16 @@ export function useFormManager({
   // ─────────────────────────────────────────────────────────────────────────
 
   /** Handle form data change */
-  const onFormChange = useCallback((systemId: string, key: StepKey, change: IChangeEvent) => {
-    applyFormChange(setFormState, systemId, key, change)
+  const onFormChange = useCallback((systemId: string, key: StepKey, data: unknown) => {
+    applyFormDataChange(setFormState, systemId, key, data)
   }, [])
 
   /** Handle form submission */
   const onFormSubmit = useCallback(
-    (key: StepKey, change: IChangeEvent) => {
+    (key: StepKey, data: unknown) => {
       if (!selectedSystem) return
 
-      applyFormChange(setFormState, selectedSystem, key, change)
+      applyFormDataChange(setFormState, selectedSystem, key, data)
 
       if (stepKeys[activeStep] === key) {
         if (activeStep === stepKeys.length - 1) {
@@ -225,7 +239,7 @@ export function useFormManager({
   // ─────────────────────────────────────────────────────────────────────────
 
   /** Attach a form ref for programmatic submission */
-  const attachFormRef = useCallback((key: StepKey, ref: RjsfFormRef | null) => {
+  const attachFormRef = useCallback((key: StepKey, ref: FormStepRef | null) => {
     formRefs.current[key] = ref
   }, [])
 

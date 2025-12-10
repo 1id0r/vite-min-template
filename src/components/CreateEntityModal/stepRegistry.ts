@@ -14,8 +14,7 @@ import type { ComponentType } from 'react'
 import type { StepKey, FormDefinition, CategoryDefinition, SystemDefinition } from '../../types/entity'
 import type { TreeSelectionList } from '../../types/tree'
 import type { FlowId, FlowOption, FormStatus } from './types'
-import type { IChangeEvent } from '@rjsf/core'
-import type { RjsfFormRef } from './FormStepCard'
+import type { FormStepRef } from './FormStepCard'
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Step Props Interfaces
@@ -46,9 +45,8 @@ export interface FormStepProps extends BaseStepProps {
   status?: FormStatus
   error?: string
   formData: unknown
-  attachRef: (ref: RjsfFormRef | null) => void
-  onChange: (change: IChangeEvent) => void
-  onSubmit: (change: IChangeEvent) => void
+  attachRef: (ref: FormStepRef | null) => void
+  onChange: (data: unknown) => void
   onRetry: () => void
 }
 

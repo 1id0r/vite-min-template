@@ -7,11 +7,10 @@
 
 import { memo, useCallback, useMemo } from 'react'
 import { Alert, Box, Stack, Text } from '@mantine/core'
-import type { IChangeEvent } from '@rjsf/core'
 import type { CategoryDefinition, FormDefinition, StepKey, SystemDefinition } from '../../types/entity'
 import type { TreeSelectionList } from '../../types/tree'
 import type { FlowId, FlowOption, FormStatus } from './types'
-import type { RjsfFormRef } from './FormStepCard'
+import type { FormStepRef } from './FormStepCard'
 import { FormStepCard } from './FormStepCard'
 import { SystemStep } from './SystemStep'
 import { TreeStep } from './TreeStep'
@@ -19,6 +18,7 @@ import { DisplayIconMenu } from './DisplayIconMenu'
 import { STEP_REGISTRY } from './stepRegistry'
 import { DISPLAY_FLOW_ID, DISPLAY_FLOW_SYSTEM_IDS, fallbackSystemIcon } from './iconRegistry'
 import { FlowSelector } from './FlowSelector'
+import { GeneralFieldConfig, getMonitorFieldConfig } from '../../schemas/fieldConfigs'
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Props Interface
@@ -41,9 +41,9 @@ export interface StepRendererProps {
   formStatus: Record<string, Partial<Record<StepKey, FormStatus>>>
   formErrors: Record<string, Partial<Record<StepKey, string>>>
   currentFormState: Record<StepKey, unknown>
-  attachFormRef: (key: StepKey, ref: RjsfFormRef | null) => void
-  onFormChange: (systemId: string, key: StepKey, change: IChangeEvent) => void
-  onFormSubmit: (key: StepKey, change: IChangeEvent) => void
+  attachFormRef: (key: StepKey, ref: FormStepRef | null) => void
+  onFormChange: (systemId: string, key: StepKey, data: unknown) => void
+  onFormSubmit: (key: StepKey, data: unknown) => void
   requestFormDefinition: (systemId: string, stepKey: StepKey) => Promise<FormDefinition>
   treeSelection: TreeSelectionList
 }
@@ -245,9 +245,9 @@ interface FormStepRendererProps {
   formStatus: Record<string, Partial<Record<StepKey, FormStatus>>>
   formErrors: Record<string, Partial<Record<StepKey, string>>>
   currentFormState: Record<StepKey, unknown>
-  attachFormRef: (key: StepKey, ref: RjsfFormRef | null) => void
-  onFormChange: (systemId: string, key: StepKey, change: IChangeEvent) => void
-  onFormSubmit: (key: StepKey, change: IChangeEvent) => void
+  attachFormRef: (key: StepKey, ref: FormStepRef | null) => void
+  onFormChange: (systemId: string, key: StepKey, data: unknown) => void
+  onFormSubmit: (key: StepKey, data: unknown) => void
   requestFormDefinition: (systemId: string, stepKey: StepKey) => Promise<FormDefinition>
   annotateSystemIcon: (systemId: string, iconName?: string) => void
 }
@@ -264,7 +264,6 @@ const FormStepRenderer = memo(function FormStepRenderer(props: FormStepRendererP
     currentFormState,
     attachFormRef,
     onFormChange,
-    onFormSubmit,
     requestFormDefinition,
     annotateSystemIcon,
   } = props
@@ -295,15 +294,18 @@ const FormStepRenderer = memo(function FormStepRenderer(props: FormStepRendererP
   const status = formStatus[selectedSystem]?.[activeStepKey]
   const error = formErrors[selectedSystem]?.[activeStepKey]
 
+  // Get field configuration based on step type
+  const fieldConfig = activeStepKey === 'general' ? GeneralFieldConfig : getMonitorFieldConfig(selectedSystem)
+
   const formCard = (
     <FormStepCard
       status={status}
       definition={definition}
+      fieldConfig={fieldConfig}
       error={error}
       formData={currentFormState[activeStepKey]}
       attachRef={(ref) => attachFormRef(activeStepKey, ref)}
-      onChange={(change) => onFormChange(selectedSystem, activeStepKey, change)}
-      onSubmit={(change) => onFormSubmit(activeStepKey, change)}
+      onChange={(data) => onFormChange(selectedSystem, activeStepKey, data)}
       onRetry={() => requestFormDefinition(selectedSystem, activeStepKey)}
       fullHeight
     />
