@@ -7,13 +7,13 @@
 
 import { memo, useCallback, useMemo } from 'react'
 import { Alert, Box, Stack, Text } from '@mantine/core'
-import type { CategoryDefinition, FormDefinition, StepKey, SystemDefinition } from '../../types/entity'
+import type { Attachment, CategoryDefinition, FormDefinition, StepKey, SystemDefinition } from '../../types/entity'
 import type { TreeSelectionList } from '../../types/tree'
 import type { FlowId, FlowOption, FormStatus } from './types'
 import type { FormStepRef } from './FormStepCard'
 import { FormStepCard } from './FormStepCard'
 import { SystemStep } from './SystemStep'
-import { TreeStep } from './TreeStep'
+import { BindingsStep } from './BindingsStep/BindingsStep'
 import { DisplayIconMenu } from './DisplayIconMenu'
 import { STEP_REGISTRY } from './stepRegistry'
 import { DISPLAY_FLOW_ID, DISPLAY_FLOW_SYSTEM_IDS, fallbackSystemIcon } from './iconRegistry'
@@ -46,6 +46,8 @@ export interface StepRendererProps {
   onFormSubmit: (key: StepKey, data: unknown) => void
   requestFormDefinition: (systemId: string, stepKey: StepKey) => Promise<FormDefinition>
   treeSelection: TreeSelectionList
+  attachments: Attachment[]
+  handleAttachmentsChange: (systemId: string, attachments: Attachment[]) => void
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -75,6 +77,8 @@ export const StepRenderer = memo(function StepRenderer(props: StepRendererProps)
     onFormSubmit,
     requestFormDefinition,
     treeSelection,
+    attachments,
+    handleAttachmentsChange,
   } = props
 
   // Early return if no active step
@@ -117,9 +121,11 @@ export const StepRenderer = memo(function StepRenderer(props: StepRendererProps)
 
     case 'tree':
       return (
-        <TreeStep
-          selection={treeSelection}
-          onSelectionChange={(value) => handleTreeSelection(selectedSystem!, value)}
+        <BindingsStep
+          treeSelection={treeSelection}
+          onTreeSelectionChange={(selection) => handleTreeSelection(selectedSystem!, selection)}
+          attachments={attachments}
+          onAttachmentsChange={(newAttachments) => handleAttachmentsChange(selectedSystem!, newAttachments)}
         />
       )
 

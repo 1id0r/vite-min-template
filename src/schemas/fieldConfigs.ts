@@ -271,7 +271,7 @@ export const GeneralFieldConfig: FormFieldsConfig = {
   fields: [
     { name: 'displayName', type: 'text', label: 'שם תצוגה', required: true, colSpan: 6 },
     { name: 'entityType', type: 'text', label: 'סוג יישות', disabled: true, colSpan: 6 },
-    { name: 'description', type: 'textarea', label: 'תיאור', colSpan: 12 },
+    { name: 'description', type: 'textarea', label: 'תיאור', required: true, colSpan: 12 },
     { name: 'contactInfo', type: 'text', label: 'פרטי התקשרות', colSpan: 6 },
     { name: 'responsibleParty', type: 'text', label: 'גורם אחראי', colSpan: 6 },
     { name: 'links', type: 'links-array', label: '', colSpan: 12 },

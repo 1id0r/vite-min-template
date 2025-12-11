@@ -57,6 +57,8 @@ export function EntityFlowContent({ controller, onClose }: EntityFlowContentProp
     annotateSystemIcon,
     handleTreeSelection,
     treeSelection,
+    attachments,
+    handleAttachmentsChange,
   } = controller
 
   const isInitialLoad = configStatus === 'loading' && !config
@@ -135,6 +137,8 @@ export function EntityFlowContent({ controller, onClose }: EntityFlowContentProp
               onFormSubmit={onFormSubmit}
               requestFormDefinition={requestFormDefinition}
               treeSelection={treeSelection}
+              attachments={attachments}
+              handleAttachmentsChange={handleAttachmentsChange}
             />
           </Box>
         )}

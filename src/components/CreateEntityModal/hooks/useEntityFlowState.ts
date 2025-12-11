@@ -19,6 +19,7 @@
 
 import { useCallback, useMemo, useState } from 'react'
 import type {
+  Attachment,
   CategoryDefinition,
   FormDefinition,
   StepDefinition,
@@ -76,6 +77,8 @@ export interface UseEntityFlowStateResult {
   requestFormDefinition: (systemId: string, stepKey: StepKey) => Promise<FormDefinition>
   treeSelection: TreeSelectionList
   handleTreeSelection: (systemId: string, selection: TreeSelectionList) => void
+  attachments: Attachment[]
+  handleAttachmentsChange: (systemId: string, attachments: Attachment[]) => void
 
   // Result
   result: AggregatedResult | null
@@ -269,6 +272,8 @@ export function useEntityFlowState(): UseEntityFlowStateResult {
       requestFormDefinition: formManager.requestFormDefinition,
       treeSelection: formManager.treeSelection,
       handleTreeSelection: formManager.handleTreeSelection,
+      attachments: formManager.attachments,
+      handleAttachmentsChange: formManager.handleAttachmentsChange,
 
       // Result
       result,

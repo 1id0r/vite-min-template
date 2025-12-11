@@ -33,7 +33,7 @@ export const LinkSchema = z.object({
 export const GeneralFormSchema = z.object({
   displayName: z.string().min(1, 'שם תצוגה הוא שדה חובה').max(50, 'שם תצוגה חייב להיות עד 50 תווים'),
   entityType: z.string(),
-  description: z.string().max(200, 'תיאור חייב להיות עד 200 תווים').optional(),
+  description: z.string().min(1, 'תיאור הוא שדה חובה').max(200, 'תיאור חייב להיות עד 200 תווים'),
   contactInfo: z.string().regex(/^[0-9\-+() ]*$/, 'פרטי התקשרות יכולים להכיל רק מספרים ותווי פיסוק').optional(),
   responsibleParty: z.string().max(50, 'גורם אחראי חייב להיות עד 50 תווים').optional(),
   links: z.array(LinkSchema).optional(),
@@ -266,4 +266,41 @@ export function getMonitorSchema(systemId: string): z.ZodObject<any> {
   return MonitorSchemaRegistry[systemId] ?? BasicMonitorSchema
 }
 
+
 export type MonitorFormData = z.infer<typeof BasicMonitorSchema>
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Attachment Schemas (for Bindings tab)
+// ─────────────────────────────────────────────────────────────────────────────
+
+export const UrlAttachmentSchema = z.object({
+  type: z.literal('url'),
+  id: z.string(),
+  name: z.string().min(1, 'Name is required'),
+  address: z.string().min(1, 'URL is required').url('Invalid URL format'),
+  timeout: z.string().min(1, 'Timeout is required'),
+})
+
+export const ElasticAttachmentSchema = z.object({
+  type: z.literal('elastic'),
+  id: z.string(),
+  name: z.string().min(1, 'Name is required'),
+  cluster: z.string().min(1, 'Cluster is required'),
+  index: z.string().min(1, 'Index is required'),
+  scheduleValue: z.number({ invalid_type_error: 'Required' }).min(1, 'Must be positive'),
+  scheduleUnit: z.enum(['minutes', 'hours']),
+  timeout: z.enum(['5s', '15s', '30s']),
+  query: z.string().min(1, 'Query is required').refine((val) => {
+    try {
+      JSON.parse(val)
+      return true
+    } catch {
+      return false
+    }
+  }, 'Invalid JSON'),
+})
+
+export const AttachmentSchema = z.discriminatedUnion('type', [
+  UrlAttachmentSchema,
+  ElasticAttachmentSchema,
+])

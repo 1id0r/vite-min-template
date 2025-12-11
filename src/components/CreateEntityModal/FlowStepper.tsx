@@ -24,7 +24,7 @@ export function FlowStepper({ stepKeys, activeStep, definitions }: FlowStepperPr
     >
       {orderedKeys.map((key, index) => {
         const originalIndex = stepKeys.length - 1 - index
-        const label = definitions?.[key]?.label ?? key
+        const label = key === 'tree' ? 'הצמדות' : definitions?.[key]?.label ?? key
         const state = getStepState(originalIndex, activeStep)
         const isLast = index === orderedKeys.length - 1
         const displayNumber = originalIndex + 1
