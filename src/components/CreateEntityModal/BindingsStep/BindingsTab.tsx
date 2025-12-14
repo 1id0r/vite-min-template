@@ -49,10 +49,10 @@ export function BindingsTab({ attachments, onChange }: BindingsTabProps) {
       <Button
         variant='outline'
         onClick={handleAdd}
-        leftSection={<BsPlus size={20} />}
-        style={{ alignSelf: 'flex-start' }}
+        rightSection={<BsPlus size={20} />}
+        style={{ alignSelf: 'flex-end' }}
       >
-        ערך תזונתי נוספת
+        הצמדה חדשה{' '}
       </Button>
     </Stack>
   )

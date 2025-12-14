@@ -5,7 +5,6 @@ import {
   Group,
   NumberInput,
   Paper,
-  SegmentedControl,
   Select,
   Stack,
   Text,
@@ -87,27 +86,57 @@ export function BindingCard({ attachment, onChange, onDelete }: BindingCardProps
       <Stack gap='md'>
         {/* Header with Type Selector and Delete */}
         <Group justify='space-between' align='flex-start'>
-          <Group align='center'>
-            <ActionIcon variant='subtle' color='red' onClick={onDelete}>
-              <BsTrash size={16} />
-            </ActionIcon>
-            <Box>
-              <Text size='sm' fw={500} mb={4}>
-                סוג הצמדה <span style={{ color: 'red' }}>*</span>
-              </Text>
-              <SegmentedControl
-                value={attachment.type}
-                onChange={handleTypeChange}
-                data={[
-                  { label: 'URL', value: 'url' },
-                  { label: 'ELASTIC', value: 'elastic' }, // Mock label per request
-                  { label: 'MONGO', value: 'mongo', disabled: true },
-                  { label: 'SQL', value: 'sql', disabled: true },
-                  { label: 'REDIS', value: 'redis', disabled: true },
-                ]}
-              />
+          <Box>
+            <Text size='sm' fw={500} mb={4}>
+              סוג הצמדה <span style={{ color: 'red' }}>*</span>
+            </Text>
+            <Box
+              style={{
+                display: 'flex',
+                border: '1px solid #E5E7EB',
+                borderRadius: 16,
+                overflow: 'hidden',
+                backgroundColor: '#FFFFFF',
+                width: 'fit-content',
+              }}
+            >
+              {[
+                { label: 'URL', value: 'url' },
+                { label: 'ELASTIC', value: 'elastic' },
+                { label: 'MONGO', value: 'mongo', disabled: true },
+                { label: 'SQL', value: 'sql', disabled: true },
+                { label: 'REDIS', value: 'redis', disabled: true },
+              ].map((option, index, arr) => {
+                const isActive = option.value === attachment.type
+                const isLast = index === arr.length - 1
+
+                return (
+                  <button
+                    key={option.value}
+                    type='button'
+                    onClick={() => !option.disabled && handleTypeChange(option.value)}
+                    disabled={option.disabled}
+                    style={{
+                      padding: '6px 16px',
+                      border: 'none',
+                      borderLeft: isLast ? 'none' : '1px solid #E5E7EB',
+                      backgroundColor: isActive ? '#0B5FFF' : '#FFFFFF',
+                      color: isActive ? '#FFFFFF' : option.disabled ? '#9CA3AF' : '#111827',
+                      fontWeight: 600,
+                      fontSize: '14px',
+                      cursor: option.disabled ? 'not-allowed' : 'pointer',
+                      transition: 'background-color 0.2s, color 0.2s',
+                    }}
+                  >
+                    {option.label}
+                  </button>
+                )
+              })}
             </Box>
-          </Group>
+          </Box>
+          <ActionIcon variant='subtle' color='red' onClick={onDelete}>
+            <BsTrash size={16} />
+          </ActionIcon>
         </Group>
 
         {/* Common Name Field */}

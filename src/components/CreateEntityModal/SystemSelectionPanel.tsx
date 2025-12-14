@@ -1,5 +1,5 @@
-import { Button, Group, Menu, Stack, Text } from '@mantine/core'
-import { memo, useCallback, useEffect, useMemo } from 'react'
+import { Box, Card, Grid, Group, NavLink, ScrollArea, SimpleGrid, Stack, Text, ThemeIcon } from '@mantine/core'
+import { memo, useCallback, useMemo, useState } from 'react'
 import type { SystemSelectionPanelProps } from './types'
 
 export const SystemSelectionPanel = memo(function SystemSelectionPanel({
@@ -14,162 +14,156 @@ export const SystemSelectionPanel = memo(function SystemSelectionPanel({
   prefixIcon: PrefixIcon,
   showGeneralOption = false,
 }: SystemSelectionPanelProps) {
-  const menuItemHoverClass = useMemo(() => 'system-selection-panel__item', [])
+  const [activeCategoryId, setActiveCategoryId] = useState<string | null>(
+    showGeneralOption ? 'general' : categories[0]?.id ?? null
+  )
 
-  useEffect(() => {
-    if (typeof document === 'undefined') {
-      return
-    }
+  const handleCategorySelect = (id: string) => {
+    setActiveCategoryId(id)
+  }
 
-    const styleId = `${menuItemHoverClass}-styles`
-    if (document.getElementById(styleId)) {
-      return
-    }
+  const activeCategory = useMemo(() => {
+    if (activeCategoryId === 'general') return null
+    return categories.find((c) => c.id === activeCategoryId)
+  }, [activeCategoryId, categories])
 
-    const style = document.createElement('style')
-    style.id = styleId
-    style.textContent = `
-      .${menuItemHoverClass}[data-hovered] {
-        background-color: rgba(11, 95, 255, 0.08);
-      }
-    `
-    document.head.appendChild(style)
-  }, [menuItemHoverClass])
-
-  const selectedSystemLabel = useMemo(() => {
-    if (!selectedSystem) {
-      return null
-    }
-    return systems[selectedSystem]?.label ?? selectedSystem
-  }, [selectedSystem, systems])
-
-  const handleGeneralSelect = useCallback(() => onSystemSelect('general'), [onSystemSelect])
-
-  const renderSystemItem = useCallback(
+  const renderSystemCard = useCallback(
     (systemId: string) => {
       const system = systems[systemId]
-      if (!system) {
-        return null
-      }
+      if (!system) return null
+
       const SystemIcon = resolveIcon(system.icon) ?? fallbackSystemIcon
+      const isSelected = selectedSystem === systemId
+
       return (
-        <Menu.Item
+        <Card
           key={systemId}
+          withBorder
+          shadow='sm'
+          padding='md'
+          radius='md'
+          component='button'
           onClick={() => onSystemSelect(systemId)}
-          leftSection={<SystemIcon size={16} />}
-          className={menuItemHoverClass}
+          style={{
+            cursor: 'pointer',
+            border: isSelected ? '2px solid #0B5FFF' : undefined,
+            backgroundColor: isSelected ? 'rgba(11, 95, 255, 0.04)' : undefined,
+            textAlign: 'left',
+            height: '100%',
+            transition: 'transform 0.2s, box-shadow 0.2s',
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.transform = 'translateY(-4px)'
+            e.currentTarget.style.boxShadow = '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)'
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.transform = 'none'
+            e.currentTarget.style.boxShadow = '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)'
+          }}
         >
-          {system.label}
-        </Menu.Item>
+          <Group align='flex-start' justify='space-between' mb='xs'>
+            <ThemeIcon size='lg' radius='md' variant={isSelected ? 'filled' : 'light'} color='blue'>
+              <SystemIcon size={20} />
+            </ThemeIcon>
+          </Group>
+
+          <Text fw={600} size='sm' mt='md'>
+            {system.label}
+          </Text>
+
+          {system.description && (
+            <Text size='xs' c='dimmed' lineClamp={2} mt={4}>
+              {system.description}
+            </Text>
+          )}
+        </Card>
       )
     },
-    [fallbackSystemIcon, menuItemHoverClass, onSystemSelect, resolveIcon, systems]
+    [systems, selectedSystem, onSystemSelect, resolveIcon, fallbackSystemIcon]
   )
 
   return (
-    <Group align='flex-start' dir='ltr' justify='space-between' gap='xl' wrap='nowrap'>
-      <Stack gap='xs' style={{ flex: 1 }}>
-        <Text size='sm' c='dimmed'>
-          {selectedSystemConfig ? selectedSystemConfig.description : 'בחר מערכת כדי להמשיך'}
-        </Text>
-      </Stack>
+    <Grid gutter='xl' style={{ height: 500 }}>
+      {/* Sidebar - Categories */}
+      <Grid.Col span={3} style={{ borderRight: '1px solid var(--mantine-color-gray-3)' }}>
+        <Stack gap='xs' h='100%'>
+          <ScrollArea type='auto' offsetScrollbars>
+            <Stack gap={4}>
+              {showGeneralOption && (
+                <NavLink
+                  label='כללי'
+                  active={activeCategoryId === 'general'}
+                  onClick={() => {
+                    handleCategorySelect('general')
+                    onSystemSelect('general')
+                  }}
+                  variant='light'
+                  color='blue'
+                  leftSection={<PrefixIcon size={16} />}
+                  style={{ borderRadius: 8 }}
+                />
+              )}
 
-      <Stack gap='md' w={240}>
-        <Stack gap='xs'>
-          {showGeneralOption && (
-            <Button
-              variant='outline'
-              color='black'
-              radius='md'
-              onClick={handleGeneralSelect}
-              styles={(theme) => ({
-                root: {
-                  borderColor: 'rgba(11, 95, 255,0.5)',
-                  fontWeight: 600,
-                  gap: theme.spacing.md,
-                  justifyContent: 'center',
-                },
-                section: { alignItems: 'center', marginInlineStart: 0 },
-                label: {
-                  flex: 1,
-                  display: 'flex',
-                  justifyContent: 'flex-start',
-                  alignItems: 'center',
-                  gap: theme.spacing.xs,
-                },
+              {categories.map((category) => {
+                const CategoryIcon = resolveIcon(category.icon) ?? fallbackCategoryIcon
+                return (
+                  <NavLink
+                    key={category.id}
+                    label={category.label}
+                    active={activeCategoryId === category.id}
+                    onClick={() => handleCategorySelect(category.id)}
+                    variant='light'
+                    color='blue'
+                    leftSection={<CategoryIcon size={16} />}
+                    style={{ borderRadius: 8, fontWeight: 500 }}
+                  />
+                )
               })}
-            >
-              <Text component='span'>כללי</Text>
-            </Button>
-          )}
-          {categories.map((category) => {
-            const CategoryIcon = resolveIcon(category.icon) ?? fallbackCategoryIcon
-            return (
-              <Menu key={category.id} trigger='hover' position='left-start' withinPortal offset={8}>
-                <Menu.Target>
-                  <Button
-                    variant='outline'
-                    color='black'
-                    radius='md'
-                    leftSection={<PrefixIcon size={16} color='rgb(11, 95, 255)' />}
-                    styles={(theme) => ({
-                      root: {
-                        borderColor: 'rgba(11, 95, 255,0.5)',
-                        fontWeight: 500,
-                        gap: theme.spacing.md,
-                      },
-                      section: {
-                        alignItems: 'center',
-                      },
-                      label: {
-                        flex: 1,
-                        display: 'flex',
-                        justifyContent: 'flex-end',
-                        alignItems: 'center',
-                        gap: theme.spacing.xs,
-                      },
-                    })}
-                  >
-                    <Text component='span'>{category.label}</Text>
-                    <CategoryIcon size={18} />
-                  </Button>
-                </Menu.Target>
-                <Menu.Dropdown style={{ overflow: 'hidden' }}>
-                  {category.systemIds.map((systemId) => renderSystemItem(systemId))}
-                  {category.subMenus?.map((submenu) => (
-                    <Menu
-                      key={`${category.id}-${submenu.label}`}
-                      trigger='hover'
-                      position='left-start'
-                      withinPortal
-                      offset={4}
-                    >
-                      <Menu.Target>
-                        <Menu.Item
-                          leftSection={<PrefixIcon size={14} color='rgb(11, 95, 255,0.5)' />}
-                          className={menuItemHoverClass}
-                        >
-                          {submenu.label}
-                        </Menu.Item>
-                      </Menu.Target>
-                      <Menu.Dropdown style={{ overflow: 'hidden' }}>
-                        {submenu.systemIds.map((systemId) => renderSystemItem(systemId))}
-                      </Menu.Dropdown>
-                    </Menu>
-                  ))}
-                </Menu.Dropdown>
-              </Menu>
-            )
-          })}
+            </Stack>
+          </ScrollArea>
         </Stack>
+      </Grid.Col>
 
-        {selectedSystemLabel && (
-          <Text size='sm' dir='ltr' fw={600} c='rgb(11, 95, 255)'>
-            יישות נבחרת: {selectedSystemLabel}
-          </Text>
-        )}
-      </Stack>
-    </Group>
+      {/* Main Content - Grid */}
+      <Grid.Col span={9}>
+        <Stack h='100%'>
+          <ScrollArea type='auto' flex={1} offsetScrollbars>
+            {activeCategoryId === 'general' ? (
+              <Text c='dimmed' fs='italic'>
+                תצורה כללית נבחרה. לחץ על "הבא" להמשך.
+              </Text>
+            ) : (
+              <Stack gap='xl'>
+                {/* Direct Systems */}
+                {activeCategory?.systemIds && activeCategory.systemIds.length > 0 && (
+                  <SimpleGrid cols={{ base: 1, sm: 2, lg: 3 }} spacing='md'>
+                    {activeCategory.systemIds.map(renderSystemCard)}
+                  </SimpleGrid>
+                )}
+
+                {/* Sub Menus */}
+                {activeCategory?.subMenus?.map((submenu) => (
+                  <Box key={submenu.label}>
+                    <Text
+                      fw={600}
+                      size='sm'
+                      c='dimmed'
+                      mb='md'
+                      style={{ borderBottom: '1px solid #eee', paddingBottom: 4 }}
+                    >
+                      {submenu.label}
+                    </Text>
+                    <SimpleGrid cols={{ base: 1, sm: 2, lg: 3 }} spacing='md'>
+                      {submenu.systemIds.map(renderSystemCard)}
+                    </SimpleGrid>
+                  </Box>
+                ))}
+              </Stack>
+            )}
+          </ScrollArea>
+        </Stack>
+      </Grid.Col>
+    </Grid>
   )
 })
 
