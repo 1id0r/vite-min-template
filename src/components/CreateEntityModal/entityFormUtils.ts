@@ -3,7 +3,7 @@ import type { IChangeEvent } from '@rjsf/core'
 import type { FormDefinition, StepKey } from '../../types/entity'
 import type { AggregatedResult, FlowId, FormStatus } from './types'
 
-export type StepState = Record<StepKey, unknown>
+export type StepState = Record<StepKey, unknown> & { attachments?: unknown[] }
 export type FormState = Record<string, StepState>
 export type FormDefinitionsState = Record<string, Partial<Record<StepKey, FormDefinition>>>
 export type FormStatusState = Record<string, Partial<Record<StepKey, FormStatus>>>
@@ -14,6 +14,7 @@ export const createEmptyStepState = (): StepState => ({
   general: {},
   monitor: {},
   tree: [],
+  attachments: [],
 })
 
 export const buildAggregateResult = (

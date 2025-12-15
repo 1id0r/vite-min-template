@@ -12,6 +12,7 @@ import type {
 } from '../../../types/entity'
 import type { AggregatedResult, FlowId, FlowOption, FormStatus } from '../types'
 import type { TreeSelectionList } from '../../../types/tree'
+import type { AttachmentList } from '../../../types/entity'
 import {
   applyFormChange,
   buildAggregateResult,
@@ -46,6 +47,7 @@ export interface UseEntityFlowStateResult {
   handleSystemSelect: (systemId: string) => void
   annotateSystemIcon: (systemId: string, iconName?: string) => void
   handleTreeSelection: (systemId: string, selection: TreeSelectionList) => void
+  handleAttachmentsChange: (systemId: string, attachments: AttachmentList) => void
   categories: CategoryDefinition[]
   systems: Record<string, SystemDefinition>
   stepDefinitions?: Record<StepKey, StepDefinition>
@@ -59,6 +61,7 @@ export interface UseEntityFlowStateResult {
   onFormSubmit: (key: StepKey, change: IChangeEvent) => void
   requestFormDefinition: (systemId: string, stepKey: StepKey) => Promise<FormDefinition>
   treeSelection: TreeSelectionList
+  attachments: AttachmentList
   result: AggregatedResult | null
   resetFlowState: () => void
   nextButtonDisabled: boolean
@@ -327,6 +330,15 @@ export function useEntityFlowState(): UseEntityFlowStateResult {
     }
     return []
   }, [formState, selectedSystem])
+
+  const attachments = useMemo<AttachmentList>(() => {
+    if (!selectedSystem) {
+      return []
+    }
+    const state = formState[selectedSystem] ?? createEmptyStepState()
+    return (state.attachments as AttachmentList) ?? []
+  }, [formState, selectedSystem])
+
   const canMoveNext = Boolean(selectedSystem)
 
   const aggregateResult = useCallback(() => {
@@ -444,6 +456,23 @@ export function useEntityFlowState(): UseEntityFlowStateResult {
     [ensureFormState]
   )
 
+  const handleAttachmentsChange = useCallback(
+    (systemId: string, attachments: AttachmentList) => {
+      ensureFormState(systemId)
+      setFormState((prev) => {
+        const existingState = prev[systemId] ?? createEmptyStepState()
+        return {
+          ...prev,
+          [systemId]: {
+            ...existingState,
+            attachments, // Make sure this key is valid in StepState or cast it
+          },
+        }
+      })
+    },
+    [ensureFormState]
+  )
+
   const onFormChange = useCallback((systemId: string, key: StepKey, change: IChangeEvent) => {
     applyFormChange(setFormState, systemId, key, change)
   }, [])
@@ -521,6 +550,7 @@ export function useEntityFlowState(): UseEntityFlowStateResult {
       handleSystemSelect,
       annotateSystemIcon,
       handleTreeSelection,
+      handleAttachmentsChange,
       categories,
       systems,
       stepDefinitions,
@@ -534,6 +564,7 @@ export function useEntityFlowState(): UseEntityFlowStateResult {
       onFormSubmit,
       requestFormDefinition,
       treeSelection,
+      attachments,
       result,
       resetFlowState,
       nextButtonDisabled,
@@ -557,6 +588,7 @@ export function useEntityFlowState(): UseEntityFlowStateResult {
       handleSystemSelect,
       annotateSystemIcon,
       handleTreeSelection,
+      handleAttachmentsChange,
       categories,
       systems,
       stepDefinitions,
@@ -570,6 +602,7 @@ export function useEntityFlowState(): UseEntityFlowStateResult {
       onFormSubmit,
       requestFormDefinition,
       treeSelection,
+      attachments,
       result,
       resetFlowState,
       nextButtonDisabled,

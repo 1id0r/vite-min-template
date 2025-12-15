@@ -7,8 +7,10 @@ import { FlowStepper } from './FlowStepper'
 import { FormStepCard, type RjsfFormRef } from './FormStepCard'
 import { ResultSummary } from './ResultSummary'
 import { SystemStep } from './SystemStep'
-import { TreeStep } from './TreeStep'
+// import { TreeStep } from './TreeStep' // Replaced by Step4Container
+import { Step4Container } from './Step4Container'
 import { DisplayIconMenu } from './DisplayIconMenu'
+import type { AttachmentList } from '../../types/entity'
 import { DISPLAY_FLOW_ID, DISPLAY_FLOW_SYSTEM_IDS, fallbackSystemIcon } from './iconRegistry'
 import type { UseEntityFlowStateResult } from './hooks/useEntityFlowState'
 import type { FlowId, FlowOption, FormStatus } from './types'
@@ -54,6 +56,8 @@ export function EntityFlowContent({ controller, onClose }: EntityFlowContentProp
     annotateSystemIcon,
     handleTreeSelection,
     treeSelection,
+    handleAttachmentsChange,
+    attachments,
   } = controller
   const isInitialLoad = configStatus === 'loading' && !config
   const hasBlockingError = configStatus === 'error' && !config
@@ -85,7 +89,20 @@ export function EntityFlowContent({ controller, onClose }: EntityFlowContentProp
     >
       {/* Fixed header with stepper */}
       <Stack gap='md' style={{ flexShrink: 0 }}>
-        <FlowStepper stepKeys={stepKeys} activeStep={activeStep} definitions={stepDefinitions} />
+        <FlowStepper
+          stepKeys={stepKeys}
+          activeStep={activeStep}
+          definitions={useMemo(() => {
+            if (!stepDefinitions) return stepDefinitions
+            return {
+              ...stepDefinitions,
+              tree: {
+                ...stepDefinitions.tree,
+                label: 'הצמדות',
+              },
+            }
+          }, [stepDefinitions])}
+        />
         <Divider />
       </Stack>
 
@@ -128,6 +145,8 @@ export function EntityFlowContent({ controller, onClose }: EntityFlowContentProp
               requestFormDefinition={requestFormDefinition}
               handleTreeSelection={handleTreeSelection}
               treeSelection={treeSelection}
+              handleAttachmentsChange={handleAttachmentsChange}
+              attachments={attachments}
             />
           </Box>
         )}
@@ -180,6 +199,8 @@ interface StepContentProps {
   onFormSubmit: (key: StepKey, change: IChangeEvent) => void
   requestFormDefinition: (systemId: string, stepKey: StepKey) => Promise<FormDefinition>
   treeSelection: TreeSelectionList
+  handleAttachmentsChange: (systemId: string, attachments: AttachmentList) => void
+  attachments: AttachmentList
 }
 
 const StepContent = memo(function StepContent({
@@ -204,6 +225,8 @@ const StepContent = memo(function StepContent({
   onFormSubmit,
   requestFormDefinition,
   treeSelection,
+  handleAttachmentsChange,
+  attachments,
 }: StepContentProps) {
   const shouldShowGeneralIcons = useMemo(
     () => flow === 'monitor' && selectedSystem === 'general' && activeStepKey === 'general',
@@ -291,7 +314,12 @@ const StepContent = memo(function StepContent({
 
   if (activeStepKey === 'tree') {
     return (
-      <TreeStep selection={treeSelection} onSelectionChange={(value) => handleTreeSelection(selectedSystem, value)} />
+      <Step4Container
+        treeSelection={treeSelection}
+        onTreeSelectionChange={(value) => handleTreeSelection(selectedSystem, value)}
+        attachments={attachments}
+        onAttachmentsChange={(value) => handleAttachmentsChange(selectedSystem, value)}
+      />
     )
   }
 
