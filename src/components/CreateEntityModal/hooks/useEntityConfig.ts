@@ -46,6 +46,19 @@ export function useEntityConfig(): UseEntityConfigResult {
     let cancelled = false
 
     const loadConfig = async () => {
+      // Check for environment variable override
+      const useStaticConfig = import.meta.env.VITE_USE_STATIC_CONFIG === 'true'
+
+      if (useStaticConfig) {
+        import('../../../config/staticConfig').then(({ STATIC_CONFIG }) => {
+             if (!cancelled) {
+                setConfig(STATIC_CONFIG)
+                setConfigStatus('success')
+             }
+        })
+        return
+      }
+
       setConfigStatus('loading')
       setConfigError(null)
 
@@ -57,8 +70,16 @@ export function useEntityConfig(): UseEntityConfigResult {
         }
       } catch (error) {
         if (!cancelled) {
-          setConfigStatus('error')
-          setConfigError(error instanceof Error ? error.message : 'Failed to load configuration')
+          console.warn('Failed to load dynamic config, falling back to static config', error)
+          // Fallback to static config instead of error
+          import('../../../config/staticConfig').then(({ STATIC_CONFIG }) => {
+              if(!cancelled) {
+                  setConfig(STATIC_CONFIG)
+                  setConfigStatus('success') 
+                  // Note: We set success because the app can function with static config
+                  // We could set a warning flag if needed, but 'error' blocks the UI.
+              }
+          })
         }
       }
     }

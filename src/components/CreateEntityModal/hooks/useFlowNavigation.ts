@@ -40,7 +40,7 @@ export function useFlowNavigation({
   config,
   selectedSystem,
 }: UseFlowNavigationParams): UseFlowNavigationResult {
-  const [flow, setFlow] = useState<FlowId>(DISPLAY_FLOW_ID)
+  const [flow, setFlow] = useState<FlowId>('monitor')
   const [activeStep, setActiveStep] = useState(0)
 
   // Sync flow with config on load (fallback to first available flow)
