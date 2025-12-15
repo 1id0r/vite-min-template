@@ -42,6 +42,7 @@ export interface UseEntityFlowStateResult {
   isCompleted: boolean
   goToPreviousStep: () => void
   handleAdvance: () => void
+  handleCreate: () => void
   selectedSystem: string | null
   selectedSystemConfig: SystemDefinition | null
   handleSystemSelect: (systemId: string) => void
@@ -369,10 +370,6 @@ export function useEntityFlowState(): UseEntityFlowStateResult {
       return
     }
 
-    if (currentKey === 'tree' && treeSelection.length === 0) {
-      return
-    }
-
     const formRef = formRefs.current[currentKey]
 
     if (formRef && typeof formRef.submit === 'function') {
@@ -523,7 +520,6 @@ export function useEntityFlowState(): UseEntityFlowStateResult {
   const flowDescription = useMemo(() => currentFlow?.description?.trim(), [currentFlow])
   const nextButtonDisabled =
     (activeStepKey === 'system' && !canMoveNext) ||
-    (activeStepKey === 'tree' && treeSelection.length === 0) ||
     (activeStepKey !== null &&
       activeStepKey !== 'system' &&
       selectedSystem !== null &&
@@ -545,6 +541,7 @@ export function useEntityFlowState(): UseEntityFlowStateResult {
       isCompleted,
       goToPreviousStep,
       handleAdvance,
+      handleCreate,
       selectedSystem,
       selectedSystemConfig,
       handleSystemSelect,
@@ -583,6 +580,7 @@ export function useEntityFlowState(): UseEntityFlowStateResult {
       isCompleted,
       goToPreviousStep,
       handleAdvance,
+      handleCreate,
       selectedSystem,
       selectedSystemConfig,
       handleSystemSelect,

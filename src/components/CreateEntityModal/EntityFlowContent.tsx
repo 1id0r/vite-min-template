@@ -43,6 +43,7 @@ export function EntityFlowContent({ controller, onClose }: EntityFlowContentProp
     nextButtonDisabled,
     goToPreviousStep,
     handleAdvance,
+    handleCreate,
     result,
     formDefinitions,
     formStatus,
@@ -163,9 +164,17 @@ export function EntityFlowContent({ controller, onClose }: EntityFlowContentProp
               חזור
             </Button>
             <Group>
-              <Button variant='default' onClick={onClose}>
-                ביטול
-              </Button>
+              {activeStep < stepKeys.length - 1 && (
+                <Button
+                  variant='filled'
+                  color='blue'
+                  onClick={handleCreate}
+                  disabled={activeStep < 3}
+                  style={{ opacity: activeStep < 3 ? 0.5 : 1 }}
+                >
+                  יצירת יישות
+                </Button>
+              )}
               <Button onClick={handleAdvance} disabled={nextButtonDisabled}>
                 {activeStep === stepKeys.length - 1 ? ' צור יישות' : 'המשך'}
               </Button>
