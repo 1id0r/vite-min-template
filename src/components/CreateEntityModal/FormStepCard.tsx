@@ -42,7 +42,7 @@ export function FormStepCard({
 
   // Initialize form with schema and resolver
   const form = useForm({
-    resolver: definition?.schema ? zodResolver(definition.schema) : undefined,
+    resolver: definition?.schema ? (zodResolver(definition.schema) as any) : undefined,
     defaultValues: formData ?? definition?.initialData ?? {},
     mode: 'onSubmit', // Only validate when user submits
     reValidateMode: 'onChange', // Re-validate on change after first submit
@@ -71,6 +71,16 @@ export function FormStepCard({
       reset(formData ?? definition.initialData ?? {})
     }
   }, [definition?.schema, reset]) // Only depend on schema, not formData
+
+  // Sync external formData updates if form is pristine (e.g. initial data loaded late)
+  useEffect(() => {
+    if (formData && !form.formState.isDirty) {
+      const currentValues = form.getValues()
+      if (JSON.stringify(formData) !== JSON.stringify(currentValues)) {
+        reset(formData)
+      }
+    }
+  }, [formData, form.formState.isDirty, reset, form])
 
   if (status === 'error' && !definition) {
     return (

@@ -287,7 +287,7 @@ export const ElasticAttachmentSchema = z.object({
   name: z.string().min(1, 'Name is required'),
   cluster: z.string().min(1, 'Cluster is required'),
   index: z.string().min(1, 'Index is required'),
-  scheduleValue: z.number({ invalid_type_error: 'Required' }).min(1, 'Must be positive'),
+  scheduleValue: z.number({ invalid_type_error: 'Required' } as any).min(1, 'Must be positive'),
   scheduleUnit: z.enum(['minutes', 'hours']),
   timeout: z.enum(['5s', '15s', '30s']),
   query: z.string().min(1, 'Query is required').refine((val) => {

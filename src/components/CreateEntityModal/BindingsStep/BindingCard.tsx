@@ -1,7 +1,6 @@
 import {
   ActionIcon,
   Box,
-  Grid,
   Group,
   NumberInput,
   Paper,
@@ -10,6 +9,7 @@ import {
   Text,
   Textarea,
   TextInput,
+  Grid,
 } from '@mantine/core'
 import { BsTrash } from 'react-icons/bs'
 import { Controller, useForm } from 'react-hook-form'
@@ -37,7 +37,7 @@ export function BindingCard({ attachment, onChange, onDelete }: BindingCardProps
     reset,
     formState: {},
   } = useForm<Attachment>({
-    resolver: zodResolver(schema),
+    resolver: zodResolver(schema) as any, // Temporary cast to resolve complex union type mismatch
     defaultValues: attachment,
     mode: 'onChange',
   })

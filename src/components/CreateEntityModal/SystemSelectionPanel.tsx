@@ -6,7 +6,6 @@ export const SystemSelectionPanel = memo(function SystemSelectionPanel({
   categories,
   systems,
   selectedSystem,
-  selectedSystemConfig,
   onSystemSelect,
   resolveIcon,
   fallbackCategoryIcon,
