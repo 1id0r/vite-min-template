@@ -29,7 +29,6 @@ export interface StepRendererProps {
   flow: FlowId
   flowOptions: FlowOption[]
   onFlowChange: (value: string) => void
-  flowDescription?: string
   categories: CategoryDefinition[]
   systems: Record<string, SystemDefinition>
   selectedSystem: string | null
@@ -60,7 +59,6 @@ export const StepRenderer = memo(function StepRenderer(props: StepRendererProps)
     flow,
     flowOptions,
     onFlowChange,
-    flowDescription,
     categories,
     systems,
     selectedSystem,
@@ -109,7 +107,6 @@ export const StepRenderer = memo(function StepRenderer(props: StepRendererProps)
           flow={flow}
           flowOptions={flowOptions}
           onFlowChange={onFlowChange}
-          flowDescription={flowDescription}
           categories={categories}
           systems={systems}
           selectedSystem={selectedSystem}
@@ -167,7 +164,6 @@ interface SystemStepRendererProps {
   flow: FlowId
   flowOptions: FlowOption[]
   onFlowChange: (value: string) => void
-  flowDescription?: string
   categories: CategoryDefinition[]
   systems: Record<string, SystemDefinition>
   selectedSystem: string | null
@@ -181,7 +177,6 @@ const SystemStepRenderer = memo(function SystemStepRenderer(props: SystemStepRen
     flow,
     flowOptions,
     onFlowChange,
-    flowDescription,
     categories,
     systems,
     selectedSystem,
@@ -205,12 +200,7 @@ const SystemStepRenderer = memo(function SystemStepRenderer(props: SystemStepRen
               </Text>
             </Text>
           </Box>
-          <FlowSelector
-            flow={flow}
-            flowOptions={flowOptions}
-            onFlowChange={onFlowChange}
-            flowDescription={flowDescription}
-          />
+          <FlowSelector flow={flow} flowOptions={flowOptions} onFlowChange={onFlowChange} />
         </Stack>
       )}
       {showEntityTypeLabel && (

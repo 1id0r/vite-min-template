@@ -31,7 +31,6 @@ export interface SystemStepProps extends BaseStepProps {
   flow: FlowId
   flowOptions: FlowOption[]
   onFlowChange: (value: string) => void
-  flowDescription?: string
   categories: CategoryDefinition[]
   systems: Record<string, SystemDefinition>
   selectedSystemConfig: SystemDefinition | null

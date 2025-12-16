@@ -1,10 +1,10 @@
-# Entity Creation Modal - CreateEntityModal
+# Entity Creation Drawer - CreateEntityModal
 
 ## Overview
 
 This component manages the complete entity creation flow through a multi-step wizard.
 Users can select an entity type, configure general properties, set up monitoring (optional),
-and choose a location in the hierarchical tree.
+and choose a location in the hierarchical tree. The UI slides in from the left as a Drawer.
 
 **Tech Stack:**
 - **Forms:** React Hook Form + Zod (replaced RJSF in Dec 2024)

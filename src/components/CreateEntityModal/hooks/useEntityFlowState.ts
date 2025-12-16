@@ -58,7 +58,6 @@ export interface UseEntityFlowStateResult {
   isCompleted: boolean
   goToPreviousStep: () => void
   handleAdvance: () => void
-  flowDescription?: string
 
   // System Selection
   selectedSystem: string | null
@@ -253,7 +252,6 @@ export function useEntityFlowState(): UseEntityFlowStateResult {
       isCompleted: flowNavigation.isCompleted,
       goToPreviousStep: flowNavigation.goToPreviousStep,
       handleAdvance,
-      flowDescription: flowNavigation.flowDescription,
 
       // System Selection
       selectedSystem: systemSelection.selectedSystem,

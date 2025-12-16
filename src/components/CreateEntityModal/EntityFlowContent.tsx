@@ -40,7 +40,6 @@ export function EntityFlowContent({ controller, onClose }: EntityFlowContentProp
     flow,
     flowOptions,
     handleFlowChange,
-    flowDescription,
     selectedSystem,
     selectedSystemConfig,
     categories,
@@ -119,7 +118,6 @@ export function EntityFlowContent({ controller, onClose }: EntityFlowContentProp
               flow={flow}
               flowOptions={flowOptions}
               onFlowChange={handleFlowChange}
-              flowDescription={flowDescription}
               categories={categories}
               systems={systems}
               selectedSystem={selectedSystem}

@@ -4,7 +4,6 @@ export type StepKey = "system" | "general" | "monitor" | "tree";
 
 export interface StepDefinition {
   label: string;
-  description?: string;
 }
 
 export interface FormDefinition {
@@ -17,7 +16,6 @@ export interface SystemDefinition {
   label: string;
   category: string;
   icon?: string;
-  description?: string;
   forms: Partial<Record<StepKey, FormDefinition>>;
 }
 
@@ -36,7 +34,6 @@ export interface FlowDefinition {
   id: string;
   label: string;
   steps: StepKey[];
-  description?: string;
 }
 
 export interface EntityConfig {

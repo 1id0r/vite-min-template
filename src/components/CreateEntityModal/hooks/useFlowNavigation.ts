@@ -12,14 +12,12 @@ import type {
   StepKey,
 } from '../../../types/entity'
 import type { FlowId, FlowOption } from '../types'
-import { DISPLAY_FLOW_ID } from '../iconRegistry'
 
 export interface UseFlowNavigationResult {
   flow: FlowId
   flowOptions: FlowOption[]
   handleFlowChange: (value: string) => void
   currentFlow: FlowDefinition | null
-  flowDescription?: string
   stepKeys: StepKey[]
   activeStep: number
   activeStepKey: StepKey | null
@@ -116,10 +114,7 @@ export function useFlowNavigation({
     }))
   }, [config])
 
-  const flowDescription = useMemo(
-    () => currentFlow?.description?.trim(),
-    [currentFlow]
-  )
+
 
   return useMemo(
     () => ({
@@ -127,7 +122,6 @@ export function useFlowNavigation({
       flowOptions,
       handleFlowChange,
       currentFlow,
-      flowDescription,
       stepKeys,
       activeStep,
       activeStepKey,
@@ -143,7 +137,6 @@ export function useFlowNavigation({
       flowOptions,
       handleFlowChange,
       currentFlow,
-      flowDescription,
       stepKeys,
       activeStep,
       activeStepKey,

@@ -5,14 +5,13 @@
  */
 
 import { memo, useCallback } from 'react'
-import { Box, Stack, Text } from '@mantine/core'
+import { Box, Stack } from '@mantine/core'
 import type { FlowId, FlowOption } from './types'
 
 export interface FlowSelectorProps {
   flow: FlowId
   flowOptions: FlowOption[]
   onFlowChange: (value: string) => void
-  flowDescription?: string
 }
 
 const FLOW_LABELS: Partial<Record<FlowId, string>> = {
@@ -21,12 +20,7 @@ const FLOW_LABELS: Partial<Record<FlowId, string>> = {
   general: 'ישות כללית',
 }
 
-export const FlowSelector = memo(function FlowSelector({
-  flow,
-  flowOptions,
-  onFlowChange,
-  flowDescription,
-}: FlowSelectorProps) {
+export const FlowSelector = memo(function FlowSelector({ flow, flowOptions, onFlowChange }: FlowSelectorProps) {
   const getButtonHandler = useCallback((value: string) => () => onFlowChange(value), [onFlowChange])
 
   return (
@@ -67,11 +61,6 @@ export const FlowSelector = memo(function FlowSelector({
           )
         })}
       </Box>
-      {flowDescription && (
-        <Text size='xs' c='dimmed'>
-          {flowDescription}
-        </Text>
-      )}
     </Stack>
   )
 })
