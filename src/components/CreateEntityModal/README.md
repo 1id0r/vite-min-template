@@ -24,6 +24,10 @@ CreateEntityModal/
 │   ├── useFlowNavigation.ts     # Flow & step navigation (~140 lines)
 │   ├── useSystemSelection.ts    # System selection (~55 lines)
 │   └── useFormManager.ts        # Form state management (~367 lines)
+├── BindingsStep/                # Step 4: Bindings & Tree Selection
+│   ├── BindingsStep.tsx         # Tab container (measurements + bindings)
+│   ├── BindingsTab.tsx          # Attachment type manager
+│   └── BindingCard.tsx          # Individual binding configuration
 ├── stepRegistry.ts              # Step configuration registry (~140 lines)
 ├── StepRenderer.tsx             # Dynamic step renderer (~348 lines)
 ├── FlowSelector.tsx             # Flow type selector (~75 lines)
@@ -32,8 +36,8 @@ CreateEntityModal/
 ├── FlowStepper.tsx              # Progress stepper UI
 ├── FormStepCard.tsx             # React Hook Form wrapper (~115 lines)
 ├── SystemStep.tsx               # System/template selection step
+├── SystemSelectionPanel.tsx     # System selection panel with fixed header
 ├── TreeStep.tsx                 # Tree location selection step
-├── SystemSelectionPanel.tsx     # System selection panel
 ├── DisplayIconMenu.tsx          # Icon picker menu
 ├── ResultSummary.tsx            # Result summary display
 ├── entityFormUtils.ts           # Form utility functions
@@ -72,7 +76,7 @@ The system supports three entity types:
 | `system` | System Selection | Choose a template/system from categories |
 | `general` | General Details | Form with basic fields (name, type, links, etc.) |
 | `monitor` | Monitor Settings | Monitoring configuration for the selected system |
-| `tree` | Tree Location | Hierarchical tree position selection |
+| `tree` | Bindings & Tree | Tabbed step with measurements (tree) and bindings (attachments) |
 
 > **Note:** Not all flows include all steps. For example, the `display` flow skips the `monitor` step.
 
@@ -488,4 +492,4 @@ The modal communicates with three endpoints:
 
 ---
 
-*Last updated: December 2024 (Post-RJSF Migration)*
+*Last updated: December 2024 (Added BindingsStep, Layout improvements)*

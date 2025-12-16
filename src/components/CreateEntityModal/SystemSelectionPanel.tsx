@@ -1,4 +1,4 @@
-import { Box, Card, Grid, Group, NavLink, ScrollArea, SimpleGrid, Stack, Text, ThemeIcon } from '@mantine/core'
+import { Box, Card, Grid, NavLink, ScrollArea, SimpleGrid, Stack, Text, ThemeIcon } from '@mantine/core'
 import { memo, useCallback, useMemo, useState } from 'react'
 import type { SystemSelectionPanelProps } from './types'
 
@@ -39,7 +39,7 @@ export const SystemSelectionPanel = memo(function SystemSelectionPanel({
           key={systemId}
           withBorder
           shadow='sm'
-          padding='md'
+          padding='xs'
           radius='md'
           component='button'
           onClick={() => onSystemSelect(systemId)}
@@ -47,34 +47,30 @@ export const SystemSelectionPanel = memo(function SystemSelectionPanel({
             cursor: 'pointer',
             border: isSelected ? '2px solid #0B5FFF' : undefined,
             backgroundColor: isSelected ? 'rgba(11, 95, 255, 0.04)' : undefined,
-            textAlign: 'left',
-            height: '100%',
+            textAlign: 'center',
+            aspectRatio: '1 / 1',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
             transition: 'transform 0.2s, box-shadow 0.2s',
           }}
           onMouseEnter={(e) => {
-            e.currentTarget.style.transform = 'translateY(-4px)'
-            e.currentTarget.style.boxShadow = '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)'
+            e.currentTarget.style.transform = 'translateY(-2px)'
+            e.currentTarget.style.boxShadow = '0 6px 12px -3px rgba(0, 0, 0, 0.1)'
           }}
           onMouseLeave={(e) => {
             e.currentTarget.style.transform = 'none'
-            e.currentTarget.style.boxShadow = '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)'
+            e.currentTarget.style.boxShadow = '0 1px 3px 0 rgba(0, 0, 0, 0.1)'
           }}
         >
-          <Group align='flex-start' justify='space-between' mb='xs'>
-            <ThemeIcon size='lg' radius='md' variant={isSelected ? 'filled' : 'light'} color='blue'>
-              <SystemIcon size={20} />
-            </ThemeIcon>
-          </Group>
+          <ThemeIcon size='md' radius='md' variant={isSelected ? 'filled' : 'light'} color='blue'>
+            <SystemIcon size={18} />
+          </ThemeIcon>
 
-          <Text fw={600} size='sm' mt='md'>
+          <Text fw={500} size='xs' mt='xs' lineClamp={2}>
             {system.label}
           </Text>
-
-          {system.description && (
-            <Text size='xs' c='dimmed' lineClamp={2} mt={4}>
-              {system.description}
-            </Text>
-          )}
         </Card>
       )
     },
@@ -135,7 +131,7 @@ export const SystemSelectionPanel = memo(function SystemSelectionPanel({
               <Stack gap='xl'>
                 {/* Direct Systems */}
                 {activeCategory?.systemIds && activeCategory.systemIds.length > 0 && (
-                  <SimpleGrid cols={{ base: 1, sm: 2, lg: 3 }} spacing='md'>
+                  <SimpleGrid cols={{ base: 3, sm: 4, lg: 5 }} spacing='xs'>
                     {activeCategory.systemIds.map(renderSystemCard)}
                   </SimpleGrid>
                 )}
@@ -152,7 +148,7 @@ export const SystemSelectionPanel = memo(function SystemSelectionPanel({
                     >
                       {submenu.label}
                     </Text>
-                    <SimpleGrid cols={{ base: 1, sm: 2, lg: 3 }} spacing='md'>
+                    <SimpleGrid cols={{ base: 2, sm: 3, lg: 4 }} spacing='sm'>
                       {submenu.systemIds.map(renderSystemCard)}
                     </SimpleGrid>
                   </Box>
