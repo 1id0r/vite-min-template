@@ -281,6 +281,92 @@ export const UrlAttachmentSchema = z.object({
   timeout: z.string().min(1, 'Timeout is required'),
 })
 
+// ─────────────────────────────────────────────────────────────────────────────
+// Elasticsearch Query DSL Validator
+// ─────────────────────────────────────────────────────────────────────────────
+
+// Valid top-level Elasticsearch request body keys
+const VALID_ES_TOP_LEVEL_KEYS = [
+  'query', 'aggs', 'aggregations', 'size', 'from', 'sort', '_source', 'fields',
+  'highlight', 'script_fields', 'stored_fields', 'explain', 'version', 'seq_no_primary_term',
+  'track_scores', 'track_total_hits', 'min_score', 'post_filter', 'rescore',
+  'suggest', 'pit', 'runtime_mappings', 'collapse', 'timeout', 'search_after',
+]
+
+// Valid query types in Elasticsearch
+const VALID_QUERY_TYPES = [
+  // Full text queries
+  'match', 'match_phrase', 'match_phrase_prefix', 'multi_match', 'query_string', 'simple_query_string',
+  // Term-level queries
+  'term', 'terms', 'range', 'exists', 'prefix', 'wildcard', 'regexp', 'fuzzy', 'ids',
+  // Compound queries
+  'bool', 'boosting', 'constant_score', 'dis_max', 'function_score',
+  // Joining queries
+  'nested', 'has_child', 'has_parent', 'parent_id',
+  // Geo queries
+  'geo_bounding_box', 'geo_distance', 'geo_polygon', 'geo_shape',
+  // Specialized
+  'match_all', 'match_none', 'wrapper', 'script', 'percolate', 'more_like_this',
+]
+
+/**
+ * Validates an Elasticsearch Query DSL structure
+ * Returns { valid: true } or { valid: false, error: string }
+ */
+function validateElasticQueryDSL(jsonString: string): { valid: boolean; error?: string } {
+  // Step 1: Parse JSON
+  let parsed: unknown
+  try {
+    parsed = JSON.parse(jsonString)
+  } catch {
+    return { valid: false, error: 'Invalid JSON syntax' }
+  }
+
+  // Step 2: Must be an object
+  if (typeof parsed !== 'object' || parsed === null || Array.isArray(parsed)) {
+    return { valid: false, error: 'Query must be a JSON object' }
+  }
+
+  const obj = parsed as Record<string, unknown>
+  const keys = Object.keys(obj)
+
+  // Step 3: Must not be empty
+  if (keys.length === 0) {
+    return { valid: false, error: 'Query object cannot be empty' }
+  }
+
+  // Step 4: All top-level keys must be valid ES keys
+  const invalidKeys = keys.filter(key => !VALID_ES_TOP_LEVEL_KEYS.includes(key))
+  if (invalidKeys.length > 0) {
+    return { valid: false, error: `Invalid top-level key(s): ${invalidKeys.join(', ')}. Expected: query, aggs, size, from, sort, etc.` }
+  }
+
+  // Step 5: If 'query' exists, validate it has a valid query type
+  if (obj.query !== undefined) {
+    if (typeof obj.query !== 'object' || obj.query === null || Array.isArray(obj.query)) {
+      return { valid: false, error: '"query" must be an object' }
+    }
+    
+    const queryObj = obj.query as Record<string, unknown>
+    const queryKeys = Object.keys(queryObj)
+    
+    if (queryKeys.length === 0) {
+      return { valid: false, error: '"query" object cannot be empty' }
+    }
+
+    // Check if at least one query type is valid
+    const hasValidQueryType = queryKeys.some(key => VALID_QUERY_TYPES.includes(key))
+    if (!hasValidQueryType) {
+      return { 
+        valid: false, 
+        error: `No valid query type found. Expected one of: match, match_all, bool, term, range, etc. Got: ${queryKeys.join(', ')}` 
+      }
+    }
+  }
+
+  return { valid: true }
+}
+
 export const ElasticAttachmentSchema = z.object({
   type: z.literal('elastic'),
   id: z.string(),
@@ -289,15 +375,16 @@ export const ElasticAttachmentSchema = z.object({
   index: z.string().min(1, 'Index is required'),
   scheduleValue: z.number({ invalid_type_error: 'Required' } as any).min(1, 'Must be positive'),
   scheduleUnit: z.enum(['minutes', 'hours']),
-  timeout: z.enum(['5s', '15s', '30s']),
-  query: z.string().min(1, 'Query is required').refine((val) => {
-    try {
-      JSON.parse(val)
-      return true
-    } catch {
-      return false
+  timeout: z.string().regex(/^\d+s$/, 'Timeout must be in format like "30s"'),
+  query: z.string().min(1, 'Query is required').superRefine((val, ctx) => {
+    const result = validateElasticQueryDSL(val)
+    if (!result.valid) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: result.error ?? 'Invalid Elasticsearch query',
+      })
     }
-  }, 'Invalid JSON'),
+  }),
 })
 
 export const AttachmentSchema = z.discriminatedUnion('type', [
