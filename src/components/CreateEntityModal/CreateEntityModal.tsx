@@ -1,5 +1,5 @@
 import { useCallback, useState } from 'react'
-import { Button, Modal } from '@mantine/core'
+import { Button, Drawer } from '@mantine/core'
 import { EntityFlowContent } from './EntityFlowContent'
 import { useEntityFlowState } from './hooks/useEntityFlowState'
 
@@ -17,10 +17,23 @@ export function CreateEntityModal() {
 
   return (
     <>
-      <Button onClick={handleOpen}>Create entity</Button>
-      <Modal opened={opened} onClose={handleClose} title='יצירת יישות חדשה' dir='rtl' size='xl' radius='md'>
+      <Button onClick={handleOpen}>הוספת חטיף +</Button>
+      <Drawer
+        opened={opened}
+        onClose={handleClose}
+        title='הוספת חטיף'
+        position='left'
+        size={700}
+        overlayProps={{ backgroundOpacity: 0.3 }}
+        padding='md'
+        styles={{
+          header: { direction: 'rtl' },
+          body: { height: 'calc(100% - 60px)' },
+          content: { borderRadius: '16px' },
+        }}
+      >
         <EntityFlowContent controller={controller} onClose={handleClose} />
-      </Modal>
+      </Drawer>
     </>
   )
 }

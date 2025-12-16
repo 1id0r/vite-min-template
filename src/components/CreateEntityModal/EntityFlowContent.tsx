@@ -86,8 +86,7 @@ export function EntityFlowContent({ controller, onClose }: EntityFlowContentProp
   return (
     <Box
       style={{
-        minHeight: 640,
-        height: 640,
+        height: '100%',
         display: 'flex',
         flexDirection: 'column',
       }}
