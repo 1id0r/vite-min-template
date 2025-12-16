@@ -17,7 +17,7 @@ export function CreateEntityModal() {
 
   return (
     <>
-      <Button onClick={handleOpen}>הוספת חטיף +</Button>
+      <Button onClick={handleOpen}>הוספת יישות +</Button>
       <Drawer
         opened={opened}
         onClose={handleClose}
