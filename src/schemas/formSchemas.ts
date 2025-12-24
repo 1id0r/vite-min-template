@@ -391,3 +391,69 @@ export const AttachmentSchema = z.discriminatedUnion('type', [
   UrlAttachmentSchema,
   ElasticAttachmentSchema,
 ])
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Tree Selection Schema (for Measurements tab)
+// ─────────────────────────────────────────────────────────────────────────────
+
+export const TreeSelectionSchema = z.object({
+  vid: z.string(),
+  displayName: z.string(),
+})
+
+export type TreeSelectionData = z.infer<typeof TreeSelectionSchema>
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Dynamic Entity Schema Builder
+// ─────────────────────────────────────────────────────────────────────────────
+
+/** Base fields always present in the entity form */
+const EntityBaseSchema = z.object({
+  flow: z.enum(['monitor', 'display']),
+  systemId: z.string().min(1, 'בחר סוג יישות'),
+  displayName: z.string().min(1, 'שם תצוגה הוא שדה חובה').max(50, 'שם תצוגה חייב להיות עד 50 תווים'),
+  entityType: z.string(),
+  description: z.string().min(1, 'תיאור הוא שדה חובה').max(200, 'תיאור חייב להיות עד 200 תווים'),
+  contactInfo: z.string().regex(/^[0-9\-+() ]*$/, 'פרטי התקשרות יכולים להכיל רק מספרים ותווי פיסוק').optional().or(z.literal('')),
+  responsibleParty: z.string().max(50, 'גורם אחראי חייב להיות עד 50 תווים').optional(),
+  links: z.array(LinkSchema).optional(),
+})
+
+/** Display flow schema - base + icon */
+const DisplayEntitySchema = EntityBaseSchema.extend({
+  flow: z.literal('display'),
+  icon: z.string().optional(),
+})
+
+/**
+ * Builds dynamic entity schema based on flow type and selected system.
+ * @param flow - 'monitor' or 'display'
+ * @param systemId - Selected system ID (e.g., 'redis', 'kafka')
+ */
+export function getEntitySchema(flow: 'monitor' | 'display', systemId: string | null) {
+  if (flow === 'display') {
+    return DisplayEntitySchema
+  }
+
+  // Monitor flow - extend base with system-specific fields + bindings
+  const monitorFields = systemId ? getMonitorSchema(systemId) : z.object({})
+  
+  return EntityBaseSchema.extend({
+    flow: z.literal('monitor'),
+    icon: z.string().optional(),
+    // Monitor-specific fields are flattened into the form
+    monitor: monitorFields,
+    // Bindings (Step 4-5)
+    measurements: z.array(TreeSelectionSchema).optional(),
+    attachments: z.array(AttachmentSchema).optional(),
+  })
+}
+
+/** Inferred type for the full entity form data */
+export type EntityFormData = z.infer<typeof EntityBaseSchema> & {
+  icon?: string
+  monitor?: Record<string, unknown>
+  measurements?: TreeSelectionData[]
+  attachments?: z.infer<typeof AttachmentSchema>[]
+}
+

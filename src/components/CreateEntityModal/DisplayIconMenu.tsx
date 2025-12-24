@@ -57,8 +57,12 @@ export function DisplayIconMenu({
             >
               {visibleSystems.map((system) => {
                 const Icon = resolveIcon(system.icon) ?? fallbackSystemIcon
-                const isSelected = (selectedIconId ?? selectedSystem) === system.id
                 const iconName = system.icon
+                // Check if selected - icon could be stored as iconName or system.id
+                const isSelected =
+                  selectedIconId === iconName ||
+                  selectedIconId === system.id ||
+                  (selectedSystem === system.id && !selectedIconId)
 
                 return (
                   <UnstyledButton

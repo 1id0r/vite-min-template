@@ -3,21 +3,14 @@
  * 
  * This module exports all hooks for managing the entity creation flow.
  * 
- * Main Hook:
- * - useEntityFlowState - Composes all sub-hooks into a single controller
- * 
- * Sub-Hooks (can be used independently if needed):
- * - useEntityConfig    - Configuration loading
- * - useFlowNavigation  - Flow and step navigation
- * - useSystemSelection - System/template selection
- * - useFormManager     - Form state management
+ * Hooks:
+ * - useEntityForm   - Main unified form hook (replaces old split hooks)
+ * - useEntityConfig - Configuration loading
  */
 
-// Main composed hook
-export { useEntityFlowState, type UseEntityFlowStateResult } from './useEntityFlowState'
+// Main form hook
+export { useEntityForm, type UseEntityFormResult, type EntityFormData, type FlowId } from './useEntityForm'
 
-// Sub-hooks (for advanced usage or testing)
+// Config hook
 export { useEntityConfig, type UseEntityConfigResult, type ConfigStatus } from './useEntityConfig'
-export { useFlowNavigation, type UseFlowNavigationResult } from './useFlowNavigation'
-export { useSystemSelection, type UseSystemSelectionResult } from './useSystemSelection'
-export { useFormManager, type UseFormManagerResult } from './useFormManager'
+

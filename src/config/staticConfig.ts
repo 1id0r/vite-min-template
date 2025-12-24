@@ -33,6 +33,12 @@ export const STATIC_CONFIG: EntityConfig = {
       icon: 'FiGrid', 
       systemIds: ['chevila', 'ribua', 'tardis_xport'] 
     },
+    { 
+      id: 'general_category', 
+      label: 'כללי', 
+      icon: 'FiLayers', 
+      systemIds: ['general'] 
+    },
   ],
   flows: {
     monitor: {
