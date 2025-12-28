@@ -16,59 +16,13 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { LinkSchema, TreeSelectionSchema } from '../../../schemas/formSchemas'
-import type { Attachment, CategoryDefinition, SystemDefinition } from '../../../types/entity'
+import type { Attachment } from '../../../types/entity'
 import type { TreeSelection } from '../../../types/tree'
 import { STATIC_CONFIG } from '../../../config/staticConfig'
+import type { FlowId, EntityFormData, UseEntityFormResult } from '../types/entityForm'
 
-export type FlowId = 'monitor' | 'display'
-
-/** Form data structure for entity creation */
-export interface EntityFormData {
-  flow: FlowId
-  systemId: string
-  displayName: string
-  entityType: string
-  description: string
-  contactInfo?: string
-  responsibleParty?: string
-  links?: { label?: string; url?: string }[]
-  icon?: string
-  monitor?: Record<string, unknown>
-  measurements?: TreeSelection[]
-  attachments?: Attachment[]
-}
-
-export interface UseEntityFormResult {
-  // Form instance - typed as any to handle dynamic schema
-  form: any
-  
-  // Watched values for conditional rendering
-  flow: FlowId
-  systemId: string | null
-  categoryId: string | null
-  
-  // Config data
-  categories: CategoryDefinition[]
-  systems: Record<string, SystemDefinition>
-  selectedSystemConfig: SystemDefinition | null
-  
-  // Visibility flags
-  showSystemSelector: boolean
-  showGeneralSection: boolean
-  showIconMenu: boolean
-  showMonitorSection: boolean
-  showBindingsPanel: boolean
-  
-  // Handlers
-  handleFlowChange: (newFlow: FlowId) => void
-  handleCategoryChange: (categoryId: string | null) => void
-  handleSystemSelect: (systemId: string | null) => void
-  handleMeasurementsChange: (measurements: TreeSelection[]) => void
-  handleAttachmentsChange: (attachments: Attachment[]) => void
-  handleIconSelect: (systemId: string, iconName?: string) => void
-  handleSave: () => void
-  resetForm: () => void
-}
+// Re-export types for convenience
+export type { FlowId, EntityFormData, UseEntityFormResult } from '../types/entityForm'
 
 const DEFAULT_VALUES: EntityFormData = {
   flow: 'monitor',
