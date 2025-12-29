@@ -21,7 +21,7 @@ export function CreateEntityModal() {
       <Drawer
         opened={opened}
         onClose={handleClose}
-        title='הוספת חטיף'
+        title='הוספת יישות'
         position='left'
         size={700}
         overlayProps={{ backgroundOpacity: 0.3 }}

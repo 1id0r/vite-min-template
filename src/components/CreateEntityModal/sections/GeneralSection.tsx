@@ -123,10 +123,27 @@ export const GeneralSection = memo(function GeneralSection({ compact }: GeneralS
 
           <Stack gap='xs'>
             {links.map((_, index) => (
-              <Group key={index} gap='xs' align='flex-start'>
-                <TextInput placeholder='שם הלינק' dir='rtl' style={{ flex: 1 }} {...register(`links.${index}.label`)} />
-                <TextInput placeholder='כתובת URL' dir='ltr' style={{ flex: 2 }} {...register(`links.${index}.url`)} />
-                <ActionIcon variant='subtle' color='red' onClick={() => handleRemoveLink(index)}>
+              <Group key={index} gap='xs' align='flex-start' wrap='nowrap'>
+                <TextInput
+                  placeholder='שם הלינק'
+                  dir='rtl'
+                  style={{ flex: 1 }}
+                  error={errors.links?.[index]?.label?.message}
+                  {...register(`links.${index}.label`)}
+                />
+                <TextInput
+                  placeholder='כתובת URL'
+                  dir='ltr'
+                  style={{ flex: 2 }}
+                  error={errors.links?.[index]?.url?.message}
+                  {...register(`links.${index}.url`)}
+                />
+                <ActionIcon
+                  variant='subtle'
+                  color='red'
+                  onClick={() => handleRemoveLink(index)}
+                  mt={errors.links?.[index] ? 0 : 0}
+                >
                   <IconX size={14} />
                 </ActionIcon>
               </Group>
