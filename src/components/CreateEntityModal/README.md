@@ -7,7 +7,7 @@ Users can select an entity type, configure general properties, set up monitoring
 and choose a location in the hierarchical tree. The UI slides in from the left as a Drawer.
 
 **Tech Stack:**
-- **Forms:** React Hook Form + Zod (replaced RJSF in Dec 2024)
+- **Forms:** React Hook Form + Zod
 - **UI:** Mantine components
 - **Validation:** Client-side Zod schemas with type inference
 
@@ -18,89 +18,66 @@ and choose a location in the hierarchical tree. The UI slides in from the left a
 ```
 CreateEntityModal/
 ├── hooks/
-│   ├── index.ts                 # Hook exports
-│   ├── useEntityFlowState.ts    # Main composed hook (~290 lines)
-│   ├── useEntityConfig.ts       # Config loading (~95 lines)
-│   ├── useFlowNavigation.ts     # Flow & step navigation (~140 lines)
-│   ├── useSystemSelection.ts    # System selection (~55 lines)
-│   └── useFormManager.ts        # Form state management (~367 lines)
-├── BindingsStep/                # Step 4: Bindings & Tree Selection
+│   └── useEntityForm.ts         # Unified form management hook (~194 lines)
+├── sections/
+│   ├── index.ts                 # Section exports
+│   ├── GeneralSection.tsx       # General details form (~160 lines)
+│   ├── MonitorSection.tsx       # System-specific monitoring (~150 lines)
+│   ├── CategorySystemSelector.tsx # Category/system picker (~80 lines)
+│   └── BindingsPanel.tsx        # Attachments panel (~70 lines)
+├── BindingsStep/
 │   ├── BindingsStep.tsx         # Tab container (measurements + bindings)
 │   ├── BindingsTab.tsx          # Attachment type manager
 │   └── BindingCard.tsx          # Individual binding configuration
-├── stepRegistry.ts              # Step configuration registry (~140 lines)
-├── StepRenderer.tsx             # Dynamic step renderer (~348 lines)
-├── FlowSelector.tsx             # Flow type selector (~75 lines)
-├── EntityFlowContent.tsx        # Main content container (~175 lines)
+├── types/
+│   └── entityForm.ts            # Form type definitions
 ├── CreateEntityModal.tsx        # Modal wrapper
-├── FlowStepper.tsx              # Progress stepper UI
-├── FormStepCard.tsx             # React Hook Form wrapper (~115 lines)
-├── SystemStep.tsx               # System/template selection step
-├── SystemSelectionPanel.tsx     # System selection panel with fixed header
-├── TreeStep.tsx                 # Tree location selection step
+├── EntityForm.tsx               # Main form container
+├── FlowSelector.tsx             # Flow type selector (monitor/display)
+├── TreeStep.tsx                 # Tree location selection
 ├── DisplayIconMenu.tsx          # Icon picker menu
 ├── ResultSummary.tsx            # Result summary display
-├── entityFormUtils.ts           # Form utility functions
 ├── iconRegistry.ts              # Icon registry
 ├── types.ts                     # Type definitions
+├── index.ts                     # Public exports
 └── README.md                    # This file
 
-../FormFields/
-├── FormField.tsx                # Generic field renderer (~90 lines)
-├── LinksField.tsx               # Custom links array field (~77 lines)
-└── AsyncSelectField.tsx         # Async select dropdown (~69 lines)
-
 ../schemas/
-├── formSchemas.ts               # Zod validation schemas (~270 lines)
-└── fieldConfigs.ts              # UI field configurations (~280 lines)
+├── formSchemas.ts               # Zod validation schemas (~460 lines)
+├── fieldConfigs.ts              # UI field configurations (~285 lines)
+└── ruleSchemas.ts               # Future rules feature schemas (~585 lines)
 ```
 
 ---
 
 ## Flow Types
 
-The system supports three entity types:
-
 | ID | Name | Description |
 |----|------|-------------|
 | `monitor` | Monitored Entity | Full entity with monitoring configuration |
 | `display` | Display Entity | Display-only entity without monitoring |
-| `general` | General Entity | Generic entity type |
-
----
-
-## Step Types
-
-| ID | Name | Description |
-|----|------|-------------|
-| `system` | System Selection | Choose a template/system from categories |
-| `general` | General Details | Form with basic fields (name, type, links, etc.) |
-| `monitor` | Monitor Settings | Monitoring configuration for the selected system |
-| `tree` | Bindings & Tree | Tabbed step with measurements (tree) and bindings (attachments) |
-
-> **Note:** Not all flows include all steps. For example, the `display` flow skips the `monitor` step.
 
 ---
 
 ## Architecture
 
-### Hook Composition
+### Unified Form Hook
 
-The main `useEntityFlowState` hook composes 4 focused sub-hooks:
+The `useEntityForm` hook manages all form state in a single place:
 
 ```
 ┌─────────────────────────────────────────────────────────────────────┐
-│                      useEntityFlowState                             │
-│                     (Composer ~290 lines)                           │
+│                        useEntityForm                                │
+│                      (~194 lines)                                   │
 ├─────────────────────────────────────────────────────────────────────┤
-│  useEntityConfig    │ Config loading from API        (~95 lines)   │
-│  useFlowNavigation  │ Flow type & step navigation   (~140 lines)   │
-│  useSystemSelection │ System/template selection      (~55 lines)   │
-│  useFormManager     │ Form data, schemas, submission (~367 lines)  │
+│  • Single React Hook Form instance                                  │
+│  • Dynamic validation based on flow and system                      │
+│  • Validates on blur                                                │
+│  • Derived state for conditional section visibility                 │
 └─────────────────────────────────────────────────────────────────────┘
 ```
 
-### Form Architecture (Post-RJSF Migration)
+### Form Architecture
 
 ```
 ┌───────────────────────────────────────────────────────────────┐
@@ -108,41 +85,22 @@ The main `useEntityFlowState` hook composes 4 focused sub-hooks:
 ├───────────────────────────────────────────────────────────────┤
 │                                                                │
 │  schemas/formSchemas.ts                                       │
-│  ├─ Zod schemas (validation + types)                         │
+│  ├─ LinkSchema (links validation)                            │
 │  ├─ GeneralFormSchema (Step 2)                               │
-│  └─ MonitorSchemaRegistry (Step 3, per system)               │
+│  ├─ Monitor schemas per system (Step 3)                      │
+│  ├─ Attachment schemas (URL, Elastic)                        │
+│  └─ getEntitySchema() builder                                │
 │                                                                │
 │  schemas/fieldConfigs.ts                                      │
 │  ├─ UI field configurations (labels, layout, types)          │
 │  ├─ GeneralFieldConfig (Step 2)                              │
 │  └─ MonitorFieldConfigs (Step 3, per system)                 │
 │                                                                │
-│  FormFields/                                                   │
-│  ├─ FormField.tsx (generic field renderer)                   │
-│  ├─ LinksField.tsx (custom array field)                      │
-│  └─ AsyncSelectField.tsx (async dropdown)                    │
-│                                                                │
-│  FormStepCard.tsx                                             │
-│  └─ React Hook Form integration                              │
+│  schemas/ruleSchemas.ts (future)                              │
+│  ├─ Rule field groups (generic, dynamic, etc.)               │
+│  └─ EntityRuleRegistry (rules per entity type)               │
 │                                                                │
 └───────────────────────────────────────────────────────────────┘
-```
-
-### Data Flow
-
-```mermaid
-graph TD
-    A[EntityConfig API] --> B[useEntityConfig]
-    B --> C[useEntityFlowState]
-    C --> D[EntityFlowContent]
-    D --> E[FlowStepper]
-    D --> F[StepContent]
-    F --> G[SystemStep]
-    F --> H[FormStepCard]
-    F --> I[TreeStep]
-    H --> J[React Hook Form]
-    J --> K[Zod Validation]
-    K --> L[FormField Components]
 ```
 
 ---
@@ -166,20 +124,6 @@ function App() {
       />
     </>
   )
-}
-```
-
-### Direct Hook Access
-
-```tsx
-import { useEntityFlowState } from './hooks/useEntityFlowState'
-
-function CustomEntityFlow() {
-  const controller = useEntityFlowState()
-  
-  console.log('Current step:', controller.activeStepKey)
-  console.log('Selected system:', controller.selectedSystem)
-  console.log('Form data:', controller.currentFormState)
 }
 ```
 
@@ -236,55 +180,6 @@ MonitorFieldConfigs['my_system'] = {
 
 ---
 
-## Modifying Existing Forms
-
-### Changing Validation Rules
-
-Update the Zod schema in `formSchemas.ts`:
-
-```typescript
-// BEFORE
-dc: z.string().min(1, 'DC is required'),
-
-// AFTER - Add max length
-dc: z.string().min(1, 'DC is required').max(10, 'DC too long'),
-```
-
-### Changing Field UI
-
-Update the field config in `fieldConfigs.ts`:
-
-```typescript
-// BEFORE
-{ name: 'dc', type: 'text', label: 'DC', colSpan: 4 }
-
-// AFTER - Change to dropdown
-{
-  name: 'dc',
-  type: 'select',
-  label: 'DC',
-  colSpan: 4,
-  options: [
-    { label: 'DC-01', value: 'dc01' },
-    { label: 'DC-02', value: 'dc02' },
-  ]
-}
-```
-
-### Adding a New Field
-
-1. Add to schema:
-```typescript
-newField: z.string().optional(),
-```
-
-2. Add to field config:
-```typescript
-{ name: 'newField', type: 'text', label: 'New Field', colSpan: 6 }
-```
-
----
-
 ## Field Types Reference
 
 | Type | Component | Props Required |
@@ -294,127 +189,34 @@ newField: z.string().optional(),
 | `number` | NumberInput | - |
 | `boolean` | Checkbox | - |
 | `select` | Select | `options` array |
-| `async-select` | AsyncSelectField | `apiEndpoint` string |
-| `links-array` | LinksField | - |
+| `async-select` | AsyncSelectField | `asyncOptions.path` |
 
 ---
 
 ## Hook API Reference
 
-### Configuration State
+### Visibility Flags
 
 | Field | Type | Description |
 |-------|------|-------------|
-| `config` | `EntityConfig \| null` | Loaded configuration from API |
-| `configStatus` | `'idle' \| 'loading' \| 'error' \| 'success'` | Loading status |
-| `configError` | `string \| null` | Error message |
-| `handleConfigRetry` | `() => void` | Retry loading |
+| `showSystemSelector` | `boolean` | Show system selection (monitor flow) |
+| `showGeneralSection` | `boolean` | Show general details section |
+| `showIconMenu` | `boolean` | Show icon picker |
+| `showMonitorSection` | `boolean` | Show monitor-specific fields |
+| `showBindingsPanel` | `boolean` | Show bindings tab |
 
-### Navigation
-
-| Field | Type | Description |
-|-------|------|-------------|
-| `flow` | `FlowId` | Current flow type |
-| `stepKeys` | `StepKey[]` | Steps in the current flow |
-| `activeStep` | `number` | Current step index |
-| `activeStepKey` | `StepKey \| null` | Current step identifier |
-| `isCompleted` | `boolean` | Whether the flow is completed |
-| `goToPreviousStep` | `() => void` | Navigate to previous step |
-| `handleAdvance` | `() => void` | Advance to next step |
-
-### System Selection
+### Handlers
 
 | Field | Type | Description |
 |-------|------|-------------|
-| `selectedSystem` | `string \| null` | Selected system ID |
-| `selectedSystemConfig` | `SystemDefinition \| null` | System configuration |
-| `handleSystemSelect` | `(systemId: string) => void` | Select a system |
-| `categories` | `CategoryDefinition[]` | Available categories |
-| `systems` | `Record<string, SystemDefinition>` | Available systems |
-
-### Forms
-
-| Field | Type | Description |
-|-------|------|-------------|
-| `currentFormState` | `Record<StepKey, unknown>` | Current form data |
-| `formDefinitions` | `FormDefinitionsState` | Loaded form schemas |
-| `formStatus` | `FormStatusState` | Form loading status |
-| `formErrors` | `FormErrorState` | Form errors |
-| `onFormChange` | `Function` | Handle form changes |
-| `requestFormDefinition` | `Function` | Load form definition |
-
-### Result
-
-| Field | Type | Description |
-|-------|------|-------------|
-| `result` | `AggregatedResult \| null` | Final aggregated result |
-| `resetFlowState` | `() => void` | Reset all state |
-
----
-
-## Advanced: Custom Field Components
-
-To create a custom field type:
-
-### 1. Create Component
-
-```tsx
-// FormFields/CustomField.tsx
-export function CustomField({ value, onChange, ...props }: FieldProps) {
-  return (
-    <YourCustomComponent
-      value={value}
-      onChange={onChange}
-      {...props}
-    />
-  )
-}
-```
-
-### 2. Register in FormField
-
-```tsx
-// FormFields/FormField.tsx
-case 'custom':
-  return <CustomField {...field} control={control} />
-```
-
-### 3. Use in Config
-
-```typescript
-{
-  name: 'myField',
-  type: 'custom',
-  label: 'My Custom Field',
-  colSpan: 12,
-}
-```
-
----
-
-## Migration Notes (RJSF → React Hook Form)
-
-**December 2024:** Migrated from RJSF to React Hook Form + Zod
-
-### Benefits
-- ✅ **93% smaller** - 3 packages vs 28 packages
-- ✅ **Type-safe** - Full TypeScript inference from Zod
-- ✅ **Client-side** - No backend dependency for schemas
-- ✅ **Maintainable** - Easier to customize and debug
-- ✅ **Modern** - Active ecosystem and better DX
-
-### Breaking Changes
-- Forms now use Zod instead of JSON Schema
-- No more RJSF widgets - use field configs instead
-- Validation errors use Zod format
-
-### Compatibility
-All existing functionality preserved:
-- ✅ Form validation
-- ✅ Async select fields
-- ✅ Custom links field
-- ✅ Multi-step flow
-- ✅ Dynamic forms per system
+| `handleFlowChange` | `(flow: FlowId) => void` | Change flow type |
+| `handleCategoryChange` | `(id: string \| null) => void` | Select category |
+| `handleSystemSelect` | `(id: string \| null) => void` | Select system |
+| `handleMeasurementsChange` | `(items: TreeSelection[]) => void` | Update measurements |
+| `handleAttachmentsChange` | `(items: Attachment[]) => void` | Update attachments |
+| `handleIconSelect` | `(systemId: string, icon?: string) => void` | Select icon |
+| `handleSave` | `() => void` | Submit form |
+| `resetForm` | `() => void` | Reset all state |
 
 ---
 
@@ -435,12 +237,15 @@ myField: z.string().min(1, 'Field is required')
 - Schema: `formSchemas.ts` 
 - Config: `fieldConfigs.ts`
 
-### Validation message not in Hebrew/English
+### Validation message not showing
 **Update the Zod schema message:**
 ```typescript
 z.string().min(1, 'הודעה בעברית') // Hebrew
 z.string().min(1, 'English message') // English
 ```
+
+### URL validation not showing on links
+The `LinkSchema` validates URLs with `z.string().url()`. Errors display on blur.
 
 ---
 
@@ -456,40 +261,12 @@ z.string().min(1, 'English message') // English
 
 ## Backend API
 
-The modal communicates with three endpoints:
+The modal communicates with these endpoints:
 
-1. **GET /config** - Load general configuration (systems, flows, steps)
-2. **GET /owning-teams** - Load teams for async select
-3. **GET /tree** - Load hierarchical tree nodes
+1. **GET /tree** - Load hierarchical tree nodes
 
-> **Note:** Form schemas are now client-side (no `/form-definition` endpoint needed)
+> **Note:** Form schemas are client-side (no backend dependency for validation)
 
 ---
 
-## Future Improvements
-
-### Potential Optimizations
-
-1. **Auto-generate field configs from schemas** (~200 lines saved)
-   - Use Zod `.describe()` for field metadata
-   - Reduce duplication between schemas and configs
-
-2. **Simplify form submission flow** 
-   - Flatten the call hierarchy
-   - Reduce indirection
-
-3. **Schema-driven field types**
-   - Infer `type: 'text'` from `z.string()`
-   - Infer `type: 'number'` from `z.number()`
-   - Minimal configuration needed
-
-### Considered Features
-
-- **Conditional fields** - Show/hide based on other values
-- **Field dependencies** - Validate based on other fields
-- **Multi-step validation** - Validate across steps
-- **Auto-save drafts** - Persist incomplete forms
-
----
-
-*Last updated: December 2024 (Added BindingsStep, Layout improvements)*
+*Last updated: December 2024*

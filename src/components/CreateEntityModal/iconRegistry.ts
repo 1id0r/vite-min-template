@@ -2,7 +2,6 @@ import type { IconType } from 'react-icons'
 import * as FiIcons from 'react-icons/fi'
 import * as MdIcons from 'react-icons/md'
 import * as SiIcons from 'react-icons/si'
-import type { FlowId } from './types'
 
 const iconRegistry = {
   ...FiIcons,
@@ -18,13 +17,8 @@ export const resolveIcon = (name?: string) => {
   return iconRegistry[name]
 }
 
-export const fallbackCategoryIconName = 'FiLayers'
-export const fallbackSystemIconName = 'FiBox'
-export const fallbackCategoryIcon = resolveIcon(fallbackCategoryIconName)!
-export const fallbackSystemIcon = resolveIcon(fallbackSystemIconName)!
-export const categoryPrefixIcon = resolveIcon('FiArrowLeft') ?? fallbackCategoryIcon
+export const fallbackSystemIcon = resolveIcon('FiBox')!
 
-export const DISPLAY_FLOW_ID: FlowId = 'display'
 export const DISPLAY_FLOW_SYSTEM_IDS: string[] = [
   'sql_server',
   'postgresql',
@@ -43,7 +37,5 @@ export const DISPLAY_FLOW_SYSTEM_IDS: string[] = [
   'jupyter',
   'llm',
   'dns',
-  'gslb',
 ]
 
-export { iconRegistry }

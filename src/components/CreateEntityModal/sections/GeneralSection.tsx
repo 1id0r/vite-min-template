@@ -138,12 +138,7 @@ export const GeneralSection = memo(function GeneralSection({ compact }: GeneralS
                   error={errors.links?.[index]?.url?.message}
                   {...register(`links.${index}.url`)}
                 />
-                <ActionIcon
-                  variant='subtle'
-                  color='red'
-                  onClick={() => handleRemoveLink(index)}
-                  mt={errors.links?.[index] ? 0 : 0}
-                >
+                <ActionIcon variant='subtle' color='red' onClick={() => handleRemoveLink(index)}>
                   <IconX size={14} />
                 </ActionIcon>
               </Group>
