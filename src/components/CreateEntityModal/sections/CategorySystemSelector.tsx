@@ -59,7 +59,7 @@ export const CategorySystemSelector = memo(function CategorySystemSelector({
   return (
     <Stack gap='sm'>
       <Select
-        label='קטגוריה'
+        label='עולם מוצרים'
         placeholder='בחר קטגוריה'
         data={categoryOptions}
         value={selectedCategory}
@@ -69,7 +69,7 @@ export const CategorySystemSelector = memo(function CategorySystemSelector({
         styles={{ label: { fontWeight: 600 } }}
       />
       <Select
-        label='יישות'
+        label='סוג מוצר'
         placeholder='בחר יישות'
         data={entityOptions}
         value={selectedSystem}

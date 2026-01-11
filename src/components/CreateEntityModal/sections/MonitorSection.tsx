@@ -1,13 +1,14 @@
 /**
- * MonitorSection - Dynamic Monitor Configuration
+ * MonitorSection - Dynamic Monitor Configuration (פרטי היישות)
  *
  * Renders system-specific monitor fields based on the selected system.
  * Uses field configs from fieldConfigs.ts to generate the form.
+ * Includes a "בדוק ולידציה" (Check Validation) button for future validation integration.
  */
 
 import { memo, useMemo } from 'react'
 import { useFormContext, Controller } from 'react-hook-form'
-import { Box, Grid, Text, TextInput, NumberInput, Checkbox, Textarea, Select, Divider } from '@mantine/core'
+import { Box, Grid, Text, TextInput, NumberInput, Checkbox, Textarea, Select, Button, Stack } from '@mantine/core'
 import { getMonitorFieldConfig, type FieldConfig } from '../../../schemas/fieldConfigs'
 import type { EntityFormData } from '../hooks/useEntityForm'
 
@@ -28,19 +29,31 @@ export const MonitorSection = memo(function MonitorSection({ systemId }: Monitor
     return null
   }
 
+  const handleValidate = () => {
+    // Placeholder for future validation integration
+    console.log('Validate button clicked - will connect to validation component later')
+  }
+
   return (
     <Box>
       <Text size='sm' fw={700} c='gray.8' mb='xs' dir='rtl'>
-        {fieldConfig.title || 'פרטי מוניטור'}
+        פרטי היישות
       </Text>
-      <Grid gutter='md'>
-        {fieldConfig.fields.map((field) => (
-          <Grid.Col key={field.name} span={field.colSpan || 6}>
-            <MonitorField field={field} control={control} error={(errors.monitor as any)?.[field.name]?.message} />
-          </Grid.Col>
-        ))}
-      </Grid>
-      <Divider my='md' />
+      <Stack gap='md'>
+        {/* Dynamic Fields */}
+        <Grid gutter='md'>
+          {fieldConfig.fields.map((field) => (
+            <Grid.Col key={field.name} span={12}>
+              <MonitorField field={field} control={control} error={(errors.monitor as any)?.[field.name]?.message} />
+            </Grid.Col>
+          ))}
+        </Grid>
+
+        {/* Validate Button */}
+        <Button variant='outline' color='gray' size='sm' onClick={handleValidate} style={{ alignSelf: 'flex-start' }}>
+          בדוק ולידציה
+        </Button>
+      </Stack>
     </Box>
   )
 })
@@ -60,6 +73,12 @@ interface MonitorFieldProps {
 const MonitorField = memo(function MonitorField({ field, control, error }: MonitorFieldProps) {
   const name = `monitor.${field.name}` as const
 
+  // Common label style matching mock design
+  const labelStyles = {
+    label: { fontWeight: 600 },
+    input: { textAlign: 'right' as const },
+  }
+
   switch (field.type) {
     case 'text':
       return (
@@ -69,13 +88,14 @@ const MonitorField = memo(function MonitorField({ field, control, error }: Monit
           render={({ field: rhfField }) => (
             <TextInput
               label={field.label}
-              placeholder={field.placeholder}
+              placeholder={field.placeholder || 'הזן שדה'}
               required={field.required}
               disabled={field.disabled}
               error={error}
+              dir='rtl'
               {...rhfField}
               value={rhfField.value || ''}
-              styles={{ label: { fontWeight: 600 } }}
+              styles={labelStyles}
             />
           )}
         />
@@ -89,13 +109,14 @@ const MonitorField = memo(function MonitorField({ field, control, error }: Monit
           render={({ field: rhfField }) => (
             <NumberInput
               label={field.label}
-              placeholder={field.placeholder}
+              placeholder={field.placeholder || 'הזן שדה'}
               required={field.required}
               disabled={field.disabled}
               error={error}
+              dir='rtl'
               value={rhfField.value || ''}
               onChange={rhfField.onChange}
-              styles={{ label: { fontWeight: 600 } }}
+              styles={labelStyles}
             />
           )}
         />
@@ -109,13 +130,14 @@ const MonitorField = memo(function MonitorField({ field, control, error }: Monit
           render={({ field: rhfField }) => (
             <Textarea
               label={field.label}
-              placeholder={field.placeholder}
+              placeholder={field.placeholder || 'הזן שדה'}
               required={field.required}
               disabled={field.disabled}
               error={error}
+              dir='rtl'
               {...rhfField}
               value={rhfField.value || ''}
-              styles={{ label: { fontWeight: 600 } }}
+              styles={labelStyles}
             />
           )}
         />
@@ -146,14 +168,15 @@ const MonitorField = memo(function MonitorField({ field, control, error }: Monit
           render={({ field: rhfField }) => (
             <Select
               label={field.label}
-              placeholder={field.placeholder}
+              placeholder={field.placeholder || 'בחר'}
               required={field.required}
               disabled={field.disabled}
               error={error}
+              dir='rtl'
               data={field.options || []}
               value={rhfField.value || null}
               onChange={rhfField.onChange}
-              styles={{ label: { fontWeight: 600 } }}
+              styles={labelStyles}
             />
           )}
         />
@@ -168,14 +191,15 @@ const MonitorField = memo(function MonitorField({ field, control, error }: Monit
           render={({ field: rhfField }) => (
             <Select
               label={field.label}
-              placeholder={field.asyncOptions?.placeholder || 'Select...'}
+              placeholder={field.asyncOptions?.placeholder || 'בחר...'}
               required={field.required}
               disabled={field.disabled}
               error={error}
+              dir='rtl'
               data={[]} // Would be loaded from API
               value={rhfField.value || null}
               onChange={rhfField.onChange}
-              styles={{ label: { fontWeight: 600 } }}
+              styles={labelStyles}
               searchable
             />
           )}
