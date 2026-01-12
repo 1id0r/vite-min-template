@@ -1,22 +1,13 @@
-import {
-  ActionIcon,
-  Box,
-  Group,
-  NumberInput,
-  Paper,
-  Select,
-  Stack,
-  Text,
-  Textarea,
-  TextInput,
-  Grid,
-} from '@mantine/core'
-import { BsTrash } from 'react-icons/bs'
+import { Button, Card, Input, InputNumber, Select, Row, Col, Space, Typography, Segmented } from 'antd'
+import { DeleteOutlined } from '@ant-design/icons'
 import { Controller, useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useEffect } from 'react'
 import type { Attachment, ElasticAttachment, UrlAttachment } from '../../../types/entity'
 import { ElasticAttachmentSchema, UrlAttachmentSchema } from '../../../schemas/formSchemas'
+
+const { Text } = Typography
+const { TextArea } = Input
 
 interface BindingCardProps {
   attachment: Attachment
@@ -37,7 +28,7 @@ export function BindingCard({ attachment, onChange, onDelete }: BindingCardProps
     reset,
     formState: {},
   } = useForm<Attachment>({
-    resolver: zodResolver(schema) as any, // Temporary cast to resolve complex union type mismatch
+    resolver: zodResolver(schema) as any,
     defaultValues: attachment,
     mode: 'onChange',
   })
@@ -45,7 +36,6 @@ export function BindingCard({ attachment, onChange, onDelete }: BindingCardProps
   // Watch for changes and propagate up
   useEffect(() => {
     const subscription = watch((value) => {
-      // Cast partially filled data to Attachment type for update
       onChange({ ...attachment, ...value } as Attachment)
     })
     return () => subscription.unsubscribe()
@@ -81,79 +71,48 @@ export function BindingCard({ attachment, onChange, onDelete }: BindingCardProps
     }
   }
 
-  return (
-    <Paper withBorder p='md' radius='md' style={{ position: 'relative' }}>
-      <Stack gap='md'>
-        {/* Header with Type Selector and Delete */}
-        <Group justify='space-between' align='flex-start'>
-          <Box>
-            <Text size='sm' fw={500} mb={4}>
-              סוג הצמדה <span style={{ color: 'red' }}>*</span>
-            </Text>
-            <Box
-              style={{
-                display: 'flex',
-                border: '1px solid #E5E7EB',
-                borderRadius: 16,
-                overflow: 'hidden',
-                backgroundColor: '#FFFFFF',
-                width: 'fit-content',
-              }}
-            >
-              {[
-                { label: 'URL', value: 'url' },
-                { label: 'ELASTIC', value: 'elastic' },
-                { label: 'MONGO', value: 'mongo', disabled: true },
-                { label: 'SQL', value: 'sql', disabled: true },
-                { label: 'REDIS', value: 'redis', disabled: true },
-              ].map((option, index, arr) => {
-                const isActive = option.value === attachment.type
-                const isLast = index === arr.length - 1
+  const typeOptions = [
+    { label: 'URL', value: 'url' },
+    { label: 'ELASTIC', value: 'elastic' },
+    { label: 'MONGO', value: 'mongo', disabled: true },
+    { label: 'SQL', value: 'sql', disabled: true },
+    { label: 'REDIS', value: 'redis', disabled: true },
+  ]
 
-                return (
-                  <button
-                    key={option.value}
-                    type='button'
-                    onClick={() => !option.disabled && handleTypeChange(option.value)}
-                    disabled={option.disabled}
-                    style={{
-                      padding: '6px 16px',
-                      border: 'none',
-                      borderLeft: isLast ? 'none' : '1px solid #E5E7EB',
-                      backgroundColor: isActive ? '#0B5FFF' : '#FFFFFF',
-                      color: isActive ? '#FFFFFF' : option.disabled ? '#9CA3AF' : '#111827',
-                      fontWeight: 600,
-                      fontSize: '14px',
-                      cursor: option.disabled ? 'not-allowed' : 'pointer',
-                      transition: 'background-color 0.2s, color 0.2s',
-                    }}
-                  >
-                    {option.label}
-                  </button>
-                )
-              })}
-            </Box>
-          </Box>
-          <ActionIcon variant='subtle' color='red' onClick={onDelete}>
-            <BsTrash size={16} />
-          </ActionIcon>
-        </Group>
+  return (
+    <Card size='small' style={{ position: 'relative' }}>
+      <Space direction='vertical' size='middle' style={{ width: '100%' }}>
+        {/* Header with Type Selector and Delete */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+          <div>
+            <Text strong style={{ fontSize: 14, display: 'block', marginBottom: 4 }}>
+              סוג הצמדה <span style={{ color: '#ff4d4f' }}>*</span>
+            </Text>
+            <Segmented
+              options={typeOptions}
+              value={attachment.type}
+              onChange={(value) => handleTypeChange(value as string)}
+            />
+          </div>
+          <Button type='text' danger icon={<DeleteOutlined />} onClick={onDelete} />
+        </div>
 
         {/* Common Name Field */}
         <Controller
           name='name'
           control={control}
           render={({ field, fieldState }) => (
-            <TextInput
-              {...field}
-              label={
-                <span>
-                  שם הצמדה<span style={{ color: 'red' }}>*</span>
-                </span>
-              }
-              placeholder='שם הצמדה'
-              error={fieldState.error?.message}
-            />
+            <div>
+              <Text strong style={{ fontSize: 14, display: 'block', marginBottom: 4 }}>
+                שם הצמדה <span style={{ color: '#ff4d4f' }}>*</span>
+              </Text>
+              <Input {...field} placeholder='שם הצמדה' status={fieldState.error ? 'error' : undefined} />
+              {fieldState.error && (
+                <Text type='danger' style={{ fontSize: 12 }}>
+                  {fieldState.error.message}
+                </Text>
+              )}
+            </div>
           )}
         />
 
@@ -163,16 +122,17 @@ export function BindingCard({ attachment, onChange, onDelete }: BindingCardProps
             name='address'
             control={control}
             render={({ field, fieldState }) => (
-              <TextInput
-                {...field}
-                label={
-                  <span>
-                    URL <span style={{ color: 'red' }}>*</span>
-                  </span>
-                }
-                placeholder='כתובת לייצוא'
-                error={fieldState.error?.message}
-              />
+              <div>
+                <Text strong style={{ fontSize: 14, display: 'block', marginBottom: 4 }}>
+                  URL <span style={{ color: '#ff4d4f' }}>*</span>
+                </Text>
+                <Input {...field} placeholder='כתובת לייצוא' status={fieldState.error ? 'error' : undefined} />
+                {fieldState.error && (
+                  <Text type='danger' style={{ fontSize: 12 }}>
+                    {fieldState.error.message}
+                  </Text>
+                )}
+              </div>
             )}
           />
         )}
@@ -180,65 +140,67 @@ export function BindingCard({ attachment, onChange, onDelete }: BindingCardProps
         {/* Elastic Specific Fields */}
         {isElastic && (
           <>
-            <Grid>
-              <Grid.Col span={6}>
+            <Row gutter={16}>
+              <Col span={12}>
                 <Controller
                   name='cluster'
                   control={control}
                   render={({ field, fieldState }) => (
-                    <Select
-                      {...field}
-                      label={
-                        <span>
-                          Cluster <span style={{ color: 'red' }}>*</span>
-                        </span>
-                      }
-                      placeholder='Select Cluster'
-                      data={['Cluster A', 'Cluster B']} // Mock data
-                      error={fieldState.error?.message}
-                    />
+                    <div>
+                      <Text strong style={{ fontSize: 14, display: 'block', marginBottom: 4 }}>
+                        Cluster <span style={{ color: '#ff4d4f' }}>*</span>
+                      </Text>
+                      <Select
+                        {...field}
+                        placeholder='Select Cluster'
+                        options={[
+                          { label: 'Cluster A', value: 'Cluster A' },
+                          { label: 'Cluster B', value: 'Cluster B' },
+                        ]}
+                        status={fieldState.error ? 'error' : undefined}
+                        style={{ width: '100%' }}
+                      />
+                      {fieldState.error && (
+                        <Text type='danger' style={{ fontSize: 12 }}>
+                          {fieldState.error.message}
+                        </Text>
+                      )}
+                    </div>
                   )}
                 />
-              </Grid.Col>
-              <Grid.Col span={6}>
+              </Col>
+              <Col span={12}>
                 <Controller
                   name='index'
                   control={control}
                   render={({ field, fieldState }) => (
-                    <TextInput
-                      {...field}
-                      label={
-                        <span>
-                          Index <span style={{ color: 'red' }}>*</span>
-                        </span>
-                      }
-                      placeholder='Index'
-                      error={fieldState.error?.message}
-                    />
+                    <div>
+                      <Text strong style={{ fontSize: 14, display: 'block', marginBottom: 4 }}>
+                        Index <span style={{ color: '#ff4d4f' }}>*</span>
+                      </Text>
+                      <Input {...field} placeholder='Index' status={fieldState.error ? 'error' : undefined} />
+                      {fieldState.error && (
+                        <Text type='danger' style={{ fontSize: 12 }}>
+                          {fieldState.error.message}
+                        </Text>
+                      )}
+                    </div>
                   )}
                 />
-              </Grid.Col>
-            </Grid>
+              </Col>
+            </Row>
 
             {/* Schedule & Timeout Row */}
-            <Grid align='flex-end'>
-              <Grid.Col span={6}>
-                <Text size='sm' fw={500} mb={3}>
-                  תזמון שליפה <span style={{ color: 'red' }}>*</span>
+            <Row gutter={16}>
+              <Col span={12}>
+                <Text strong style={{ fontSize: 14, display: 'block', marginBottom: 4 }}>
+                  תזמון שליפה <span style={{ color: '#ff4d4f' }}>*</span>
                 </Text>
-                <Group gap={0}>
+                <Space.Compact style={{ width: '100%' }}>
                   <Controller
                     name='scheduleValue'
                     control={control}
-                    render={({ field }) => (
-                      <NumberInput
-                        {...field}
-                        min={1}
-                        style={{ flex: 1 }}
-                        rightSectionWidth={0}
-                        styles={{ input: { borderTopRightRadius: 0, borderBottomRightRadius: 0 } }}
-                      />
-                    )}
+                    render={({ field }) => <InputNumber {...field} min={1} style={{ flex: 1 }} />}
                   />
                   <Controller
                     name='scheduleUnit'
@@ -246,63 +208,64 @@ export function BindingCard({ attachment, onChange, onDelete }: BindingCardProps
                     render={({ field }) => (
                       <Select
                         {...field}
-                        data={[
+                        options={[
                           { label: 'דקות', value: 'minutes' },
                           { label: 'שעות', value: 'hours' },
                         ]}
-                        styles={{ input: { borderTopLeftRadius: 0, borderBottomLeftRadius: 0 } }}
                         style={{ width: 80 }}
                       />
                     )}
                   />
-                </Group>
-              </Grid.Col>
+                </Space.Compact>
+              </Col>
 
-              <Grid.Col span={6}>
-                <Text size='sm' fw={500} mb={3}>
-                  Timeout (0-60s) <span style={{ color: 'red' }}>*</span>
+              <Col span={12}>
+                <Text strong style={{ fontSize: 14, display: 'block', marginBottom: 4 }}>
+                  Timeout (0-60s) <span style={{ color: '#ff4d4f' }}>*</span>
                 </Text>
                 <Controller
                   name='timeout'
                   control={control}
                   render={({ field: { value, onChange } }) => {
-                    // Parse "30s" to 30 for the slider/number input
                     const numValue = parseInt(String(value).replace('s', '')) || 30
                     return (
-                      <NumberInput
+                      <InputNumber
                         value={numValue}
                         onChange={(val) => onChange(`${val}s`)}
                         min={0}
                         max={60}
-                        suffix='s'
+                        addonAfter='s'
+                        style={{ width: '100%' }}
                       />
                     )
                   }}
                 />
-              </Grid.Col>
-            </Grid>
+              </Col>
+            </Row>
 
             <Controller
               name='query'
               control={control}
               render={({ field, fieldState }) => (
-                <Textarea
-                  {...field}
-                  label={
-                    <span>
-                      json<span style={{ color: 'red' }}>*</span>
-                    </span>
-                  }
-                  placeholder=''
-                  minRows={4}
-                  error={fieldState.error?.message}
-                  description='JSON format required'
-                />
+                <div>
+                  <Text strong style={{ fontSize: 14, display: 'block', marginBottom: 4 }}>
+                    json <span style={{ color: '#ff4d4f' }}>*</span>
+                  </Text>
+                  <TextArea {...field} placeholder='' rows={4} status={fieldState.error ? 'error' : undefined} />
+                  <Text type='secondary' style={{ fontSize: 12 }}>
+                    JSON format required
+                  </Text>
+                  {fieldState.error && (
+                    <Text type='danger' style={{ fontSize: 12, display: 'block' }}>
+                      {fieldState.error.message}
+                    </Text>
+                  )}
+                </div>
               )}
             />
           </>
         )}
-      </Stack>
-    </Paper>
+      </Space>
+    </Card>
   )
 }

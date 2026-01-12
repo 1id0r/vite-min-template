@@ -2,13 +2,15 @@
  * CategorySystemSelector - Two-Select System Picker
  *
  * Replaces the grid-based category/system selection with two dropdowns:
- * 1. Category select
- * 2. Entity select (filtered by selected category)
+ * 1. Category select (עולם מוצרים)
+ * 2. Entity select (סוג מוצר) - filtered by selected category
  */
 
 import { memo, useMemo } from 'react'
-import { Select, Stack } from '@mantine/core'
+import { Select, Space, Typography } from 'antd'
 import type { CategoryDefinition, SystemDefinition } from '../../../types/entity'
+
+const { Text } = Typography
 
 interface CategorySystemSelectorProps {
   categories: CategoryDefinition[]
@@ -57,29 +59,35 @@ export const CategorySystemSelector = memo(function CategorySystemSelector({
   }
 
   return (
-    <Stack gap='sm'>
-      <Select
-        label='עולם מוצרים'
-        placeholder='בחר קטגוריה'
-        data={categoryOptions}
-        value={selectedCategory}
-        onChange={handleCategoryChange}
-        clearable
-        dir='rtl'
-        styles={{ label: { fontWeight: 600 } }}
-      />
-      <Select
-        label='סוג מוצר'
-        placeholder='בחר יישות'
-        data={entityOptions}
-        value={selectedSystem}
-        onChange={onSystemChange}
-        disabled={!selectedCategory}
-        clearable
-        dir='rtl'
-        styles={{ label: { fontWeight: 600 } }}
-      />
-    </Stack>
+    <Space direction='vertical' style={{ width: '100%', direction: 'rtl' }} size='middle'>
+      <div style={{ display: 'flex', alignItems: 'center' }}>
+        <Text strong style={{ fontSize: 14, width: 100, marginLeft: 16 }}>
+          עולם מוצרים
+        </Text>
+        <Select
+          placeholder='בחר קטגוריה'
+          options={categoryOptions}
+          value={selectedCategory}
+          onChange={handleCategoryChange}
+          allowClear
+          style={{ flex: 1, direction: 'rtl' }}
+        />
+      </div>
+      <div style={{ display: 'flex', alignItems: 'center' }}>
+        <Text strong style={{ fontSize: 14, width: 100, marginLeft: 16 }}>
+          סוג מוצר
+        </Text>
+        <Select
+          placeholder='בחר יישות'
+          options={entityOptions}
+          value={selectedSystem}
+          onChange={onSystemChange}
+          disabled={!selectedCategory}
+          allowClear
+          style={{ flex: 1, direction: 'rtl' }}
+        />
+      </div>
+    </Space>
   )
 })
 

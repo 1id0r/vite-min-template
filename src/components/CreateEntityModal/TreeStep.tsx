@@ -1,16 +1,18 @@
 import { useEffect, useMemo, useState } from 'react'
-import { ActionIcon, Badge, Box, Flex, Group, Loader, Paper, Stack, Text, TextInput } from '@mantine/core'
-import { FiSearch } from 'react-icons/fi'
+import { Input, Button, Tag, Space, Spin, Card, Typography } from 'antd'
+import { SearchOutlined, PlusOutlined, MinusOutlined, DownOutlined, RightOutlined } from '@ant-design/icons'
 import type { ApiTreeNode, TreeSelectionList } from '../../types/tree'
 import { fetchTreeNodes } from '../../api/client'
 
-type MantineNode = {
+const { Text } = Typography
+
+type TreeNode = {
   label: React.ReactNode
   value: string
-  children?: MantineNode[]
+  children?: TreeNode[]
 }
 
-function apiToMantine(node: ApiTreeNode): MantineNode {
+function apiToMantine(node: ApiTreeNode): TreeNode {
   return {
     label: node.DisplayName,
     value: node.VID,
@@ -18,7 +20,7 @@ function apiToMantine(node: ApiTreeNode): MantineNode {
   }
 }
 
-function updateNodeChildren(nodes: MantineNode[], value: string, children: MantineNode[]): MantineNode[] {
+function updateNodeChildren(nodes: TreeNode[], value: string, children: TreeNode[]): TreeNode[] {
   return nodes.map((n) => {
     if (n.value === value) {
       return { ...n, children }
@@ -39,12 +41,12 @@ interface TreeStepProps {
 }
 
 export function TreeStep({ selection, onSelectionChange }: TreeStepProps) {
-  const [data, setData] = useState<MantineNode[] | null>(null)
+  const [data, setData] = useState<TreeNode[] | null>(null)
   const [expanded, setExpanded] = useState<string[]>([])
   const [loading, setLoading] = useState<Record<string, boolean>>({})
   const selectedIds = useMemo(() => new Set(selection.map((item) => item.vid)), [selection])
   const [searchTerm, setSearchTerm] = useState('')
-  const [searchResults, setSearchResults] = useState<MantineNode[]>([])
+  const [searchResults, setSearchResults] = useState<TreeNode[]>([])
   const [searching, setSearching] = useState(false)
   const [searchError, setSearchError] = useState<string | null>(null)
 
@@ -71,7 +73,7 @@ export function TreeStep({ selection, onSelectionChange }: TreeStepProps) {
   const SEARCH_ENDPOINT = 'https://replace-with-real-api/tree-search'
   const APP_TOKEN = '123lidor'
 
-  const fetchSearchResults = async (term: string, signal?: AbortSignal): Promise<MantineNode[]> => {
+  const fetchSearchResults = async (term: string, signal?: AbortSignal): Promise<TreeNode[]> => {
     const url = new URL(SEARCH_ENDPOINT)
     url.searchParams.set('name', term)
 
@@ -120,7 +122,7 @@ export function TreeStep({ selection, onSelectionChange }: TreeStepProps) {
     }
   }, [isSearching, trimmedSearch])
 
-  const addSelection = (node: MantineNode) => {
+  const addSelection = (node: TreeNode) => {
     if (selectedIds.has(node.value)) {
       return
     }
@@ -131,7 +133,7 @@ export function TreeStep({ selection, onSelectionChange }: TreeStepProps) {
     onSelectionChange(selection.filter((item) => item.vid !== vid))
   }
 
-  const toggleSelection = (node: MantineNode) => {
+  const toggleSelection = (node: TreeNode) => {
     if (selectedIds.has(node.value)) {
       removeSelection(node.value)
     } else {
@@ -139,7 +141,7 @@ export function TreeStep({ selection, onSelectionChange }: TreeStepProps) {
     }
   }
 
-  const TreeNodeView: React.FC<{ node: MantineNode; depth?: number }> = ({ node, depth = 0 }) => {
+  const TreeNodeView: React.FC<{ node: TreeNode; depth?: number }> = ({ node, depth = 0 }) => {
     const isOpen = expanded.includes(node.value)
     const isSelected = selectedIds.has(node.value)
 
@@ -155,11 +157,12 @@ export function TreeStep({ selection, onSelectionChange }: TreeStepProps) {
     }
 
     return (
-      <Box style={{ marginBottom: 8, direction: 'rtl' }}>
-        <Flex
-          align='center'
-          gap='sm'
+      <div style={{ marginBottom: 8, direction: 'rtl' }}>
+        <div
           style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 8,
             width: '100%',
             padding: '10px 12px',
             borderRadius: 10,
@@ -169,49 +172,36 @@ export function TreeStep({ selection, onSelectionChange }: TreeStepProps) {
             boxShadow: isSelected ? '0 2px 6px rgba(76, 110, 245, 0.12)' : '0 1px 3px rgba(0,0,0,0.04)',
           }}
         >
-          <ActionIcon
-            variant='subtle'
-            radius='xl'
-            color='indigo'
-            size='lg'
+          <Button
+            type='text'
+            shape='circle'
+            size='small'
             onClick={handleExpandToggle}
             aria-label={isOpen ? 'Collapse' : 'Expand'}
-          >
-            <Text fw={700} size='lg'>
-              {isOpen ? '▾' : '▸'}
-            </Text>
-          </ActionIcon>
+            icon={isOpen ? <DownOutlined /> : <RightOutlined />}
+          />
 
-          <Flex
-            align='center'
-            gap='xs'
-            style={{ flex: 1, cursor: 'pointer', minWidth: 0 }}
-            onClick={() => toggleSelection(node)}
-          >
-            <Text size='sm' fw={500} c='gray.9' style={{ wordBreak: 'break-word' }}>
+          <div style={{ flex: 1, cursor: 'pointer', minWidth: 0 }} onClick={() => toggleSelection(node)}>
+            <Text strong style={{ wordBreak: 'break-word' }}>
               {node.label}
             </Text>
-          </Flex>
+          </div>
 
-          <Group gap={6} wrap='nowrap'>
-            {loading[node.value] && <Loader size='xs' />}
-            <ActionIcon
-              variant={isSelected ? 'filled' : 'light'}
-              color='indigo'
-              radius='xl'
-              size='lg'
+          <Space size={6}>
+            {loading[node.value] && <Spin size='small' />}
+            <Button
+              type={isSelected ? 'primary' : 'default'}
+              shape='circle'
+              size='small'
               aria-label={isSelected ? 'Remove from selection' : 'Add to selection'}
               onClick={() => toggleSelection(node)}
-            >
-              <Text fw={800} size='lg'>
-                {isSelected ? '-' : '+'}
-              </Text>
-            </ActionIcon>
-          </Group>
-        </Flex>
+              icon={isSelected ? <MinusOutlined /> : <PlusOutlined />}
+            />
+          </Space>
+        </div>
 
         {isOpen && node.children && node.children.length > 0 && (
-          <Box
+          <div
             style={{
               marginRight: 24,
               marginTop: 8,
@@ -223,108 +213,83 @@ export function TreeStep({ selection, onSelectionChange }: TreeStepProps) {
             {node.children.map((c) => (
               <TreeNodeView key={c.value} node={c} depth={depth + 1} />
             ))}
-          </Box>
+          </div>
         )}
-      </Box>
+      </div>
     )
   }
 
   if (!data) {
-    return <Loader />
+    return <Spin />
   }
 
   return (
-    <Stack gap='md' style={{ direction: 'rtl' }}>
-      <TextInput
+    <Space direction='vertical' size='middle' style={{ width: '100%', direction: 'rtl' }}>
+      <Input
         value={searchTerm}
-        onChange={(e) => setSearchTerm(e.currentTarget.value)}
+        onChange={(e) => setSearchTerm(e.target.value)}
         placeholder='חיפוש'
-        radius='lg'
-        size='md'
-        rightSection={<FiSearch size={16} color='#6B7280' />}
-        styles={{
-          input: {
-            textAlign: 'right',
-          },
-        }}
+        prefix={<SearchOutlined style={{ color: '#6B7280' }} />}
+        style={{ textAlign: 'right' }}
       />
 
-      <Stack gap={6}>
-        <Text size='sm' fw={600}>
+      <div>
+        <Text strong style={{ fontSize: 14, display: 'block', marginBottom: 8 }}>
           בחירות
         </Text>
-        <Paper withBorder radius='md' p='sm'>
+        <Card size='small'>
           {selection.length === 0 ? (
-            <Text size='xs' c='dimmed'>
+            <Text type='secondary' style={{ fontSize: 12 }}>
               הוסיפו פריטים באמצעות הסימן +
             </Text>
           ) : (
-            <Group gap='xs'>
+            <Space size={4} wrap>
               {selection.map((item) => (
-                <Badge
-                  key={item.vid}
-                  radius='xl'
-                  variant='light'
-                  color='indigo'
-                  rightSection={
-                    <ActionIcon
-                      size='xs'
-                      variant='subtle'
-                      color='indigo'
-                      radius='xl'
-                      aria-label='הסר'
-                      onClick={() => removeSelection(item.vid)}
-                    >
-                      <Text fw={800} size={'sm'}>
-                        x
-                      </Text>
-                    </ActionIcon>
-                  }
-                >
+                <Tag key={item.vid} color='blue' closable onClose={() => removeSelection(item.vid)}>
                   {item.displayName}
-                </Badge>
+                </Tag>
               ))}
-            </Group>
+            </Space>
           )}
-        </Paper>
-      </Stack>
+        </Card>
+      </div>
 
       {isSearching ? (
-        <Stack gap={8}>
-          <Group gap='xs' align='center'>
-            <Text size='sm' fw={600}>
+        <div>
+          <Space align='center' style={{ marginBottom: 8 }}>
+            <Text strong style={{ fontSize: 14 }}>
               תוצאות חיפוש
             </Text>
-            {searching && <Loader size='xs' />}
-          </Group>
+            {searching && <Spin size='small' />}
+          </Space>
           {searchError && (
-            <Text size='sm' c='red.6'>
+            <Text type='danger' style={{ fontSize: 14 }}>
               {searchError}
             </Text>
           )}
           {!searching && searchResults.length === 0 && !searchError && (
-            <Text size='sm' c='dimmed'>
+            <Text type='secondary' style={{ fontSize: 14 }}>
               אין תוצאות לחיפוש
             </Text>
           )}
-          <Box>
+          <div>
             {searchResults.map((n) => (
               <TreeNodeView key={n.value} node={n} />
             ))}
-          </Box>
-        </Stack>
+          </div>
+        </div>
       ) : (
-        <Stack gap={8}>
-          <Text size='sm' c='dimmed'>
+        <div>
+          <Text type='secondary' style={{ fontSize: 14, display: 'block', marginBottom: 8 }}>
             הרחיבו ענפים ובחרו באמצעות +
           </Text>
-          <Box>
+          <div>
             {data.map((n) => (
               <TreeNodeView key={n.value} node={n} />
             ))}
-          </Box>
-        </Stack>
+          </div>
+        </div>
       )}
-    </Stack>
+    </Space>
   )
 }

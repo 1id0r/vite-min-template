@@ -10,8 +10,8 @@
  */
 
 import { memo, useState } from 'react'
-import { FormProvider } from 'react-hook-form'
-import { Box, Button, Divider, ScrollArea, Stack, Text, TextInput, Textarea } from '@mantine/core'
+import { FormProvider, Controller } from 'react-hook-form'
+import { Button, Input, Typography, Space } from 'antd'
 import { FlowSelector } from './FlowSelector'
 import { DisplayIconMenu } from './DisplayIconMenu'
 import { MonitorSection, CategorySystemSelector, LinksSection } from './sections'
@@ -19,6 +19,9 @@ import { FormStepper } from './FormStepper'
 import { useEntityForm, type EntityFormData } from './hooks/useEntityForm'
 import { DISPLAY_FLOW_SYSTEM_IDS, fallbackSystemIcon } from './iconRegistry'
 import { ResultSummary } from './ResultSummary'
+
+const { Text } = Typography
+const { TextArea } = Input
 
 interface EntityFormProps {
   onSave?: (data: EntityFormData) => void
@@ -79,7 +82,7 @@ export const EntityForm = memo(function EntityForm({ onSave }: EntityFormProps) 
 
   return (
     <FormProvider {...form}>
-      <Box
+      <div
         style={{
           height: '100%',
           display: 'flex',
@@ -87,8 +90,8 @@ export const EntityForm = memo(function EntityForm({ onSave }: EntityFormProps) 
         }}
       >
         {/* Scrollable Content */}
-        <ScrollArea style={{ flex: 1 }} offsetScrollbars>
-          <Stack gap='md' p='md'>
+        <div style={{ flex: 1, overflowY: 'auto', padding: 16 }}>
+          <Space direction='vertical' size='middle' style={{ width: '100%' }}>
             {/* Flow Selector - Always visible */}
             <FlowSelector
               flow={flow}
@@ -103,7 +106,7 @@ export const EntityForm = memo(function EntityForm({ onSave }: EntityFormProps) 
             {currentStep === 1 && (
               <>
                 {/* פרטים כלליים Section Header */}
-                <Text size='md' fw={700} c='gray.8' ta='center' dir='rtl'>
+                <Text strong style={{ fontSize: 16, display: 'block', textAlign: 'right', marginBottom: 16 }}>
                   פרטים כלליים
                 </Text>
 
@@ -121,35 +124,59 @@ export const EntityForm = memo(function EntityForm({ onSave }: EntityFormProps) 
 
                 {/* Name and Description - Visible after system selection */}
                 {showGeneralSection && (
-                  <>
-                    <TextInput
-                      label='שם מוצר'
-                      placeholder='הזן שם מוצר'
-                      required
-                      dir='rtl'
-                      {...form.register('displayName')}
-                      error={form.formState.errors.displayName?.message}
-                      styles={{ label: { fontWeight: 600 } }}
-                    />
-                    <Textarea
-                      label='תיאור'
-                      placeholder='הזן תיאור ותפקיד המוצר'
-                      required
-                      dir='rtl'
-                      minRows={2}
-                      {...form.register('description')}
-                      error={form.formState.errors.description?.message}
-                      styles={{ label: { fontWeight: 600 } }}
-                    />
-                  </>
+                  <div style={{ direction: 'rtl' }}>
+                    <div style={{ marginBottom: 16, display: 'flex', alignItems: 'center' }}>
+                      <Text strong style={{ fontSize: 14, width: 100, marginLeft: 16 }}>
+                        שם מוצר <span style={{ color: '#ff4d4f' }}>*</span>
+                      </Text>
+                      <Controller
+                        name='displayName'
+                        control={form.control}
+                        render={({ field }) => (
+                          <Input
+                            {...field}
+                            placeholder='הזן שם מוצר'
+                            status={form.formState.errors.displayName ? 'error' : undefined}
+                            style={{ flex: 1, direction: 'rtl' }}
+                          />
+                        )}
+                      />
+                      {form.formState.errors.displayName && (
+                        <Text type='danger' style={{ fontSize: 12, marginRight: 8 }}>
+                          {form.formState.errors.displayName.message}
+                        </Text>
+                      )}
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'start' }}>
+                      <Text strong style={{ fontSize: 14, width: 100, marginLeft: 16, marginTop: 5 }}>
+                        תיאור <span style={{ color: '#ff4d4f' }}>*</span>
+                      </Text>
+                      <div style={{ flex: 1 }}>
+                        <Controller
+                          name='description'
+                          control={form.control}
+                          render={({ field }) => (
+                            <TextArea
+                              {...field}
+                              placeholder='הזן תיאור ותפקיד המוצר'
+                              rows={3}
+                              status={form.formState.errors.description ? 'error' : undefined}
+                              style={{ direction: 'rtl', width: '100%' }}
+                            />
+                          )}
+                        />
+                        {form.formState.errors.description && (
+                          <Text type='danger' style={{ fontSize: 12, display: 'block' }}>
+                            {form.formState.errors.description.message}
+                          </Text>
+                        )}
+                      </div>
+                    </div>
+                  </div>
                 )}
-
-                <Divider />
 
                 {/* Links Section */}
                 {showGeneralSection && <LinksSection />}
-
-                <Divider />
 
                 {/* Monitor Section - Dynamic fields per system */}
                 {showMonitorSection && systemId && <MonitorSection systemId={systemId} />}
@@ -170,32 +197,32 @@ export const EntityForm = memo(function EntityForm({ onSave }: EntityFormProps) 
 
             {/* Step 2: Bindings & Rules - TBD */}
             {currentStep === 2 && (
-              <Box ta='center' py='xl'>
-                <Text c='dimmed'>הצמדות וחוקים - בקרוב</Text>
-              </Box>
+              <div style={{ textAlign: 'center', padding: 48 }}>
+                <Text type='secondary'>הצמדות וחוקים - בקרוב</Text>
+              </div>
             )}
-          </Stack>
-        </ScrollArea>
+          </Space>
+        </div>
 
         {/* Footer with Next/Save Button */}
-        <Box
+        <div
           style={{
-            padding: '16px',
+            padding: 16,
             borderTop: '1px solid #E5E7EB',
             backgroundColor: '#FFFFFF',
           }}
         >
           {currentStep === 1 ? (
-            <Button fullWidth size='md' onClick={handleNext} disabled={isNextDisabled}>
+            <Button type='primary' block size='large' onClick={handleNext} disabled={isNextDisabled}>
               הבא
             </Button>
           ) : (
-            <Button fullWidth size='md' onClick={handleSave}>
+            <Button type='primary' block size='large' onClick={handleSave}>
               שמור
             </Button>
           )}
-        </Box>
-      </Box>
+        </div>
+      </div>
     </FormProvider>
   )
 })

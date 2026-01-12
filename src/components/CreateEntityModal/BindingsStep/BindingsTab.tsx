@@ -1,5 +1,5 @@
-import { Button, Stack } from '@mantine/core'
-import { BsPlus } from 'react-icons/bs'
+import { Button, Space } from 'antd'
+import { PlusOutlined } from '@ant-design/icons'
 import type { Attachment, UrlAttachment } from '../../../types/entity'
 import { BindingCard } from './BindingCard'
 
@@ -32,9 +32,9 @@ export function BindingsTab({ attachments, onChange }: BindingsTabProps) {
   }
 
   return (
-    <Stack gap='lg' style={{ direction: 'rtl' }}>
+    <Space direction='vertical' size='large' style={{ width: '100%', direction: 'rtl' }}>
       {/* List of Cards */}
-      <Stack gap='md'>
+      <Space direction='vertical' size='middle' style={{ width: '100%' }}>
         {attachments.map((attachment) => (
           <BindingCard
             key={attachment.id}
@@ -43,17 +43,12 @@ export function BindingsTab({ attachments, onChange }: BindingsTabProps) {
             onDelete={() => handleDelete(attachment.id)}
           />
         ))}
-      </Stack>
+      </Space>
 
       {/* Add Button */}
-      <Button
-        variant='outline'
-        onClick={handleAdd}
-        rightSection={<BsPlus size={20} />}
-        style={{ alignSelf: 'flex-end' }}
-      >
-        הצמדה חדשה{' '}
+      <Button onClick={handleAdd} icon={<PlusOutlined />} style={{ alignSelf: 'flex-end' }}>
+        הצמדה חדשה
       </Button>
-    </Stack>
+    </Space>
   )
 }

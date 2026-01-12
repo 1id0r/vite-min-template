@@ -1,7 +1,9 @@
-import { Box, ScrollArea, SimpleGrid, Stack, Text, UnstyledButton } from '@mantine/core'
+import { Row, Col, Typography, Button } from 'antd'
 import type { IconType } from 'react-icons'
 import type { SystemDefinition } from '../../types/entity'
 import { resolveIcon } from './iconRegistry'
+
+const { Text } = Typography
 
 interface DisplayIconMenuProps {
   systems: Record<string, SystemDefinition>
@@ -27,46 +29,34 @@ export function DisplayIconMenu({
     .filter((system): system is SystemDefinition => Boolean(system))
 
   return (
-    <Stack gap='md' style={{ flex: 1 }} align='flex-end'>
+    <div style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
       {visibleSystems.length === 0 ? (
-        <Box w='100%' style={{ textAlign: 'right' }}>
-          <Text size='sm' c='dimmed'>
-            No display templates configured yet.
-          </Text>
-        </Box>
+        <div style={{ width: '100%', textAlign: 'right' }}>
+          <Text type='secondary'>No display templates configured yet.</Text>
+        </div>
       ) : (
-        <Box
-          w='100%'
+        <div
           style={{
+            width: '100%',
             border: '1px solid rgb(11, 95, 255)',
             borderRadius: 16,
             padding: '12px 16px',
           }}
         >
-          <ScrollArea style={{ width: '100%' }}>
-            <SimpleGrid
-              cols={{ base: 5, sm: 6, md: 7 }}
-              spacing={12}
-              verticalSpacing={12}
-              style={{
-                marginLeft: 'auto',
-                borderColor: 'rgb(11, 95, 255)',
-                // width: 'min(100%, 520px)',
-                justifyItems: 'center',
-              }}
-            >
-              {visibleSystems.map((system) => {
-                const Icon = resolveIcon(system.icon) ?? fallbackSystemIcon
-                const iconName = system.icon
-                // Check if selected - icon could be stored as iconName or system.id
-                const isSelected =
-                  selectedIconId === iconName ||
-                  selectedIconId === system.id ||
-                  (selectedSystem === system.id && !selectedIconId)
+          <Row gutter={[12, 12]} justify='center'>
+            {visibleSystems.map((system) => {
+              const Icon = resolveIcon(system.icon) ?? fallbackSystemIcon
+              const iconName = system.icon
+              // Check if selected - icon could be stored as iconName or system.id
+              const isSelected =
+                selectedIconId === iconName ||
+                selectedIconId === system.id ||
+                (selectedSystem === system.id && !selectedIconId)
 
-                return (
-                  <UnstyledButton
-                    key={system.id}
+              return (
+                <Col key={system.id}>
+                  <Button
+                    type='text'
                     aria-label={system.label}
                     onClick={() => {
                       if (onIconSelect) {
@@ -76,31 +66,27 @@ export function DisplayIconMenu({
                       }
                     }}
                     title={system.label}
-                    style={(theme) => ({
+                    style={{
                       borderRadius: 8,
-                      border: `1px solid ${isSelected ? 'rgba(11, 95, 255, 0.3)' : 'rgb(11, 95, 255,0.3)'}`,
-                      padding: theme.spacing.xs,
+                      border: `1px solid ${isSelected ? 'rgba(11, 95, 255, 0.3)' : 'rgba(11, 95, 255, 0.3)'}`,
+                      padding: 8,
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
-                      width: '100%',
-                      maxWidth: 64,
-                      minHeight: 64,
-                      aspectRatio: '1 / 1',
-                      margin: '0 auto',
-
-                      boxShadow: isSelected ? `0 0 0 1px rgba(11, 95, 255, 0.18)` : undefined,
-                      backgroundColor: isSelected ? 'rgba(11, 95, 255, 0.08)' : theme.white,
-                    })}
+                      width: 64,
+                      height: 64,
+                      boxShadow: isSelected ? '0 0 0 1px rgba(11, 95, 255, 0.18)' : undefined,
+                      backgroundColor: isSelected ? 'rgba(11, 95, 255, 0.08)' : '#fff',
+                    }}
                   >
                     <Icon size={22} />
-                  </UnstyledButton>
-                )
-              })}
-            </SimpleGrid>
-          </ScrollArea>
-        </Box>
+                  </Button>
+                </Col>
+              )
+            })}
+          </Row>
+        </div>
       )}
-    </Stack>
+    </div>
   )
 }

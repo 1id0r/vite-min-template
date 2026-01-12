@@ -7,7 +7,7 @@
  */
 
 import { memo } from 'react'
-import { Group, Text, Box } from '@mantine/core'
+import { Steps } from 'antd'
 
 interface Step {
   label: string
@@ -21,51 +21,21 @@ interface FormStepperProps {
 
 export const FormStepper = memo(function FormStepper({ currentStep, steps }: FormStepperProps) {
   return (
-    <Group gap='xl' justify='center' py='md'>
-      {steps.map((step, index) => {
-        const isActive = step.value === currentStep
-        const isCompleted = step.value < currentStep
-        const isLast = index === steps.length - 1
-
-        return (
-          <Group key={step.value} gap='md' align='center'>
-            {/* Step circle */}
-            <Group gap='xs' align='center'>
-              <Box
-                style={{
-                  width: 28,
-                  height: 28,
-                  borderRadius: '50%',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  backgroundColor: isActive ? '#228BE6' : isCompleted ? '#228BE6' : '#E9ECEF',
-                  color: isActive || isCompleted ? 'white' : '#868E96',
-                  fontWeight: 600,
-                  fontSize: 14,
-                }}
-              >
-                {step.value}
-              </Box>
-              <Text size='sm' fw={isActive ? 600 : 400} c={isActive ? 'dark' : 'dimmed'}>
-                {step.label}
-              </Text>
-            </Group>
-
-            {/* Connector line */}
-            {!isLast && (
-              <Box
-                style={{
-                  width: 60,
-                  height: 2,
-                  backgroundColor: isCompleted ? '#228BE6' : '#E9ECEF',
-                }}
-              />
-            )}
-          </Group>
-        )
-      })}
-    </Group>
+    <div
+      style={{
+        padding: '12px 18px',
+      }}
+    >
+      <Steps
+        current={currentStep - 1}
+        direction='horizontal'
+        size='default'
+        style={{ direction: 'rtl' }}
+        items={steps.map((step) => ({
+          title: <span style={{ fontSize: '15px', fontWeight: 500 }}>{step.label}</span>,
+        }))}
+      />
+    </div>
   )
 })
 

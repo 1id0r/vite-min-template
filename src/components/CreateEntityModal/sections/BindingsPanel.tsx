@@ -6,11 +6,13 @@
  */
 
 import { memo, useState } from 'react'
-import { Box, Collapse, Text, UnstyledButton, Group } from '@mantine/core'
-import { IconChevronDown, IconChevronUp } from '@tabler/icons-react'
+import { Typography, Button } from 'antd'
+import { UpOutlined, DownOutlined } from '@ant-design/icons'
 import type { Attachment } from '../../../types/entity'
 import type { TreeSelection } from '../../../types/tree'
 import { BindingsStep } from '../BindingsStep/BindingsStep'
+
+const { Text } = Typography
 
 interface BindingsPanelProps {
   measurements: TreeSelection[]
@@ -32,7 +34,7 @@ export const BindingsPanel = memo(function BindingsPanel({
   const toggleExpanded = () => setIsExpanded(!isExpanded)
 
   return (
-    <Box
+    <div
       style={{
         border: '1px solid #E5E7EB',
         borderRadius: 12,
@@ -41,35 +43,39 @@ export const BindingsPanel = memo(function BindingsPanel({
       }}
     >
       {/* Collapsible Header */}
-      <UnstyledButton
+      <Button
+        type='text'
         onClick={toggleExpanded}
         style={{
           width: '100%',
           padding: '12px 16px',
           backgroundColor: '#FFFFFF',
           borderBottom: isExpanded ? '1px solid #E5E7EB' : 'none',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          height: 'auto',
+          borderRadius: 0,
         }}
       >
-        <Group justify='space-between'>
-          <Text size='sm' fw={700} c='gray.8'>
-            הצמדות
-          </Text>
-          {isExpanded ? <IconChevronUp size={18} /> : <IconChevronDown size={18} />}
-        </Group>
-      </UnstyledButton>
+        <Text strong style={{ fontSize: 14 }}>
+          הצמדות
+        </Text>
+        {isExpanded ? <UpOutlined /> : <DownOutlined />}
+      </Button>
 
       {/* Collapsible Content - BindingsStep with its own tabs */}
-      <Collapse in={isExpanded}>
-        <Box p='md'>
+      {isExpanded && (
+        <div style={{ padding: 16 }}>
           <BindingsStep
             treeSelection={measurements}
             onTreeSelectionChange={onMeasurementsChange}
             attachments={attachments}
             onAttachmentsChange={onAttachmentsChange}
           />
-        </Box>
-      </Collapse>
-    </Box>
+        </div>
+      )}
+    </div>
   )
 })
 

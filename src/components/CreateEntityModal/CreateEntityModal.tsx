@@ -1,5 +1,5 @@
 import { useCallback, useState } from 'react'
-import { Button, Drawer } from '@mantine/core'
+import { Button, Drawer } from 'antd'
 import { EntityForm } from './EntityForm'
 
 export function CreateEntityModal() {
@@ -17,18 +17,18 @@ export function CreateEntityModal() {
 
   return (
     <>
-      <Button onClick={handleOpen}>הוספת יישות +</Button>
+      <Button type='primary' onClick={handleOpen}>
+        הוספת יישות +
+      </Button>
       <Drawer
-        opened={opened}
+        open={opened}
         onClose={handleClose}
         title='הוספת יישות'
-        position='left'
-        size={700}
-        overlayProps={{ backgroundOpacity: 0.3 }}
+        placement='right'
+        size={600}
         styles={{
           header: { direction: 'rtl' },
           body: { height: 'calc(100% - 60px)', padding: 0 },
-          content: { borderRadius: '16px' },
         }}
       >
         <EntityForm onSave={handleSave} onClose={handleClose} />

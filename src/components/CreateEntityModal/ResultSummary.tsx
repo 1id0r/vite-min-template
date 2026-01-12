@@ -1,4 +1,4 @@
-import { Alert, Box, Button, Group, Stack } from '@mantine/core'
+import { Alert, Button, Space } from 'antd'
 import type { AggregatedResult } from './types'
 
 interface ResultSummaryProps {
@@ -8,18 +8,29 @@ interface ResultSummaryProps {
 
 export function ResultSummary({ result, onClose }: ResultSummaryProps) {
   return (
-    <Stack>
-      <Alert color='green' title='Entity ready to create'>
-        The configuration is assembled from API definitions. Submit it to your API or persist it as needed.
-      </Alert>
+    <Space direction='vertical' style={{ width: '100%', padding: 16 }} size='middle'>
+      <Alert
+        type='success'
+        message='Entity ready to create'
+        description='The configuration is assembled from API definitions. Submit it to your API or persist it as needed.'
+        showIcon
+      />
       {result && (
-        <Box component='pre' bg='gray.0' p='sm' style={{ overflowX: 'auto' }}>
+        <pre
+          style={{
+            backgroundColor: '#f5f5f5',
+            padding: 12,
+            borderRadius: 8,
+            overflowX: 'auto',
+            fontSize: 12,
+          }}
+        >
           {JSON.stringify(result, null, 2)}
-        </Box>
+        </pre>
       )}
-      <Group justify='flex-end'>
+      <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
         <Button onClick={onClose}>Close</Button>
-      </Group>
-    </Stack>
+      </div>
+    </Space>
   )
 }

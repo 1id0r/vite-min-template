@@ -7,9 +7,12 @@
 
 import { memo } from 'react'
 import { useFormContext, Controller } from 'react-hook-form'
-import { Stack, TextInput, Textarea, Group, ActionIcon, Box, Text, Divider, Grid } from '@mantine/core'
-import { IconPlus, IconX } from '@tabler/icons-react'
+import { Input, Row, Col, Button, Space, Typography, Divider } from 'antd'
+import { PlusOutlined, CloseOutlined } from '@ant-design/icons'
 import type { EntityFormData } from '../hooks/useEntityForm'
+
+const { Text } = Typography
+const { TextArea } = Input
 
 interface GeneralSectionProps {
   /** Whether to show in compact mode */
@@ -38,116 +41,149 @@ export const GeneralSection = memo(function GeneralSection({ compact }: GeneralS
     )
   }
 
+  const handleLinkChange = (index: number, field: 'url' | 'label', value: string) => {
+    const newLinks = [...links]
+    newLinks[index] = { ...newLinks[index], [field]: value }
+    setValue('links', newLinks)
+  }
+
   return (
-    <Box>
-      <Text size='sm' fw={700} c='gray.8' mb='xs' dir='rtl'>
+    <div style={{ direction: 'rtl' }}>
+      <Text strong style={{ fontSize: 14, display: 'block', marginBottom: 8 }}>
         פרטים כלליים
       </Text>
-      <Stack gap={compact ? 'xs' : 'sm'}>
+      <Space direction='vertical' size={compact ? 'small' : 'middle'} style={{ width: '100%' }}>
         {/* Display Name and Entity Type - side by side */}
-        <Grid gutter='md'>
-          <Grid.Col span={6}>
-            <TextInput
-              label='שם תצוגה'
-              placeholder='הזן שם תצוגה'
-              required
-              dir='rtl'
-              error={errors.displayName?.message}
-              {...register('displayName')}
-              styles={{ label: { fontWeight: 600 } }}
-            />
-          </Grid.Col>
-          <Grid.Col span={6}>
+        <Row gutter={16}>
+          <Col span={12}>
+            <div>
+              <Text strong style={{ fontSize: 14, display: 'block', marginBottom: 4 }}>
+                שם תצוגה <span style={{ color: '#ff4d4f' }}>*</span>
+              </Text>
+              <Input
+                placeholder='הזן שם תצוגה'
+                status={errors.displayName ? 'error' : undefined}
+                {...register('displayName')}
+                style={{ direction: 'rtl' }}
+              />
+              {errors.displayName && (
+                <Text type='danger' style={{ fontSize: 12 }}>
+                  {errors.displayName.message}
+                </Text>
+              )}
+            </div>
+          </Col>
+          <Col span={12}>
             <Controller
               name='entityType'
               control={control}
               render={({ field }) => (
-                <TextInput
-                  label='סוג יישות'
-                  dir='rtl'
-                  disabled
-                  value={field.value || ''}
-                  styles={{ label: { fontWeight: 600 } }}
-                />
+                <div>
+                  <Text strong style={{ fontSize: 14, display: 'block', marginBottom: 4 }}>
+                    סוג יישות
+                  </Text>
+                  <Input disabled value={field.value || ''} style={{ direction: 'rtl' }} />
+                </div>
               )}
             />
-          </Grid.Col>
-        </Grid>
+          </Col>
+        </Row>
 
         {/* Description */}
-        <Textarea
-          label='תיאור'
-          placeholder='הזן תיאור'
-          required
-          dir='rtl'
-          minRows={2}
-          error={errors.description?.message}
-          {...register('description')}
-          styles={{ label: { fontWeight: 600 } }}
-        />
+        <div>
+          <Text strong style={{ fontSize: 14, display: 'block', marginBottom: 4 }}>
+            תיאור <span style={{ color: '#ff4d4f' }}>*</span>
+          </Text>
+          <TextArea
+            placeholder='הזן תיאור'
+            rows={2}
+            status={errors.description ? 'error' : undefined}
+            {...register('description')}
+            style={{ direction: 'rtl' }}
+          />
+          {errors.description && (
+            <Text type='danger' style={{ fontSize: 12 }}>
+              {errors.description.message}
+            </Text>
+          )}
+        </div>
 
         {/* Contact Info and Responsible Party - side by side */}
-        <Grid gutter='md'>
-          <Grid.Col span={6}>
-            <TextInput
-              label='פרטי התקשרות'
-              placeholder='מספר טלפון'
-              dir='rtl'
-              error={errors.contactInfo?.message}
-              {...register('contactInfo')}
-              styles={{ label: { fontWeight: 600 } }}
-            />
-          </Grid.Col>
-          <Grid.Col span={6}>
-            <TextInput
-              label='גורם אחראי'
-              placeholder='שם או תפקיד'
-              dir='rtl'
-              error={errors.responsibleParty?.message}
-              {...register('responsibleParty')}
-              styles={{ label: { fontWeight: 600 } }}
-            />
-          </Grid.Col>
-        </Grid>
+        <Row gutter={16}>
+          <Col span={12}>
+            <div>
+              <Text strong style={{ fontSize: 14, display: 'block', marginBottom: 4 }}>
+                פרטי התקשרות
+              </Text>
+              <Input
+                placeholder='מספר טלפון'
+                status={errors.contactInfo ? 'error' : undefined}
+                {...register('contactInfo')}
+                style={{ direction: 'rtl' }}
+              />
+              {errors.contactInfo && (
+                <Text type='danger' style={{ fontSize: 12 }}>
+                  {errors.contactInfo.message}
+                </Text>
+              )}
+            </div>
+          </Col>
+          <Col span={12}>
+            <div>
+              <Text strong style={{ fontSize: 14, display: 'block', marginBottom: 4 }}>
+                גורם אחראי
+              </Text>
+              <Input
+                placeholder='שם או תפקיד'
+                status={errors.responsibleParty ? 'error' : undefined}
+                {...register('responsibleParty')}
+                style={{ direction: 'rtl' }}
+              />
+              {errors.responsibleParty && (
+                <Text type='danger' style={{ fontSize: 12 }}>
+                  {errors.responsibleParty.message}
+                </Text>
+              )}
+            </div>
+          </Col>
+        </Row>
 
         {/* Links Section */}
-        <Box>
-          <Group justify='space-between' mb='xs'>
-            <Text size='sm' fw={600} c='gray.7'>
+        <div>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+            <Text strong style={{ fontSize: 14 }}>
               לינקים
             </Text>
-            <ActionIcon variant='light' color='blue' size='sm' onClick={handleAddLink}>
-              <IconPlus size={14} />
-            </ActionIcon>
-          </Group>
+            <Button type='link' icon={<PlusOutlined />} onClick={handleAddLink} size='small'>
+              הוסף
+            </Button>
+          </div>
 
-          <Stack gap='xs'>
-            {links.map((_, index) => (
-              <Group key={index} gap='xs' align='flex-start' wrap='nowrap'>
-                <TextInput
+          <Space direction='vertical' size='small' style={{ width: '100%' }}>
+            {links.map((link, index) => (
+              <Space key={index} align='start' style={{ width: '100%' }}>
+                <Input
                   placeholder='שם הלינק'
-                  dir='rtl'
-                  style={{ flex: 1 }}
-                  error={errors.links?.[index]?.label?.message}
-                  {...register(`links.${index}.label`)}
+                  value={link.label}
+                  onChange={(e) => handleLinkChange(index, 'label', e.target.value)}
+                  status={errors.links?.[index]?.label ? 'error' : undefined}
+                  style={{ flex: 1, direction: 'rtl', width: 150 }}
                 />
-                <TextInput
+                <Input
                   placeholder='כתובת URL'
-                  dir='ltr'
-                  style={{ flex: 2 }}
-                  error={errors.links?.[index]?.url?.message}
-                  {...register(`links.${index}.url`)}
+                  value={link.url}
+                  onChange={(e) => handleLinkChange(index, 'url', e.target.value)}
+                  status={errors.links?.[index]?.url ? 'error' : undefined}
+                  style={{ flex: 2, direction: 'ltr', width: 250 }}
                 />
-                <ActionIcon variant='subtle' color='red' onClick={() => handleRemoveLink(index)}>
-                  <IconX size={14} />
-                </ActionIcon>
-              </Group>
+                <Button type='text' danger icon={<CloseOutlined />} onClick={() => handleRemoveLink(index)} />
+              </Space>
             ))}
-          </Stack>
-        </Box>
-      </Stack>
-      <Divider my='md' />
-    </Box>
+          </Space>
+        </div>
+      </Space>
+      <Divider />
+    </div>
   )
 })
 

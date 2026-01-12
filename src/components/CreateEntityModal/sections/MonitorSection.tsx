@@ -8,9 +8,12 @@
 
 import { memo, useMemo } from 'react'
 import { useFormContext, Controller } from 'react-hook-form'
-import { Box, Grid, Text, TextInput, NumberInput, Checkbox, Textarea, Select, Button, Stack } from '@mantine/core'
+import { Input, InputNumber, Checkbox, Select, Button, Space, Typography } from 'antd'
 import { getMonitorFieldConfig, type FieldConfig } from '../../../schemas/fieldConfigs'
 import type { EntityFormData } from '../hooks/useEntityForm'
+
+const { Text } = Typography
+const { TextArea } = Input
 
 interface MonitorSectionProps {
   systemId: string
@@ -35,26 +38,33 @@ export const MonitorSection = memo(function MonitorSection({ systemId }: Monitor
   }
 
   return (
-    <Box>
-      <Text size='sm' fw={700} c='gray.8' mb='xs' dir='rtl'>
+    <div
+      style={{
+        direction: 'rtl',
+        border: '1px solid #d9d9d9',
+        borderRadius: '8px',
+        padding: '24px',
+        marginTop: '24px',
+      }}
+    >
+      <Text strong style={{ fontSize: 14, display: 'block', marginBottom: 16, textAlign: 'right' }}>
         פרטי היישות
       </Text>
-      <Stack gap='md'>
+      <Space direction='vertical' style={{ width: '100%' }} size='middle'>
         {/* Dynamic Fields */}
-        <Grid gutter='md'>
-          {fieldConfig.fields.map((field) => (
-            <Grid.Col key={field.name} span={12}>
-              <MonitorField field={field} control={control} error={(errors.monitor as any)?.[field.name]?.message} />
-            </Grid.Col>
-          ))}
-        </Grid>
+        {fieldConfig.fields.map((field) => (
+          <MonitorField
+            key={field.name}
+            field={field}
+            control={control}
+            error={(errors.monitor as any)?.[field.name]?.message}
+          />
+        ))}
 
         {/* Validate Button */}
-        <Button variant='outline' color='gray' size='sm' onClick={handleValidate} style={{ alignSelf: 'flex-start' }}>
-          בדוק ולידציה
-        </Button>
-      </Stack>
-    </Box>
+        <Button onClick={handleValidate}>בדוק ולידציה</Button>
+      </Space>
+    </div>
   )
 })
 
@@ -73,11 +83,7 @@ interface MonitorFieldProps {
 const MonitorField = memo(function MonitorField({ field, control, error }: MonitorFieldProps) {
   const name = `monitor.${field.name}` as const
 
-  // Common label style matching mock design
-  const labelStyles = {
-    label: { fontWeight: 600 },
-    input: { textAlign: 'right' as const },
-  }
+  const labelStyle = { fontSize: 14, width: 100, marginLeft: 16 }
 
   switch (field.type) {
     case 'text':
@@ -86,17 +92,24 @@ const MonitorField = memo(function MonitorField({ field, control, error }: Monit
           name={name}
           control={control}
           render={({ field: rhfField }) => (
-            <TextInput
-              label={field.label}
-              placeholder={field.placeholder || 'הזן שדה'}
-              required={field.required}
-              disabled={field.disabled}
-              error={error}
-              dir='rtl'
-              {...rhfField}
-              value={rhfField.value || ''}
-              styles={labelStyles}
-            />
+            <div style={{ display: 'flex', alignItems: 'center' }}>
+              <Text strong style={labelStyle}>
+                {field.label} {field.required && <span style={{ color: '#ff4d4f' }}>*</span>}
+              </Text>
+              <Input
+                placeholder={field.placeholder || 'הזן שדה'}
+                disabled={field.disabled}
+                status={error ? 'error' : undefined}
+                {...rhfField}
+                value={rhfField.value || ''}
+                style={{ flex: 1, direction: 'rtl' }}
+              />
+              {error && (
+                <Text type='danger' style={{ fontSize: 12, marginRight: 8 }}>
+                  {error}
+                </Text>
+              )}
+            </div>
           )}
         />
       )
@@ -107,17 +120,24 @@ const MonitorField = memo(function MonitorField({ field, control, error }: Monit
           name={name}
           control={control}
           render={({ field: rhfField }) => (
-            <NumberInput
-              label={field.label}
-              placeholder={field.placeholder || 'הזן שדה'}
-              required={field.required}
-              disabled={field.disabled}
-              error={error}
-              dir='rtl'
-              value={rhfField.value || ''}
-              onChange={rhfField.onChange}
-              styles={labelStyles}
-            />
+            <div style={{ display: 'flex', alignItems: 'center' }}>
+              <Text strong style={labelStyle}>
+                {field.label} {field.required && <span style={{ color: '#ff4d4f' }}>*</span>}
+              </Text>
+              <InputNumber
+                placeholder={field.placeholder || 'הזן שדה'}
+                disabled={field.disabled}
+                status={error ? 'error' : undefined}
+                value={rhfField.value || undefined}
+                onChange={rhfField.onChange}
+                style={{ flex: 1, direction: 'rtl', width: 'auto' }}
+              />
+              {error && (
+                <Text type='danger' style={{ fontSize: 12, marginRight: 8 }}>
+                  {error}
+                </Text>
+              )}
+            </div>
           )}
         />
       )
@@ -128,17 +148,27 @@ const MonitorField = memo(function MonitorField({ field, control, error }: Monit
           name={name}
           control={control}
           render={({ field: rhfField }) => (
-            <Textarea
-              label={field.label}
-              placeholder={field.placeholder || 'הזן שדה'}
-              required={field.required}
-              disabled={field.disabled}
-              error={error}
-              dir='rtl'
-              {...rhfField}
-              value={rhfField.value || ''}
-              styles={labelStyles}
-            />
+            <div style={{ display: 'flex', alignItems: 'start' }}>
+              <Text strong style={{ ...labelStyle, marginTop: 5 }}>
+                {field.label} {field.required && <span style={{ color: '#ff4d4f' }}>*</span>}
+              </Text>
+              <div style={{ flex: 1 }}>
+                <TextArea
+                  placeholder={field.placeholder || 'הזן שדה'}
+                  disabled={field.disabled}
+                  status={error ? 'error' : undefined}
+                  {...rhfField}
+                  value={rhfField.value || ''}
+                  style={{ direction: 'rtl', width: '100%' }}
+                  rows={3}
+                />
+                {error && (
+                  <Text type='danger' style={{ fontSize: 12, display: 'block' }}>
+                    {error}
+                  </Text>
+                )}
+              </div>
+            </div>
           )}
         />
       )
@@ -150,12 +180,12 @@ const MonitorField = memo(function MonitorField({ field, control, error }: Monit
           control={control}
           render={({ field: rhfField }) => (
             <Checkbox
-              label={field.label}
               disabled={field.disabled}
               checked={rhfField.value || false}
-              onChange={rhfField.onChange}
-              mt='md'
-            />
+              onChange={(e) => rhfField.onChange(e.target.checked)}
+            >
+              {field.label}
+            </Checkbox>
           )}
         />
       )
@@ -166,42 +196,55 @@ const MonitorField = memo(function MonitorField({ field, control, error }: Monit
           name={name}
           control={control}
           render={({ field: rhfField }) => (
-            <Select
-              label={field.label}
-              placeholder={field.placeholder || 'בחר'}
-              required={field.required}
-              disabled={field.disabled}
-              error={error}
-              dir='rtl'
-              data={field.options || []}
-              value={rhfField.value || null}
-              onChange={rhfField.onChange}
-              styles={labelStyles}
-            />
+            <div style={{ display: 'flex', alignItems: 'center' }}>
+              <Text strong style={labelStyle}>
+                {field.label} {field.required && <span style={{ color: '#ff4d4f' }}>*</span>}
+              </Text>
+              <Select
+                placeholder={field.placeholder || 'בחר'}
+                disabled={field.disabled}
+                status={error ? 'error' : undefined}
+                options={field.options}
+                value={rhfField.value || undefined}
+                onChange={rhfField.onChange}
+                style={{ flex: 1, direction: 'rtl' }}
+              />
+              {error && (
+                <Text type='danger' style={{ fontSize: 12, marginRight: 8 }}>
+                  {error}
+                </Text>
+              )}
+            </div>
           )}
         />
       )
 
     case 'async-select':
-      // TODO: Implement async select with API loading
       return (
         <Controller
           name={name}
           control={control}
           render={({ field: rhfField }) => (
-            <Select
-              label={field.label}
-              placeholder={field.asyncOptions?.placeholder || 'בחר...'}
-              required={field.required}
-              disabled={field.disabled}
-              error={error}
-              dir='rtl'
-              data={[]} // Would be loaded from API
-              value={rhfField.value || null}
-              onChange={rhfField.onChange}
-              styles={labelStyles}
-              searchable
-            />
+            <div style={{ display: 'flex', alignItems: 'center' }}>
+              <Text strong style={labelStyle}>
+                {field.label} {field.required && <span style={{ color: '#ff4d4f' }}>*</span>}
+              </Text>
+              <Select
+                placeholder={field.asyncOptions?.placeholder || 'בחר...'}
+                disabled={field.disabled}
+                status={error ? 'error' : undefined}
+                options={[]} // Would be loaded from API
+                value={rhfField.value || undefined}
+                onChange={rhfField.onChange}
+                style={{ flex: 1, direction: 'rtl' }}
+                showSearch
+              />
+              {error && (
+                <Text type='danger' style={{ fontSize: 12, marginRight: 8 }}>
+                  {error}
+                </Text>
+              )}
+            </div>
           )}
         />
       )

@@ -1,4 +1,4 @@
-import { Tabs } from '@mantine/core'
+import { Tabs } from 'antd'
 import { useState } from 'react'
 import type { Attachment } from '../../../types/entity'
 import type { TreeSelectionList } from '../../../types/tree'
@@ -18,22 +18,20 @@ export function BindingsStep({
   attachments,
   onAttachmentsChange,
 }: BindingsStepProps) {
-  const [activeTab, setActiveTab] = useState<string | null>('measurements')
+  const [activeTab, setActiveTab] = useState<string>('measurements')
 
-  return (
-    <Tabs value={activeTab} onChange={setActiveTab} variant='outline' radius='md'>
-      <Tabs.List grow mb='md'>
-        <Tabs.Tab value='measurements'>מדידות</Tabs.Tab>
-        <Tabs.Tab value='bindings'>הצמדות</Tabs.Tab>
-      </Tabs.List>
+  const items = [
+    {
+      key: 'measurements',
+      label: 'מדידות',
+      children: <TreeStep selection={treeSelection} onSelectionChange={onTreeSelectionChange} />,
+    },
+    {
+      key: 'bindings',
+      label: 'הצמדות',
+      children: <BindingsTab attachments={attachments} onChange={onAttachmentsChange} />,
+    },
+  ]
 
-      <Tabs.Panel value='measurements'>
-        <TreeStep selection={treeSelection} onSelectionChange={onTreeSelectionChange} />
-      </Tabs.Panel>
-
-      <Tabs.Panel value='bindings'>
-        <BindingsTab attachments={attachments} onChange={onAttachmentsChange} />
-      </Tabs.Panel>
-    </Tabs>
-  )
+  return <Tabs activeKey={activeTab} onChange={setActiveTab} items={items} style={{ direction: 'rtl' }} />
 }

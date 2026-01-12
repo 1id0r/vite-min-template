@@ -4,8 +4,8 @@
  * A segmented button group for selecting the entity flow type (monitor/display/general).
  */
 
-import { memo, useCallback } from 'react'
-import { Box, Stack } from '@mantine/core'
+import { memo } from 'react'
+import { Radio } from 'antd'
 import type { FlowId, FlowOption } from './types'
 
 export interface FlowSelectorProps {
@@ -21,47 +21,42 @@ const FLOW_LABELS: Partial<Record<FlowId, string>> = {
 }
 
 export const FlowSelector = memo(function FlowSelector({ flow, flowOptions, onFlowChange }: FlowSelectorProps) {
-  const getButtonHandler = useCallback((value: string) => () => onFlowChange(value), [onFlowChange])
+  const options = flowOptions.map((option) => ({
+    label: FLOW_LABELS[option.value as FlowId] ?? option.label,
+    value: option.value,
+  }))
 
   return (
-    <Stack gap={4} align='flex-start'>
-      <Box
-        style={{
-          display: 'flex',
-          border: '1px solid #E5E7EB',
-          borderRadius: 16,
-          overflow: 'hidden',
-          backgroundColor: '#FFFFFF',
-        }}
+    <div style={{ display: 'flex', justifyContent: 'flex-start' }}>
+      <Radio.Group
+        value={flow}
+        onChange={(e) => onFlowChange(e.target.value)}
+        optionType='button'
+        buttonStyle='outline'
+        style={{ display: 'flex', direction: 'rtl' }}
       >
-        {flowOptions.map((option, index) => {
-          const isActive = option.value === flow
-          const isLast = index === flowOptions.length - 1
-          const translatedLabel = FLOW_LABELS[option.value as FlowId] ?? option.label
-          const handleClick = getButtonHandler(option.value)
-
-          return (
-            <button
-              key={option.value}
-              type='button'
-              onClick={handleClick}
-              style={{
-                padding: '6px 20px',
-                border: 'none',
-                borderLeft: isLast ? 'none' : '1px solid #E5E7EB',
-                backgroundColor: isActive ? '#0B5FFF' : '#FFFFFF',
-                color: isActive ? '#FFFFFF' : '#111827',
-                fontWeight: 600,
-                fontSize: '15px',
-                cursor: 'pointer',
-              }}
-            >
-              {translatedLabel}
-            </button>
-          )
-        })}
-      </Box>
-    </Stack>
+        {options.map((option, index) => (
+          <Radio.Button
+            key={option.value}
+            value={option.value}
+            style={{
+              height: 35,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              padding: '0 32px',
+              fontSize: '15px',
+              borderTopRightRadius: index === 0 ? 12 : 0,
+              borderBottomRightRadius: index === 0 ? 12 : 0,
+              borderTopLeftRadius: index === options.length - 1 ? 12 : 0,
+              borderBottomLeftRadius: index === options.length - 1 ? 12 : 0,
+            }}
+          >
+            {option.label}
+          </Radio.Button>
+        ))}
+      </Radio.Group>
+    </div>
   )
 })
 

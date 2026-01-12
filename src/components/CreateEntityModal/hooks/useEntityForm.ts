@@ -32,7 +32,7 @@ const DEFAULT_VALUES: EntityFormData = {
   description: '',
   contactInfo: '',
   responsibleParty: '',
-  links: [],
+  links: [{ url: '', label: '' }],
   measurements: [],
   attachments: [],
 }
