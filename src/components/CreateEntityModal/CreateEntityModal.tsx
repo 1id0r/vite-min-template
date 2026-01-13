@@ -25,7 +25,7 @@ export function CreateEntityModal() {
         onClose={handleClose}
         title='הוספת יישות'
         placement='right'
-        size={600}
+        size={560}
         styles={{
           header: { direction: 'rtl' },
           body: { height: 'calc(100% - 60px)', padding: 0 },

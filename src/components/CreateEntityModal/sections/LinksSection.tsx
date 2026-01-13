@@ -65,10 +65,9 @@ export const LinksSection = memo(function LinksSection() {
                 />
                 <Button
                   type='text'
-                  danger
                   icon={<CloseOutlined />}
                   onClick={() => handleRemoveLink(index)}
-                  style={{ marginRight: 8 }}
+                  style={{ marginRight: 8, color: 'rgba(0, 0, 0, 0.45)' }}
                 />
               </div>
             </div>

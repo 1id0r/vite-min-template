@@ -125,27 +125,29 @@ export const EntityForm = memo(function EntityForm({ onSave }: EntityFormProps) 
                 {/* Name and Description - Visible after system selection */}
                 {showGeneralSection && (
                   <div style={{ direction: 'rtl' }}>
-                    <div style={{ marginBottom: 16, display: 'flex', alignItems: 'center' }}>
-                      <Text strong style={{ fontSize: 14, width: 100, marginLeft: 16 }}>
+                    <div style={{ marginBottom: 16, display: 'flex', alignItems: 'flex-start' }}>
+                      <Text strong style={{ fontSize: 14, width: 100, marginLeft: 16, marginTop: 5 }}>
                         שם מוצר <span style={{ color: '#ff4d4f' }}>*</span>
                       </Text>
-                      <Controller
-                        name='displayName'
-                        control={form.control}
-                        render={({ field }) => (
-                          <Input
-                            {...field}
-                            placeholder='הזן שם מוצר'
-                            status={form.formState.errors.displayName ? 'error' : undefined}
-                            style={{ flex: 1, direction: 'rtl' }}
-                          />
+                      <div style={{ flex: 1 }}>
+                        <Controller
+                          name='displayName'
+                          control={form.control}
+                          render={({ field }) => (
+                            <Input
+                              {...field}
+                              placeholder='הזן שם מוצר'
+                              status={form.formState.errors.displayName ? 'error' : undefined}
+                              style={{ width: '100%', direction: 'rtl' }}
+                            />
+                          )}
+                        />
+                        {form.formState.errors.displayName && (
+                          <Text type='danger' style={{ fontSize: 12, display: 'block' }}>
+                            {form.formState.errors.displayName.message}
+                          </Text>
                         )}
-                      />
-                      {form.formState.errors.displayName && (
-                        <Text type='danger' style={{ fontSize: 12, marginRight: 8 }}>
-                          {form.formState.errors.displayName.message}
-                        </Text>
-                      )}
+                      </div>
                     </div>
                     <div style={{ display: 'flex', alignItems: 'start' }}>
                       <Text strong style={{ fontSize: 14, width: 100, marginLeft: 16, marginTop: 5 }}>
