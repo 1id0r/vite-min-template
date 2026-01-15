@@ -112,19 +112,19 @@ export const EntityForm = memo(function EntityForm({ onSave }: EntityFormProps) 
         {/* Scrollable Content */}
         <div style={{ flex: 1, overflowY: 'auto', padding: 16 }}>
           <Space direction='vertical' size='middle' style={{ width: '100%' }}>
-            {/* Flow Selector - Always visible */}
-            <FlowSelector
-              flow={flow}
-              flowOptions={flowOptions}
-              onFlowChange={(value) => handleFlowChange(value as 'monitor' | 'display')}
-            />
-
             {/* Stepper - Shows current step */}
             <FormStepper currentStep={currentStep} steps={STEPS} />
 
             {/* Step 1: Entity Details */}
             {currentStep === 1 && (
               <>
+                {/* Flow Selector - Only visible on Step 1, below stepper */}
+                <FlowSelector
+                  flow={flow}
+                  flowOptions={flowOptions}
+                  onFlowChange={(value) => handleFlowChange(value as 'monitor' | 'display')}
+                />
+
                 {/* פרטים כלליים Section Header */}
                 <Text strong style={{ fontSize: 16, display: 'block', textAlign: 'right', marginBottom: 16 }}>
                   פרטים כלליים
