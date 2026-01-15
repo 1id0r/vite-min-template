@@ -62,7 +62,7 @@ export const CategorySystemSelector = memo(function CategorySystemSelector({
     <Space direction='vertical' style={{ width: '100%', direction: 'rtl' }} size='middle'>
       <div style={{ display: 'flex', alignItems: 'center' }}>
         <Text strong style={{ fontSize: 14, width: 100, marginLeft: 16 }}>
-          עולם מוצרים
+          קטגוריה
         </Text>
         <Select
           placeholder='בחר קטגוריה'
@@ -75,7 +75,7 @@ export const CategorySystemSelector = memo(function CategorySystemSelector({
       </div>
       <div style={{ display: 'flex', alignItems: 'center' }}>
         <Text strong style={{ fontSize: 14, width: 100, marginLeft: 16 }}>
-          סוג מוצר
+          סוג יישות
         </Text>
         <Select
           placeholder='בחר יישות'

@@ -233,6 +233,10 @@ export const EntityRuleRegistry: Record<string, Record<string, RuleDefinition>> 
       label: 'Absent Service',
       fieldGroups: ['generic', 'service'], // Same as service rule
     },
+    storage_usage: {
+      label: 'Storage Usage',
+      fieldGroups: ['generic', 'dynamic'],
+    },
     diskusage: {
       label: 'Disk Usage',
       fieldGroups: ['generic', 'dynamic'],

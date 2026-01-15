@@ -11,10 +11,12 @@
 
 import { memo, useState } from 'react'
 import { FormProvider, Controller } from 'react-hook-form'
-import { Button, Input, Typography, Space } from 'antd'
+import { Button, Input, Typography, Space, Tabs } from 'antd'
 import { FlowSelector } from './FlowSelector'
 import { DisplayIconMenu } from './DisplayIconMenu'
 import { MonitorSection, CategorySystemSelector, LinksSection } from './sections'
+import { RulesTab } from './sections/RulesTab'
+import { BindingsTab } from './sections/BindingsTab'
 import { FormStepper } from './FormStepper'
 import { useEntityForm, type EntityFormData } from './hooks/useEntityForm'
 import { DISPLAY_FLOW_SYSTEM_IDS, fallbackSystemIcon } from './iconRegistry'
@@ -26,6 +28,18 @@ const { TextArea } = Input
 interface EntityFormProps {
   onSave?: (data: EntityFormData) => void
   onClose?: () => void
+}
+
+// Mapping from systemId (staticConfig) to rule entity type (ruleSchemas)
+const RULE_ENTITY_MAPPING: Record<string, string> = {
+  vm_linux: 'linux',
+  vm_windows: 'windows',
+  mongo_k: 'mongok',
+  s3_db: 's3',
+  ocp4: 'openshift',
+  spark_ocp4: 'openshift',
+  hadoop_hdfs: 'hdfs',
+  // Add other mappings as needed, defaulting to exact match if not found
 }
 
 // Step definitions
@@ -78,6 +92,12 @@ export const EntityForm = memo(function EntityForm({ onSave }: EntityFormProps) 
     }
   }
 
+  const handleBack = () => {
+    if (currentStep > 1) {
+      setCurrentStep(currentStep - 1)
+    }
+  }
+
   const isNextDisabled = flow === 'monitor' && !systemId
 
   return (
@@ -127,7 +147,7 @@ export const EntityForm = memo(function EntityForm({ onSave }: EntityFormProps) 
                   <div style={{ direction: 'rtl' }}>
                     <div style={{ marginBottom: 16, display: 'flex', alignItems: 'flex-start' }}>
                       <Text strong style={{ fontSize: 14, width: 100, marginLeft: 16, marginTop: 5 }}>
-                        שם מוצר <span style={{ color: '#ff4d4f' }}>*</span>
+                        שם יישות <span style={{ color: '#ff4d4f' }}>*</span>
                       </Text>
                       <div style={{ flex: 1 }}>
                         <Controller
@@ -136,7 +156,7 @@ export const EntityForm = memo(function EntityForm({ onSave }: EntityFormProps) 
                           render={({ field }) => (
                             <Input
                               {...field}
-                              placeholder='הזן שם מוצר'
+                              placeholder='הזן שם יישות'
                               status={form.formState.errors.displayName ? 'error' : undefined}
                               style={{ width: '100%', direction: 'rtl' }}
                             />
@@ -160,7 +180,7 @@ export const EntityForm = memo(function EntityForm({ onSave }: EntityFormProps) 
                           render={({ field }) => (
                             <TextArea
                               {...field}
-                              placeholder='הזן תיאור ותפקיד המוצר'
+                              placeholder='הזן תיאור ותפקיד היישות'
                               rows={3}
                               status={form.formState.errors.description ? 'error' : undefined}
                               style={{ direction: 'rtl', width: '100%' }}
@@ -197,11 +217,38 @@ export const EntityForm = memo(function EntityForm({ onSave }: EntityFormProps) 
               </>
             )}
 
-            {/* Step 2: Bindings & Rules - TBD */}
+            {/* Step 2: Rules & Bindings */}
             {currentStep === 2 && (
-              <div style={{ textAlign: 'center', padding: 48 }}>
-                <Text type='secondary'>הצמדות וחוקים - בקרוב</Text>
-              </div>
+              <Tabs
+                defaultActiveKey='rules'
+                type='card'
+                items={[
+                  {
+                    key: 'rules',
+                    label: 'חוקים על יישות',
+                    children: (
+                      <div style={{ padding: '16px 0' }}>
+                        <RulesTab
+                          entityType={
+                            RULE_ENTITY_MAPPING[form.getValues('systemId')] || form.getValues('systemId') || 'linux'
+                          }
+                        />
+                      </div>
+                    ),
+                  },
+                  {
+                    key: 'bindings',
+                    label: 'הצמדות וחוקים',
+                    children: (
+                      <div style={{ padding: '16px 0' }}>
+                        <BindingsTab />
+                      </div>
+                    ),
+                  },
+                ]}
+                style={{ direction: 'rtl', width: '100%' }}
+                tabBarStyle={{ marginBottom: 24 }}
+              />
             )}
           </Space>
         </div>
@@ -212,16 +259,29 @@ export const EntityForm = memo(function EntityForm({ onSave }: EntityFormProps) 
             padding: 16,
             borderTop: '1px solid #E5E7EB',
             backgroundColor: '#FFFFFF',
+            display: 'flex',
+            justifyContent: 'flex-end',
+            gap: 12,
           }}
         >
           {currentStep === 1 ? (
-            <Button type='primary' block size='large' onClick={handleNext} disabled={isNextDisabled}>
+            <Button
+              type='primary'
+              onClick={handleNext}
+              disabled={isNextDisabled}
+              style={{ width: 60, borderRadius: '8px' }}
+            >
               הבא
             </Button>
           ) : (
-            <Button type='primary' block size='large' onClick={handleSave}>
-              שמור
-            </Button>
+            <>
+              <Button onClick={handleBack} style={{ borderRadius: '8px' }}>
+                חזור
+              </Button>
+              <Button type='primary' onClick={handleSave} style={{ borderRadius: '8px' }}>
+                יצירת יישות
+              </Button>
+            </>
           )}
         </div>
       </div>

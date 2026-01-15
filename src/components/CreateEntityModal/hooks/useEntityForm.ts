@@ -35,6 +35,9 @@ const DEFAULT_VALUES: EntityFormData = {
   links: [{ url: '', label: '' }],
   measurements: [],
   attachments: [],
+  entityRules: [],
+  urls: [],
+  elastic: {},
 }
 
 /** Build validation schema */
@@ -51,6 +54,21 @@ const EntitySchema = z.object({
   monitor: z.record(z.string(), z.unknown()).optional(),
   measurements: z.array(TreeSelectionSchema).optional(),
   attachments: z.array(z.any()).optional(), // Using any to avoid complex union type issues
+  
+  // Step 2 Fields
+  entityRules: z.array(z.object({
+     ruleKey: z.string(),
+     ruleLabel: z.string(),
+     enabled: z.boolean(),
+     data: z.record(z.string(), z.any())
+  })).optional(),
+  
+  urls: z.array(z.object({
+     url: z.string(),
+     timeout: z.number().optional()
+  })).optional(),
+  
+  elastic: z.record(z.string(), z.any()).optional(),
 })
 
 export function useEntityForm(onSave?: (data: EntityFormData) => void): UseEntityFormResult {

@@ -24,6 +24,21 @@ export interface EntityFormData {
   monitor?: Record<string, unknown>
   measurements?: TreeSelection[]
   attachments?: Attachment[]
+  
+  // Step 2 Fields
+  entityRules?: {
+     ruleKey: string;
+     ruleLabel: string;
+     enabled: boolean;
+     data: Record<string, any>;
+  }[]
+  
+  urls?: {
+     url: string;
+     timeout?: number;
+  }[]
+  
+  elastic?: Record<string, any>
 }
 
 export interface UseEntityFormResult {
