@@ -25,7 +25,7 @@ export const BindingsTab = memo(function BindingsTab() {
         {/* URL Section */}
         <div style={panelContainerStyle}>
           <Collapse defaultActiveKey={['urls']} ghost expandIconPosition='end'>
-            <Panel header={<Text strong>בדיקות תקינות</Text>} key='urls'>
+            <Panel header={<Text strong>URL</Text>} key='urls'>
               <URLSection />
             </Panel>
           </Collapse>
@@ -34,7 +34,7 @@ export const BindingsTab = memo(function BindingsTab() {
         {/* Elastic Section */}
         <div style={panelContainerStyle}>
           <Collapse ghost expandIconPosition='end'>
-            <Panel header={<Text strong>אלסטיק</Text>} key='elastic'>
+            <Panel header={<Text strong>Elastic</Text>} key='elastic'>
               <ElasticSection />
             </Panel>
           </Collapse>
@@ -81,7 +81,7 @@ const URLSection = () => {
       {/* Add URL Button */}
       <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 8 }}>
         <Button type='dashed' icon={<PlusOutlined />} onClick={() => append({ url: '', timeout: 30 })}>
-          הוסף בדיקת תקינות
+          הוסף URL
         </Button>
       </div>
     </Space>
@@ -273,7 +273,7 @@ const ElasticSection = () => {
     <Space direction='vertical' style={{ width: '100%' }}>
       {fields.length === 0 && (
         <Text type='secondary' style={{ display: 'block', textAlign: 'center', padding: 16 }}>
-          לא נוספו הגדרות אלסטיק עדיין
+          לא נוספו הגדרות Elastic עדיין
         </Text>
       )}
 
@@ -296,7 +296,7 @@ const ElasticSection = () => {
             append({ queryName: '', scheduleInterval: 5, scheduleUnit: 'minutes', timeout: 5, jsonQuery: '' })
           }
         >
-          הוסף אלסטיק
+          הוסף Elastic
         </Button>
       </div>
     </Space>
