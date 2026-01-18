@@ -8,7 +8,7 @@
 import { memo } from 'react'
 import { useFormContext, Controller } from 'react-hook-form'
 import { Input, Row, Col, Button, Space, Typography, Divider } from 'antd'
-import { PlusOutlined, CloseOutlined } from '@ant-design/icons'
+import { IconPlus, IconX } from '@tabler/icons-react'
 import type { EntityFormData } from '../hooks/useEntityForm'
 
 const { Text } = Typography
@@ -154,7 +154,7 @@ export const GeneralSection = memo(function GeneralSection({ compact }: GeneralS
             <Text strong style={{ fontSize: 14 }}>
               לינקים
             </Text>
-            <Button type='link' icon={<PlusOutlined />} onClick={handleAddLink} size='small'>
+            <Button type='link' icon={<IconPlus size={14} />} onClick={handleAddLink} size='small'>
               הוסף
             </Button>
           </div>
@@ -176,7 +176,7 @@ export const GeneralSection = memo(function GeneralSection({ compact }: GeneralS
                   status={errors.links?.[index]?.url ? 'error' : undefined}
                   style={{ flex: 2, direction: 'ltr', width: 250 }}
                 />
-                <Button type='text' danger icon={<CloseOutlined />} onClick={() => handleRemoveLink(index)} />
+                <Button type='text' danger icon={<IconX size={14} />} onClick={() => handleRemoveLink(index)} />
               </Space>
             ))}
           </Space>

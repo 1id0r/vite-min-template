@@ -2,7 +2,7 @@ import { memo, useState, useMemo } from 'react'
 import { Collapse, Typography, Space, Select } from 'antd'
 import { useFormContext, useFieldArray, Controller } from 'react-hook-form'
 import { TreeStep } from '../TreeStep'
-import { PlusOutlined, CloseOutlined, DownOutlined, RightOutlined } from '@ant-design/icons'
+import { IconPlus, IconX, IconChevronDown, IconChevronRight } from '@tabler/icons-react'
 import { Input, InputNumber, Button, Segmented } from 'antd'
 import { getRuleFieldGroups, FieldGroupSchemas } from '../../../schemas/ruleSchemas'
 import { useRuleInstances } from '../hooks/useRuleInstances'
@@ -76,7 +76,7 @@ const URLSection = () => {
         />
       ))}
       <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 8 }}>
-        <Button type='dashed' icon={<PlusOutlined />} onClick={() => append({ url: '', timeout: 30 })}>
+        <Button type='dashed' icon={<IconPlus size={14} />} onClick={() => append({ url: '', timeout: 30 })}>
           הוסף URL
         </Button>
       </div>
@@ -112,7 +112,7 @@ const ElasticSection = () => {
       <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 8 }}>
         <Button
           type='dashed'
-          icon={<PlusOutlined />}
+          icon={<IconPlus size={14} />}
           onClick={() =>
             append({ queryName: '', scheduleInterval: 5, scheduleUnit: 'minutes', timeout: 5, jsonQuery: '' })
           }
@@ -187,7 +187,7 @@ const BindingInstance = ({
             boxShadow: '0 1px 2px rgba(0,0,0,0.06)',
           }}
         >
-          <Button type='text' icon={<CloseOutlined />} onClick={onRemove} size='small' style={{ color: '#6B7280' }} />
+          <Button type='text' icon={<IconX size={14} />} onClick={onRemove} size='small' style={{ color: '#6B7280' }} />
           <div style={{ flex: 1, cursor: 'pointer' }} onClick={() => setIsExpanded(!isExpanded)}>
             <Text strong>{label}</Text>
           </div>
@@ -196,7 +196,7 @@ const BindingInstance = ({
             shape='circle'
             size='small'
             onClick={() => setIsExpanded(!isExpanded)}
-            icon={isExpanded ? <DownOutlined /> : <RightOutlined />}
+            icon={isExpanded ? <IconChevronDown size={14} /> : <IconChevronRight size={14} />}
           />
         </div>
 
@@ -397,7 +397,12 @@ const RuleInstanceGroup = ({
         }}
         onClick={() => setIsExpanded(!isExpanded)}
       >
-        <Button type='text' shape='circle' size='small' icon={isExpanded ? <DownOutlined /> : <RightOutlined />} />
+        <Button
+          type='text'
+          shape='circle'
+          size='small'
+          icon={isExpanded ? <IconChevronDown size={14} /> : <IconChevronRight size={14} />}
+        />
         <Text strong style={{ flex: 1, wordBreak: 'break-word' }}>
           {label}
         </Text>
@@ -418,7 +423,7 @@ const RuleInstanceGroup = ({
             />
           ))}
           <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 16 }}>
-            <Button type='link' icon={<PlusOutlined />} onClick={onAddMore} disabled={isMaxReached}>
+            <Button type='link' icon={<IconPlus size={14} />} onClick={onAddMore} disabled={isMaxReached}>
               {isMaxReached ? 'מקסימום 3 חוקים' : 'הוסף חומרה'}
             </Button>
           </div>
@@ -500,12 +505,12 @@ const RuleInstanceItem = ({
             shape='circle'
             size='small'
             onClick={() => setIsExpanded(!isExpanded)}
-            icon={isExpanded ? <DownOutlined /> : <RightOutlined />}
+            icon={isExpanded ? <IconChevronDown size={14} /> : <IconChevronRight size={14} />}
           />
           <div style={{ flex: 1, cursor: 'pointer' }} onClick={() => setIsExpanded(!isExpanded)}>
             <Text style={{ color: '#6B7280' }}>חוק {idx + 1}</Text>
           </div>
-          <Button type='text' icon={<CloseOutlined />} onClick={onRemove} size='small' style={{ color: '#6B7280' }} />
+          <Button type='text' icon={<IconX size={14} />} onClick={onRemove} size='small' style={{ color: '#6B7280' }} />
         </div>
 
         {isExpanded && (

@@ -1,6 +1,6 @@
 import { useState, type ReactNode } from 'react'
 import { Button, Typography } from 'antd'
-import { PlusOutlined, DownOutlined, RightOutlined } from '@ant-design/icons'
+import { IconPlus, IconChevronDown, IconChevronRight } from '@tabler/icons-react'
 import { MAX_RULES_PER_TYPE } from './constants'
 
 const { Text } = Typography
@@ -52,7 +52,12 @@ export const RuleGroup = ({ label, indices, onAddMore, children, usedSeverities 
         }}
         onClick={() => setIsExpanded(!isExpanded)}
       >
-        <Button type='text' shape='circle' size='small' icon={isExpanded ? <DownOutlined /> : <RightOutlined />} />
+        <Button
+          type='text'
+          shape='circle'
+          size='small'
+          icon={isExpanded ? <IconChevronDown size={14} /> : <IconChevronRight size={14} />}
+        />
         <div style={{ flex: 1, minWidth: 0 }}>
           <Text strong style={{ wordBreak: 'break-word' }}>
             {label}
@@ -73,7 +78,7 @@ export const RuleGroup = ({ label, indices, onAddMore, children, usedSeverities 
 
           {/* Add More Button */}
           <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 16 }}>
-            <Button type='dashed' icon={<PlusOutlined />} onClick={onAddMore} disabled={isMaxReached}>
+            <Button type='dashed' icon={<IconPlus size={14} />} onClick={onAddMore} disabled={isMaxReached}>
               {isMaxReached ? 'מקסימום 3 חוקים' : 'הוסף חוק'}
             </Button>
           </div>

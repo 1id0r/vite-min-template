@@ -1,7 +1,7 @@
 import { memo, useMemo, useState } from 'react'
 import { useFormContext, useFieldArray } from 'react-hook-form'
 import { Select, Button, Space, Typography } from 'antd'
-import { PlusOutlined, CloseOutlined, RightOutlined, DownOutlined } from '@ant-design/icons'
+import { IconPlus, IconX, IconChevronRight, IconChevronDown } from '@tabler/icons-react'
 import { getEntityRules, getRuleFieldGroups, FieldGroupSchemas } from '../../../schemas/ruleSchemas'
 import { RuleField, MAX_RULES_PER_TYPE } from '../shared'
 import type { EntityFormData } from '../hooks/useEntityForm'
@@ -114,17 +114,7 @@ const RuleTypeGroup = ({
   onRemove: (idx: number) => void
   onAddMore: () => void
 }) => {
-  const { watch } = useFormContext()
   const [isExpanded, setIsExpanded] = useState(true)
-
-  const allRulesData = watch('entityRules') || []
-  const usedSeverities = useMemo(() => {
-    const sev: Record<number, string> = {}
-    indices.forEach((idx) => {
-      if (allRulesData[idx]?.data?.severity) sev[idx] = allRulesData[idx].data.severity
-    })
-    return sev
-  }, [allRulesData, indices])
 
   const isMaxReached = indices.length >= MAX_RULES_PER_TYPE
 
@@ -150,7 +140,12 @@ const RuleTypeGroup = ({
         }}
         onClick={() => setIsExpanded(!isExpanded)}
       >
-        <Button type='text' shape='circle' size='small' icon={isExpanded ? <DownOutlined /> : <RightOutlined />} />
+        <Button
+          type='text'
+          shape='circle'
+          size='small'
+          icon={isExpanded ? <IconChevronDown size={14} /> : <IconChevronRight size={14} />}
+        />
         <Text strong style={{ flex: 1, wordBreak: 'break-word' }}>
           {ruleLabel}
         </Text>
@@ -165,11 +160,11 @@ const RuleTypeGroup = ({
               entityType={entityType}
               onRemove={() => onRemove(idx)}
               showDivider={i < indices.length - 1}
-              usedSeverities={usedSeverities}
+              siblingIndices={indices}
             />
           ))}
           <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 16 }}>
-            <Button type='dashed' icon={<PlusOutlined />} onClick={onAddMore} disabled={isMaxReached}>
+            <Button type='dashed' icon={<IconPlus size={14} />} onClick={onAddMore} disabled={isMaxReached}>
               {isMaxReached ? 'מקסימום 3 חוקים' : 'הוסף חוק'}
             </Button>
           </div>
@@ -188,13 +183,13 @@ const RuleInstance = ({
   entityType,
   onRemove,
   showDivider,
-  usedSeverities,
+  siblingIndices,
 }: {
   index: number
   entityType: string
   onRemove: () => void
   showDivider: boolean
-  usedSeverities: Record<number, string>
+  siblingIndices: number[]
 }) => {
   const { control, watch } = useFormContext()
   const [isExpanded, setIsExpanded] = useState(true)
@@ -231,13 +226,13 @@ const RuleInstance = ({
     return fields
   }, [fieldGroups])
 
-  const disabledSeverities = useMemo(
-    () =>
-      Object.entries(usedSeverities)
-        .filter(([idx]) => Number(idx) !== index)
-        .map(([, sev]) => sev),
-    [usedSeverities, index]
-  )
+  // Watch sibling severities directly for real-time sync
+  const siblingSeverities = siblingIndices
+    .filter((idx) => idx !== index)
+    .map((idx) => watch(`entityRules.${idx}.data.severity`))
+    .filter(Boolean)
+
+  const disabledSeverities = siblingSeverities
 
   return (
     <div
@@ -263,12 +258,12 @@ const RuleInstance = ({
             shape='circle'
             size='small'
             onClick={() => setIsExpanded(!isExpanded)}
-            icon={isExpanded ? <DownOutlined /> : <RightOutlined />}
+            icon={isExpanded ? <IconChevronDown size={14} /> : <IconChevronRight size={14} />}
           />
           <div style={{ flex: 1, cursor: 'pointer' }} onClick={() => setIsExpanded(!isExpanded)}>
             <Text style={{ color: '#6B7280' }}>חוק {index + 1}</Text>
           </div>
-          <Button type='text' icon={<CloseOutlined />} onClick={onRemove} size='small' style={{ color: '#6B7280' }} />
+          <Button type='text' icon={<IconX size={14} />} onClick={onRemove} size='small' style={{ color: '#6B7280' }} />
         </div>
 
         {isExpanded && (

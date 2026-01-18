@@ -1,5 +1,5 @@
 import { Controller } from 'react-hook-form'
-import { Input, InputNumber, Checkbox, Select, Typography, Tag } from 'antd'
+import { Input, InputNumber, Checkbox, Select, Typography } from 'antd'
 import { SEVERITY_CONFIG, formatLabel } from './constants'
 
 const { Text } = Typography
@@ -45,36 +45,34 @@ export const RuleField = ({ basePath, field, control, disabledSeverities = [] }:
             case 'select':
               if (field.name === 'severity') {
                 return (
-                  <Select
-                    {...rhfField}
-                    style={{ width: '100%' }}
-                    options={[
-                      {
-                        value: 'critical',
-                        label: <Tag color='red'>Critical</Tag>,
-                        disabled: disabledSeverities.includes('critical'),
-                      },
-                      {
-                        value: 'major',
-                        label: <Tag color='orange'>Major</Tag>,
-                        disabled: disabledSeverities.includes('major'),
-                      },
-                      {
-                        value: 'info',
-                        label: <Tag color='blue'>Info</Tag>,
-                        disabled: disabledSeverities.includes('info'),
-                      },
-                    ]}
-                    optionRender={(option) => {
-                      const config = SEVERITY_CONFIG[option.value as keyof typeof SEVERITY_CONFIG]
-                      const isDisabled = disabledSeverities.includes(option.value as string)
+                  <div style={{ display: 'flex', gap: 8, direction: 'ltr' }}>
+                    {(['critical', 'major', 'info'] as const).map((sev) => {
+                      const config = SEVERITY_CONFIG[sev]
+                      const isDisabled = disabledSeverities.includes(sev)
+                      const isSelected = rhfField.value === sev
                       return (
-                        <Tag color={config?.color} style={isDisabled ? { opacity: 0.5 } : undefined}>
-                          {config?.label} {isDisabled && '(בשימוש)'}
-                        </Tag>
+                        <div
+                          key={sev}
+                          onClick={() => !isDisabled && rhfField.onChange(sev)}
+                          style={{
+                            padding: '6px 16px',
+                            borderRadius: 16,
+                            cursor: isDisabled ? 'not-allowed' : 'pointer',
+                            backgroundColor: isSelected ? config.color : isDisabled ? '#f5f5f5' : '#fafafa',
+                            color: isSelected ? '#fff' : isDisabled ? '#bfbfbf' : '#595959',
+                            border: `1px solid ${isSelected ? config.color : isDisabled ? '#d9d9d9' : '#e8e8e8'}`,
+                            opacity: isDisabled ? 0.5 : 1,
+                            fontWeight: isSelected ? 600 : 400,
+                            fontSize: 13,
+                            transition: 'all 0.2s ease',
+                            textDecoration: isDisabled ? 'line-through' : 'none',
+                          }}
+                        >
+                          {config.label}
+                        </div>
                       )
-                    }}
-                  />
+                    })}
+                  </div>
                 )
               }
               return (
@@ -120,29 +118,34 @@ export const StandaloneRuleField = ({
       {field.type === 'boolean' && <Checkbox checked={value} onChange={(e) => onChange?.(e.target.checked)} />}
 
       {field.type === 'select' && field.name === 'severity' && (
-        <Select
-          style={{ width: '100%' }}
-          value={value}
-          onChange={onChange}
-          options={[
-            {
-              value: 'critical',
-              label: <Tag color='red'>Critical</Tag>,
-              disabled: disabledSeverities.includes('critical'),
-            },
-            { value: 'major', label: <Tag color='orange'>Major</Tag>, disabled: disabledSeverities.includes('major') },
-            { value: 'info', label: <Tag color='blue'>Info</Tag>, disabled: disabledSeverities.includes('info') },
-          ]}
-          optionRender={(option) => {
-            const config = SEVERITY_CONFIG[option.value as keyof typeof SEVERITY_CONFIG]
-            const isDisabled = disabledSeverities.includes(option.value as string)
+        <div style={{ display: 'flex', gap: 8, direction: 'ltr' }}>
+          {(['critical', 'major', 'info'] as const).map((sev) => {
+            const config = SEVERITY_CONFIG[sev]
+            const isDisabled = disabledSeverities.includes(sev)
+            const isSelected = value === sev
             return (
-              <Tag color={config?.color} style={isDisabled ? { opacity: 0.5 } : undefined}>
-                {config?.label} {isDisabled && '(בשימוש)'}
-              </Tag>
+              <div
+                key={sev}
+                onClick={() => !isDisabled && onChange?.(sev)}
+                style={{
+                  padding: '6px 16px',
+                  borderRadius: 16,
+                  cursor: isDisabled ? 'not-allowed' : 'pointer',
+                  backgroundColor: isSelected ? config.color : isDisabled ? '#f5f5f5' : '#fafafa',
+                  color: isSelected ? '#fff' : isDisabled ? '#bfbfbf' : '#595959',
+                  border: `1px solid ${isSelected ? config.color : isDisabled ? '#d9d9d9' : '#e8e8e8'}`,
+                  opacity: isDisabled ? 0.5 : 1,
+                  fontWeight: isSelected ? 600 : 400,
+                  fontSize: 13,
+                  transition: 'all 0.2s ease',
+                  textDecoration: isDisabled ? 'line-through' : 'none',
+                }}
+              >
+                {config.label}
+              </div>
             )
-          }}
-        />
+          })}
+        </div>
       )}
 
       {field.type === 'select' && field.name !== 'severity' && (

@@ -8,7 +8,7 @@
 import { memo } from 'react'
 import { useFormContext } from 'react-hook-form'
 import { Input, Button, Space, Typography } from 'antd'
-import { PlusOutlined, CloseOutlined } from '@ant-design/icons'
+import { IconPlus, IconX } from '@tabler/icons-react'
 import type { EntityFormData } from '../hooks/useEntityForm'
 
 const { Text } = Typography
@@ -69,7 +69,7 @@ export const LinksSection = memo(function LinksSection() {
                 <Button
                   type='text'
                   danger
-                  icon={<CloseOutlined />}
+                  icon={<IconX size={14} />}
                   onClick={() => handleRemoveLink(index)}
                   style={{ marginRight: 8 }}
                 />
@@ -92,7 +92,12 @@ export const LinksSection = memo(function LinksSection() {
 
         {/* Add Link Button */}
         <div style={{ display: 'flex', justifyContent: 'flex-start' }}>
-          <Button type='link' icon={<PlusOutlined />} onClick={handleAddLink} style={{ padding: 0, fontSize: '14px' }}>
+          <Button
+            type='link'
+            icon={<IconPlus size={14} />}
+            onClick={handleAddLink}
+            style={{ padding: 0, fontSize: '14px' }}
+          >
             הוסף לינק
           </Button>
         </div>

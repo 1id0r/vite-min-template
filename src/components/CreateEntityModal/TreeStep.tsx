@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Input, Button, Tag, Space, Spin, Card, Typography } from 'antd'
-import { SearchOutlined, PlusOutlined, MinusOutlined, DownOutlined, RightOutlined } from '@ant-design/icons'
+import { IconSearch, IconPlus, IconMinus, IconChevronDown, IconChevronRight } from '@tabler/icons-react'
 import type { ApiTreeNode, TreeSelectionList } from '../../types/tree'
 import { fetchTreeNodes } from '../../api/client'
 
@@ -178,7 +178,7 @@ export function TreeStep({ selection, onSelectionChange }: TreeStepProps) {
             size='small'
             onClick={handleExpandToggle}
             aria-label={isOpen ? 'Collapse' : 'Expand'}
-            icon={isOpen ? <DownOutlined /> : <RightOutlined />}
+            icon={isOpen ? <IconChevronDown size={14} /> : <IconChevronRight size={14} />}
           />
 
           <div style={{ flex: 1, cursor: 'pointer', minWidth: 0 }} onClick={() => toggleSelection(node)}>
@@ -195,7 +195,7 @@ export function TreeStep({ selection, onSelectionChange }: TreeStepProps) {
               size='small'
               aria-label={isSelected ? 'Remove from selection' : 'Add to selection'}
               onClick={() => toggleSelection(node)}
-              icon={isSelected ? <MinusOutlined /> : <PlusOutlined />}
+              icon={isSelected ? <IconMinus size={14} /> : <IconPlus size={14} />}
             />
           </Space>
         </div>
@@ -229,7 +229,7 @@ export function TreeStep({ selection, onSelectionChange }: TreeStepProps) {
         value={searchTerm}
         onChange={(e) => setSearchTerm(e.target.value)}
         placeholder='חיפוש'
-        prefix={<SearchOutlined style={{ color: '#6B7280' }} />}
+        prefix={<IconSearch size={16} style={{ color: '#6B7280' }} />}
         style={{ textAlign: 'right' }}
       />
 
