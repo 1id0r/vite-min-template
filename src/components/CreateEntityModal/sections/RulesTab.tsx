@@ -1,11 +1,16 @@
 import { memo, useMemo, useState } from 'react'
-import { useFormContext, useFieldArray, Controller } from 'react-hook-form'
-import { Select, Button, Space, Typography, Input, InputNumber, Checkbox, Tag } from 'antd'
+import { useFormContext, useFieldArray } from 'react-hook-form'
+import { Select, Button, Space, Typography } from 'antd'
 import { PlusOutlined, CloseOutlined, RightOutlined, DownOutlined } from '@ant-design/icons'
 import { getEntityRules, getRuleFieldGroups, FieldGroupSchemas } from '../../../schemas/ruleSchemas'
+import { RuleField, MAX_RULES_PER_TYPE } from '../shared'
 import type { EntityFormData } from '../hooks/useEntityForm'
 
 const { Text } = Typography
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Main RulesTab Component
+// ─────────────────────────────────────────────────────────────────────────────
 
 interface RulesTabProps {
   entityType?: string
@@ -13,102 +18,47 @@ interface RulesTabProps {
 
 export const RulesTab = memo(function RulesTab({ entityType = 'linux' }: RulesTabProps) {
   const { control } = useFormContext<EntityFormData>()
+  const { fields, append, remove } = useFieldArray({ control, name: 'entityRules' as any })
 
-  // Use field array for dynamic list of rules
-  const { fields, append, remove } = useFieldArray({
-    control,
-    name: 'entityRules' as any,
-  })
-
-  // Get available rules for the entity
   const availableRules = useMemo(() => getEntityRules(entityType), [entityType])
+  const ruleOptions = useMemo(
+    () => Object.entries(availableRules).map(([key, def]) => ({ value: key, label: def.labelHe || def.label })),
+    [availableRules]
+  )
 
-  const ruleOptions = useMemo(() => {
-    return Object.entries(availableRules).map(([key, def]) => ({
-      value: key,
-      label: def.labelHe || def.label,
-    }))
-  }, [availableRules])
+  const selectedRuleKeys = useMemo(() => [...new Set(fields.map((f: any) => f.ruleKey))], [fields])
 
-  // Get currently selected rule keys (unique)
-  const selectedRuleKeys = useMemo(() => {
-    const keys = new Set<string>()
-    fields.forEach((field: any) => {
-      keys.add(field.ruleKey)
-    })
-    return Array.from(keys)
-  }, [fields])
-
-  // Handle rule selection change
-  const handleRuleSelectionChange = (selectedKeys: string[]) => {
-    // Find rules to add (in selectedKeys but not in current fields)
-    const currentKeys = new Set(selectedRuleKeys)
-
-    selectedKeys.forEach((key) => {
-      if (!currentKeys.has(key)) {
-        // Add new rule
-        const ruleDef = availableRules[key]
-        if (ruleDef) {
-          append({
-            ruleKey: key,
-            ruleLabel: ruleDef.labelHe || ruleDef.label,
-            enabled: true,
-            data: {},
-          })
-        }
-      }
-    })
-
-    // Find rules to remove (in current fields but not in selectedKeys)
-    const newKeysSet = new Set(selectedKeys)
-    const indicesToRemove: number[] = []
-
-    fields.forEach((field: any, index) => {
-      if (!newKeysSet.has(field.ruleKey)) {
-        indicesToRemove.push(index)
-      }
-    })
-
-    // Remove in reverse order to maintain correct indices
-    indicesToRemove.reverse().forEach((index) => {
-      remove(index)
-    })
-  }
-
-  // Group rules by ruleKey for display
   const groupedRules = useMemo(() => {
     const groups: Record<string, { label: string; indices: number[] }> = {}
-
-    fields.forEach((field: any, index) => {
-      const ruleKey = field.ruleKey
-      if (!groups[ruleKey]) {
-        groups[ruleKey] = {
-          label: field.ruleLabel,
-          indices: [],
-        }
-      }
-      groups[ruleKey].indices.push(index)
+    fields.forEach((field: any, idx) => {
+      if (!groups[field.ruleKey]) groups[field.ruleKey] = { label: field.ruleLabel, indices: [] }
+      groups[field.ruleKey].indices.push(idx)
     })
-
     return groups
   }, [fields])
 
+  const handleRuleSelectionChange = (selectedKeys: string[]) => {
+    const currentKeys = new Set(selectedRuleKeys)
+    selectedKeys.forEach((key) => {
+      if (!currentKeys.has(key)) {
+        const ruleDef = availableRules[key]
+        if (ruleDef) append({ ruleKey: key, ruleLabel: ruleDef.labelHe || ruleDef.label, enabled: true, data: {} })
+      }
+    })
+    const newKeysSet = new Set(selectedKeys)
+    fields.forEach((f: any, idx) => {
+      if (!newKeysSet.has(f.ruleKey)) remove(idx)
+    })
+  }
+
   const handleAddMoreOfType = (ruleKey: string) => {
     const ruleDef = availableRules[ruleKey]
-    if (ruleDef) {
-      append({
-        ruleKey: ruleKey,
-        ruleLabel: ruleDef.labelHe || ruleDef.label,
-        enabled: true,
-        data: {},
-      })
-    }
+    if (ruleDef) append({ ruleKey, ruleLabel: ruleDef.labelHe || ruleDef.label, enabled: true, data: {} })
   }
 
   return (
     <div style={{ direction: 'rtl' }}>
       <Space direction='vertical' style={{ width: '100%' }} size='large'>
-        {/* Rule Multi-Select */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
           <Text strong style={{ whiteSpace: 'nowrap' }}>
             חוק
@@ -121,12 +71,11 @@ export const RulesTab = memo(function RulesTab({ entityType = 'linux' }: RulesTa
             value={selectedRuleKeys}
             onChange={handleRuleSelectionChange}
             showSearch
-            filterOption={(input, option) => (option?.label ?? '').toLowerCase().includes(input.toLowerCase())}
+            filterOption={(input, opt) => (opt?.label ?? '').toLowerCase().includes(input.toLowerCase())}
             maxTagCount='responsive'
           />
         </div>
 
-        {/* Grouped Rules List - Only show if rules are selected */}
         {fields.length > 0 && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
             {Object.entries(groupedRules).map(([ruleKey, group]) => (
@@ -148,9 +97,10 @@ export const RulesTab = memo(function RulesTab({ entityType = 'linux' }: RulesTa
 
 RulesTab.displayName = 'RulesTab'
 
-/**
- * Rule Type Group - Container for multiple instances of the same rule type
- */
+// ─────────────────────────────────────────────────────────────────────────────
+// RuleTypeGroup - Expandable group with severity tracking
+// ─────────────────────────────────────────────────────────────────────────────
+
 const RuleTypeGroup = ({
   ruleLabel,
   indices,
@@ -161,36 +111,33 @@ const RuleTypeGroup = ({
   ruleLabel: string
   indices: number[]
   entityType: string
-  onRemove: (index: number) => void
+  onRemove: (idx: number) => void
   onAddMore: () => void
 }) => {
   const { watch } = useFormContext()
   const [isExpanded, setIsExpanded] = useState(true)
 
-  // Watch all severities for this rule group
   const allRulesData = watch('entityRules') || []
   const usedSeverities = useMemo(() => {
-    const severities: Record<number, string> = {}
+    const sev: Record<number, string> = {}
     indices.forEach((idx) => {
-      const severity = allRulesData[idx]?.data?.severity
-      if (severity) {
-        severities[idx] = severity
-      }
+      if (allRulesData[idx]?.data?.severity) sev[idx] = allRulesData[idx].data.severity
     })
-    return severities
+    return sev
   }, [allRulesData, indices])
+
+  const isMaxReached = indices.length >= MAX_RULES_PER_TYPE
 
   return (
     <div
       style={{
         direction: 'rtl',
         border: '1px solid #fff',
-        boxShadow: '0 2px 4px rgba(0, 0, 0, 0.12)',
+        boxShadow: '0 2px 4px rgba(0,0,0,0.12)',
         borderRadius: 10,
         overflow: 'hidden',
       }}
     >
-      {/* Group Header */}
       <div
         style={{
           display: 'flex',
@@ -198,38 +145,32 @@ const RuleTypeGroup = ({
           gap: 8,
           width: '100%',
           padding: '10px 12px',
-          boxShadow: '0 2px 4px rgba(0, 0, 0, 0.06)',
+          boxShadow: '0 2px 4px rgba(0,0,0,0.06)',
           cursor: 'pointer',
         }}
         onClick={() => setIsExpanded(!isExpanded)}
       >
         <Button type='text' shape='circle' size='small' icon={isExpanded ? <DownOutlined /> : <RightOutlined />} />
-
-        <div style={{ flex: 1, minWidth: 0 }}>
-          <Text strong style={{ wordBreak: 'break-word' }}>
-            {ruleLabel}
-          </Text>
-        </div>
+        <Text strong style={{ flex: 1, wordBreak: 'break-word' }}>
+          {ruleLabel}
+        </Text>
       </div>
 
-      {/* Expanded Content - List of instances */}
       {isExpanded && (
-        <div style={{ padding: '16px' }}>
-          {indices.map((index, i) => (
+        <div style={{ padding: 16 }}>
+          {indices.map((idx, i) => (
             <RuleInstance
-              key={index}
-              index={index}
+              key={idx}
+              index={idx}
               entityType={entityType}
-              onRemove={() => onRemove(index)}
+              onRemove={() => onRemove(idx)}
               showDivider={i < indices.length - 1}
               usedSeverities={usedSeverities}
             />
           ))}
-
-          {/* Add More Button - max 3 instances per rule type */}
           <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 16 }}>
-            <Button type='dashed' icon={<PlusOutlined />} onClick={onAddMore} disabled={indices.length >= 3}>
-              {indices.length >= 3 ? 'מקסימום 3 חוקים' : 'הוסף חוק'}
+            <Button type='dashed' icon={<PlusOutlined />} onClick={onAddMore} disabled={isMaxReached}>
+              {isMaxReached ? 'מקסימום 3 חוקים' : 'הוסף חוק'}
             </Button>
           </div>
         </div>
@@ -238,9 +179,10 @@ const RuleTypeGroup = ({
   )
 }
 
-/**
- * Individual Rule Instance - Single instance with its own fields and remove button
- */
+// ─────────────────────────────────────────────────────────────────────────────
+// RuleInstance - Individual rule with fields
+// ─────────────────────────────────────────────────────────────────────────────
+
 const RuleInstance = ({
   index,
   entityType,
@@ -260,44 +202,42 @@ const RuleInstance = ({
 
   const fieldGroups = useMemo(() => getRuleFieldGroups(entityType, ruleKey), [entityType, ruleKey])
 
-  // Flatten all fields from all groups
   const allFields = useMemo(() => {
-    const fields: Array<{ name: string; type: string; label: string; options?: any[] }> = []
-
+    const fields: Array<{
+      name: string
+      type: 'text' | 'number' | 'boolean' | 'select'
+      label: string
+      options?: string[]
+    }> = []
     fieldGroups.forEach((groupName) => {
       const schema = FieldGroupSchemas[groupName]
       if (!schema) return
-
       Object.entries(schema.shape).forEach(([fieldName, fieldSchema]: [string, any]) => {
-        let currentSchema = fieldSchema
-        while (currentSchema._def.typeName === 'ZodOptional' || currentSchema._def.typeName === 'ZodNullable') {
-          currentSchema = currentSchema._def.innerType
-        }
-
-        const typeName = currentSchema._def.typeName
-
-        let type = 'text'
+        let cur = fieldSchema
+        while (cur._def.typeName === 'ZodOptional' || cur._def.typeName === 'ZodNullable') cur = cur._def.innerType
+        const typeName = cur._def.typeName
+        let type: 'text' | 'number' | 'boolean' | 'select' = 'text'
         if (typeName === 'ZodNumber') type = 'number'
         if (typeName === 'ZodBoolean') type = 'boolean'
         if (typeName === 'ZodEnum') type = 'select'
-
         fields.push({
           name: fieldName,
           type,
           label: fieldName,
-          options: typeName === 'ZodEnum' ? currentSchema._def.values : undefined,
+          options: typeName === 'ZodEnum' ? cur._def.values : undefined,
         })
       })
     })
     return fields
   }, [fieldGroups])
 
-  // Get severities used by other instances (not this one)
-  const disabledSeverities = useMemo(() => {
-    return Object.entries(usedSeverities)
-      .filter(([idx]) => Number(idx) !== index)
-      .map(([, severity]) => severity)
-  }, [usedSeverities, index])
+  const disabledSeverities = useMemo(
+    () =>
+      Object.entries(usedSeverities)
+        .filter(([idx]) => Number(idx) !== index)
+        .map(([, sev]) => sev),
+    [usedSeverities, index]
+  )
 
   return (
     <div
@@ -307,15 +247,7 @@ const RuleInstance = ({
         borderBottom: showDivider ? '1px solid #e9ecef' : 'none',
       }}
     >
-      {/* Instance Container */}
-      <div
-        style={{
-          border: '1px solid #e9ecef',
-          borderRadius: 8,
-          overflow: 'hidden',
-        }}
-      >
-        {/* Instance Header */}
+      <div style={{ border: '1px solid #e9ecef', borderRadius: 8, overflow: 'hidden' }}>
         <div
           style={{
             display: 'flex',
@@ -323,7 +255,7 @@ const RuleInstance = ({
             gap: 8,
             padding: '10px 12px',
             backgroundColor: '#fff',
-            boxShadow: '0 1px 2px rgba(0, 0, 0, 0.06)',
+            boxShadow: '0 1px 2px rgba(0,0,0,0.06)',
           }}
         >
           <Button
@@ -333,20 +265,14 @@ const RuleInstance = ({
             onClick={() => setIsExpanded(!isExpanded)}
             icon={isExpanded ? <DownOutlined /> : <RightOutlined />}
           />
-
-          <div
-            style={{ flex: 1, cursor: 'pointer', display: 'flex', alignItems: 'center' }}
-            onClick={() => setIsExpanded(!isExpanded)}
-          >
+          <div style={{ flex: 1, cursor: 'pointer' }} onClick={() => setIsExpanded(!isExpanded)}>
             <Text style={{ color: '#6B7280' }}>חוק {index + 1}</Text>
           </div>
-
           <Button type='text' icon={<CloseOutlined />} onClick={onRemove} size='small' style={{ color: '#6B7280' }} />
         </div>
 
-        {/* Instance Fields */}
         {isExpanded && (
-          <div style={{ padding: '16px' }}>
+          <div style={{ padding: 16 }}>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
               {allFields.map((field) => (
                 <RuleField
@@ -361,84 +287,6 @@ const RuleInstance = ({
           </div>
         )}
       </div>
-    </div>
-  )
-}
-
-const RuleField = ({ basePath, field, control, disabledSeverities = [] }: any) => {
-  const name = `${basePath}.${field.name}`
-
-  // Format label: replace underscores with spaces and capitalize each word
-  const formatLabel = (label: string) => {
-    return label
-      .split('_')
-      .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
-      .join(' ')
-  }
-
-  // Severity color mapping
-  const severityConfig: Record<string, { color: string; label: string }> = {
-    critical: { color: 'red', label: 'Critical' },
-    major: { color: 'orange', label: 'Major' },
-    info: { color: 'blue', label: 'Info' },
-  }
-
-  return (
-    <div style={{ marginBottom: 8 }}>
-      <Text strong style={{ fontSize: 12, display: 'block', marginBottom: 4 }}>
-        {formatLabel(field.label)}
-      </Text>
-
-      <Controller
-        name={name}
-        control={control}
-        render={({ field: rhfField }) => {
-          if (field.type === 'number') {
-            return <InputNumber {...rhfField} min={0} style={{ width: '100%' }} />
-          }
-          if (field.type === 'boolean') {
-            return <Checkbox checked={rhfField.value} onChange={(e) => rhfField.onChange(e.target.checked)} />
-          }
-          if (field.type === 'select') {
-            if (field.name === 'severity') {
-              return (
-                <Select
-                  {...rhfField}
-                  style={{ width: '100%' }}
-                  options={[
-                    {
-                      value: 'critical',
-                      label: <Tag color='red'>Critical</Tag>,
-                      disabled: disabledSeverities.includes('critical'),
-                    },
-                    {
-                      value: 'major',
-                      label: <Tag color='orange'>Major</Tag>,
-                      disabled: disabledSeverities.includes('major'),
-                    },
-                    {
-                      value: 'info',
-                      label: <Tag color='blue'>Info</Tag>,
-                      disabled: disabledSeverities.includes('info'),
-                    },
-                  ]}
-                  optionRender={(option) => {
-                    const config = severityConfig[option.value as string]
-                    const isDisabled = disabledSeverities.includes(option.value as string)
-                    return (
-                      <Tag color={config?.color} style={isDisabled ? { opacity: 0.5 } : undefined}>
-                        {config?.label} {isDisabled && '(בשימוש)'}
-                      </Tag>
-                    )
-                  }}
-                />
-              )
-            }
-            return <Select {...rhfField} style={{ width: '100%' }} />
-          }
-          return <Input {...rhfField} />
-        }}
-      />
     </div>
   )
 }
