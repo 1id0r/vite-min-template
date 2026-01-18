@@ -1,28 +1,11 @@
-import type { z } from 'zod'
-
-export type StepKey = "system" | "general" | "monitor" | "tree";
-
-export interface StepDefinition {
-  label: string;
-}
-
-export interface FormDefinition {
-  schema: z.ZodObject<any>;
-  initialData?: Record<string, unknown>;
-}
-
 export interface SystemDefinition {
   id: string;
   label: string;
-  category: string;
-  icon?: string;
-  forms: Partial<Record<StepKey, FormDefinition>>;
 }
 
 export interface CategoryDefinition {
   id: string;
   label: string;
-  icon?: string;
   systemIds: string[];
   subMenus?: {
     label: string;
@@ -30,15 +13,7 @@ export interface CategoryDefinition {
   }[];
 }
 
-export interface FlowDefinition {
-  id: string;
-  label: string;
-  steps: StepKey[];
-}
-
 export interface EntityConfig {
-  steps: Record<StepKey, StepDefinition>;
-  flows: Record<string, FlowDefinition>;
   categories: CategoryDefinition[];
   systems: Record<string, SystemDefinition>;
 }

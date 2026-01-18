@@ -40,12 +40,12 @@ export const FlowSelector = memo(function FlowSelector({ flow, flowOptions, onFl
             key={option.value}
             value={option.value}
             style={{
-              height: 35,
+              height: 34,
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              padding: '0 32px',
-              fontSize: '15px',
+              padding: '0 16px',
+              fontSize: '14px',
               borderTopRightRadius: index === 0 ? 12 : 0,
               borderBottomRightRadius: index === 0 ? 12 : 0,
               borderTopLeftRadius: index === options.length - 1 ? 12 : 0,

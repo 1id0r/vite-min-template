@@ -13,13 +13,11 @@ import { memo, useState } from 'react'
 import { FormProvider, Controller } from 'react-hook-form'
 import { Button, Input, Typography, Space, Tabs } from 'antd'
 import { FlowSelector } from './FlowSelector'
-import { DisplayIconMenu } from './DisplayIconMenu'
 import { MonitorSection, CategorySystemSelector, LinksSection } from './sections'
 import { RulesTab } from './sections/RulesTab'
 import { BindingsTab } from './sections/BindingsTab'
 import { FormStepper } from './FormStepper'
 import { useEntityForm, type EntityFormData } from './hooks/useEntityForm'
-import { DISPLAY_FLOW_SYSTEM_IDS, fallbackSystemIcon } from './iconRegistry'
 import { ResultSummary } from './ResultSummary'
 
 const { Text } = Typography
@@ -66,12 +64,10 @@ export const EntityForm = memo(function EntityForm({ onSave }: EntityFormProps) 
     systems,
     showSystemSelector,
     showGeneralSection,
-    showIconMenu,
     showMonitorSection,
     handleFlowChange,
     handleCategoryChange,
     handleSystemSelect,
-    handleIconSelect,
     handleSave,
   } = useEntityForm(handleSaveWithResult)
 
@@ -109,12 +105,14 @@ export const EntityForm = memo(function EntityForm({ onSave }: EntityFormProps) 
           flexDirection: 'column',
         }}
       >
+        {/* Fixed Header - Stepper */}
+        <div style={{ padding: '8px 12px 0' }}>
+          <FormStepper currentStep={currentStep} steps={STEPS} />
+        </div>
+
         {/* Scrollable Content */}
         <div style={{ flex: 1, overflowY: 'auto', padding: 16 }}>
           <Space direction='vertical' size='middle' style={{ width: '100%' }}>
-            {/* Stepper - Shows current step */}
-            <FormStepper currentStep={currentStep} steps={STEPS} />
-
             {/* Step 1: Entity Details */}
             {currentStep === 1 && (
               <>
@@ -147,7 +145,7 @@ export const EntityForm = memo(function EntityForm({ onSave }: EntityFormProps) 
                   <div style={{ direction: 'rtl' }}>
                     <div style={{ marginBottom: 16, display: 'flex', alignItems: 'flex-start' }}>
                       <Text strong style={{ fontSize: 14, width: 100, marginLeft: 16, marginTop: 5 }}>
-                        שם יישות <span style={{ color: '#ff4d4f' }}>*</span>
+                        שם יישות
                       </Text>
                       <div style={{ flex: 1 }}>
                         <Controller
@@ -171,7 +169,7 @@ export const EntityForm = memo(function EntityForm({ onSave }: EntityFormProps) 
                     </div>
                     <div style={{ display: 'flex', alignItems: 'start' }}>
                       <Text strong style={{ fontSize: 14, width: 100, marginLeft: 16, marginTop: 5 }}>
-                        תיאור <span style={{ color: '#ff4d4f' }}>*</span>
+                        תיאור
                       </Text>
                       <div style={{ flex: 1 }}>
                         <Controller
@@ -202,18 +200,6 @@ export const EntityForm = memo(function EntityForm({ onSave }: EntityFormProps) 
 
                 {/* Monitor Section - Dynamic fields per system */}
                 {showMonitorSection && systemId && <MonitorSection systemId={systemId} />}
-
-                {/* Icon Menu - For display flow or monitor+general system */}
-                {showIconMenu && (
-                  <DisplayIconMenu
-                    systems={systems}
-                    allowedSystemIds={DISPLAY_FLOW_SYSTEM_IDS}
-                    selectedSystem={systemId}
-                    selectedIconId={form.watch('icon')}
-                    onIconSelect={handleIconSelect}
-                    fallbackSystemIcon={fallbackSystemIcon}
-                  />
-                )}
               </>
             )}
 

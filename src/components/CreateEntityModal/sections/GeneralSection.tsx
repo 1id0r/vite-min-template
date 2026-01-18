@@ -58,7 +58,7 @@ export const GeneralSection = memo(function GeneralSection({ compact }: GeneralS
           <Col span={12}>
             <div>
               <Text strong style={{ fontSize: 14, display: 'block', marginBottom: 4 }}>
-                שם תצוגה <span style={{ color: '#ff4d4f' }}>*</span>
+                שם תצוגה
               </Text>
               <Input
                 placeholder='הזן שם תצוגה'
@@ -92,7 +92,7 @@ export const GeneralSection = memo(function GeneralSection({ compact }: GeneralS
         {/* Description */}
         <div>
           <Text strong style={{ fontSize: 14, display: 'block', marginBottom: 4 }}>
-            תיאור <span style={{ color: '#ff4d4f' }}>*</span>
+            תיאור
           </Text>
           <TextArea
             placeholder='הזן תיאור'

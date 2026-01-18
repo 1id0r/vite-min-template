@@ -13,6 +13,9 @@ import type { EntityFormData } from '../hooks/useEntityForm'
 
 const { Text } = Typography
 
+// URL regex pattern
+const URL_REGEX = /^(https?:\/\/)?([\da-z.-]+)\.([a-z.]{2,6})([/\w .-]*)*\/?$/i
+
 export const LinksSection = memo(function LinksSection() {
   const {
     formState: { errors },
@@ -57,11 +60,11 @@ export const LinksSection = memo(function LinksSection() {
               </Text>
               <div style={{ flex: 1, display: 'flex', alignItems: 'center' }}>
                 <Input
-                  placeholder='הזן שם לינק'
+                  placeholder='הזן לינק'
                   value={link.url}
                   onChange={(e) => handleLinkChange(index, 'url', e.target.value)}
-                  status={errors.links?.[index]?.url ? 'error' : undefined}
-                  style={{ direction: 'rtl' }}
+                  status={link.url && !URL_REGEX.test(link.url) ? 'error' : undefined}
+                  style={{ direction: 'ltr' }}
                 />
                 <Button
                   type='text'

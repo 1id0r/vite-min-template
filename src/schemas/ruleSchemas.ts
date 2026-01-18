@@ -198,10 +198,12 @@ export const EntityRuleRegistry: Record<string, Record<string, RuleDefinition>> 
   hdfs: {
     file_percent_usage: {
       label: 'File Percent Usage',
+      labelHe: 'אחוז שימוש בקבצים',
       fieldGroups: ['generic', 'dynamic'],
     },
     storage_usage: {
       label: 'Storage Usage',
+      labelHe: 'שימוש באחסון',
       fieldGroups: ['generic', 'dynamic'],
     },
   },
@@ -219,26 +221,32 @@ export const EntityRuleRegistry: Record<string, Record<string, RuleDefinition>> 
   linux: {
     ram: {
       label: 'RAM',
+      labelHe: 'זיכרון',
       fieldGroups: ['generic', 'dynamic'],
     },
     cpu: {
       label: 'CPU',
+      labelHe: 'מעבד',
       fieldGroups: ['generic', 'dynamic'],
     },
     service: {
       label: 'Service',
-      fieldGroups: ['generic', 'service'], // Uses service-specific fields instead of dynamic
+      labelHe: 'שירות',
+      fieldGroups: ['generic', 'service'],
     },
     absent_service: {
       label: 'Absent Service',
-      fieldGroups: ['generic', 'service'], // Same as service rule
+      labelHe: 'שירות חסר',
+      fieldGroups: ['generic', 'service'],
     },
     storage_usage: {
       label: 'Storage Usage',
+      labelHe: 'שימוש באחסון',
       fieldGroups: ['generic', 'dynamic'],
     },
     diskusage: {
       label: 'Disk Usage',
+      labelHe: 'שימוש בדיסק',
       fieldGroups: ['generic', 'dynamic'],
     },
   },
@@ -247,22 +255,27 @@ export const EntityRuleRegistry: Record<string, Record<string, RuleDefinition>> 
   mongok: {
     open_connection_mongok: {
       label: 'Open Connection',
+      labelHe: 'חיבורים פתוחים',
       fieldGroups: ['mongok'],
     },
     storage_usage_percentage: {
       label: 'Storage Usage Percentage',
+      labelHe: 'אחוז שימוש באחסון',
       fieldGroups: ['mongok'],
     },
     ram_mongok: {
       label: 'RAM',
+      labelHe: 'זיכרון',
       fieldGroups: ['mongok'],
     },
     cpu_mongok: {
       label: 'CPU',
+      labelHe: 'מעבד',
       fieldGroups: ['mongok'],
     },
     health_mongok: {
       label: 'Health',
+      labelHe: 'בריאות',
       fieldGroups: ['mongok'],
     },
   },
@@ -314,35 +327,42 @@ export const EntityRuleRegistry: Record<string, Record<string, RuleDefinition>> 
   openshift: {
     container_cpu: {
       label: 'Container CPU',
+      labelHe: 'מעבד קונטיינר',
       fieldGroups: ['generic', 'elasticThreshold'],
     },
     pods_cpu: {
       label: 'Pods CPU',
+      labelHe: 'מעבד פודים',
       fieldGroups: ['generic', 'podsThreshold'],
     },
     container_memory: {
       label: 'Container Memory',
+      labelHe: 'זיכרון קונטיינר',
       fieldGroups: ['generic', 'elasticThreshold'],
     },
     pods_memory: {
       label: 'Pods Memory',
+      labelHe: 'זיכרון פודים',
       fieldGroups: ['generic', 'podsThreshold'],
     },
     container_restarts: {
       label: 'Container Restarts',
+      labelHe: 'אתחולי קונטיינר',
       fieldGroups: ['generic', 'elasticThreshold'],
     },
     pod_pending: {
       label: 'Pod Pending',
+      labelHe: 'פוד ממתין',
       fieldGroups: ['generic'],
     },
     pods_not_running: {
       label: 'Pods Not Running',
-      labelHe: 'Unrunning pods',
+      labelHe: 'פודים לא פעילים',
       fieldGroups: ['generic', 'elasticThreshold'],
     },
     workload_without_pods: {
       label: 'Workload Without Pods',
+      labelHe: 'עומס ללא פודים',
       fieldGroups: ['generic'],
     },
     pods_errors: {
@@ -405,10 +425,12 @@ export const EntityRuleRegistry: Record<string, Record<string, RuleDefinition>> 
   postgresql: {
     connections_rate: {
       label: 'Connections Rate',
+      labelHe: 'קצב חיבורים',
       fieldGroups: ['generic', 'dynamic'],
     },
     ram_utilization: {
       label: 'RAM Utilization',
+      labelHe: 'ניצולת זיכרון',
       fieldGroups: ['generic', 'dynamic'],
     },
   },
@@ -417,7 +439,8 @@ export const EntityRuleRegistry: Record<string, Record<string, RuleDefinition>> 
   pvc: {
     pvc_usage: {
       label: 'PVC Usage',
-      fieldGroups: ['mongok'], // threshold is in generic fields
+      labelHe: 'שימוש PVC',
+      fieldGroups: ['mongok'],
     },
   },
 
@@ -425,26 +448,32 @@ export const EntityRuleRegistry: Record<string, Record<string, RuleDefinition>> 
   redis: {
     connections_amount: {
       label: 'Connections Amount',
+      labelHe: 'כמות חיבורים',
       fieldGroups: ['generic', 'dynamic'],
     },
     ram_utilization: {
       label: 'RAM Utilization',
+      labelHe: 'ניצולת זיכרון',
       fieldGroups: ['generic', 'dynamic'],
     },
     latency: {
       label: 'Latency',
+      labelHe: 'שיהוי',
       fieldGroups: ['generic', 'dynamic'],
     },
     cpu_redis: {
       label: 'CPU',
+      labelHe: 'מעבד',
       fieldGroups: ['generic', 'dynamic'],
     },
     health_redis: {
       label: 'Health',
+      labelHe: 'בריאות',
       fieldGroups: ['generic'],
     },
     shard_operations_count: {
       label: 'Shard Operations Count',
+      labelHe: 'כמות פעולות שארד',
       fieldGroups: ['generic', 'dynamic'],
     },
   },
@@ -453,14 +482,17 @@ export const EntityRuleRegistry: Record<string, Record<string, RuleDefinition>> 
   s3: {
     account_quota: {
       label: 'Account Quota',
+      labelHe: 'מכסת חשבון',
       fieldGroups: ['mongok'],
     },
     allocation_files_by_percentage: {
       label: 'Allocation Files by Percentage',
+      labelHe: 'הקצאת קבצים באחוזים',
       fieldGroups: ['mongok'],
     },
     quantitative_allocation_storage: {
       label: 'Quantitative Allocation Storage',
+      labelHe: 'הקצאת אחסון כמותית',
       fieldGroups: ['mongokVolume'],
     },
   },
@@ -469,6 +501,7 @@ export const EntityRuleRegistry: Record<string, Record<string, RuleDefinition>> 
   share: {
     storage_usage: {
       label: 'Storage Usage',
+      labelHe: 'שימוש באחסון',
       fieldGroups: ['generic', 'dynamic'],
     },
   },
@@ -477,6 +510,7 @@ export const EntityRuleRegistry: Record<string, Record<string, RuleDefinition>> 
   url: {
     url_default: {
       label: 'URL Default',
+      labelHe: 'ברירת מחדל URL',
       fieldGroups: ['generic'],
     },
   },
@@ -485,22 +519,27 @@ export const EntityRuleRegistry: Record<string, Record<string, RuleDefinition>> 
   windows: {
     ram: {
       label: 'RAM',
+      labelHe: 'זיכרון',
       fieldGroups: ['generic', 'dynamic'],
     },
     cpu: {
       label: 'CPU',
+      labelHe: 'מעבד',
       fieldGroups: ['generic', 'dynamic'],
     },
     service: {
       label: 'Service',
+      labelHe: 'שירות',
       fieldGroups: ['generic', 'service'],
     },
     absent_service: {
       label: 'Absent Service',
+      labelHe: 'שירות חסר',
       fieldGroups: ['generic', 'service'],
     },
     diskusage: {
       label: 'Disk Usage',
+      labelHe: 'שימוש בדיסק',
       fieldGroups: ['generic', 'dynamic'],
     },
   },

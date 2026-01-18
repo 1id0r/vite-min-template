@@ -18,7 +18,7 @@ import { z } from 'zod'
 import { LinkSchema, TreeSelectionSchema } from '../../../schemas/formSchemas'
 import type { Attachment } from '../../../types/entity'
 import type { TreeSelection } from '../../../types/tree'
-import { STATIC_CONFIG } from '../../../config/staticConfig'
+import { STATIC_CONFIG } from '../../../schemas/fieldConfigs'
 import type { FlowId, EntityFormData, UseEntityFormResult } from '../types/entityForm'
 
 // Re-export types for convenience

@@ -235,6 +235,7 @@ const BindingInstance = ({
                     onAddMore={() => rules.handleAddMore(ruleKey)}
                     instanceSeverities={rules.instanceSeverities}
                     onSeverityChange={rules.handleSeverityChange}
+                    entityType={type}
                   />
                 ))}
               </div>
@@ -356,6 +357,7 @@ const RuleInstanceGroup = ({
   onAddMore,
   instanceSeverities,
   onSeverityChange,
+  entityType,
 }: {
   ruleKey: string
   label: string
@@ -364,6 +366,7 @@ const RuleInstanceGroup = ({
   onAddMore: () => void
   instanceSeverities: Record<number, string>
   onSeverityChange: (idx: number, severity: string) => void
+  entityType: 'url' | 'elastic'
 }) => {
   const [isExpanded, setIsExpanded] = useState(true)
   const isMaxReached = indices.length >= MAX_RULES_PER_TYPE
@@ -407,6 +410,7 @@ const RuleInstanceGroup = ({
               key={idx}
               idx={idx}
               ruleKey={ruleKey}
+              entityType={entityType}
               onRemove={() => onRemove(idx)}
               showDivider={i < indices.length - 1}
               disabledSeverities={getDisabledSeverities(idx)}
@@ -431,6 +435,7 @@ const RuleInstanceGroup = ({
 const RuleInstanceItem = ({
   idx,
   ruleKey,
+  entityType,
   onRemove,
   showDivider,
   disabledSeverities,
@@ -438,6 +443,7 @@ const RuleInstanceItem = ({
 }: {
   idx: number
   ruleKey: string
+  entityType: 'url' | 'elastic'
   onRemove: () => void
   showDivider: boolean
   disabledSeverities: string[]
@@ -445,7 +451,7 @@ const RuleInstanceItem = ({
 }) => {
   const [isExpanded, setIsExpanded] = useState(true)
 
-  const fieldGroups = useMemo(() => getRuleFieldGroups('url', ruleKey), [ruleKey])
+  const fieldGroups = useMemo(() => getRuleFieldGroups(entityType, ruleKey), [entityType, ruleKey])
   const allFields = useMemo(() => {
     const fields: Array<{
       name: string

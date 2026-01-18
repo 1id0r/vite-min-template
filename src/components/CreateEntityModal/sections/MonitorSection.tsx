@@ -94,7 +94,7 @@ const MonitorField = memo(function MonitorField({ field, control, error }: Monit
           render={({ field: rhfField }) => (
             <div style={{ display: 'flex', alignItems: 'flex-start' }}>
               <Text strong style={{ ...labelStyle, marginTop: 5 }}>
-                {field.label} {field.required && <span style={{ color: '#ff4d4f' }}>*</span>}
+                {field.label}
               </Text>
               <div style={{ flex: 1 }}>
                 <Input
@@ -124,7 +124,7 @@ const MonitorField = memo(function MonitorField({ field, control, error }: Monit
           render={({ field: rhfField }) => (
             <div style={{ display: 'flex', alignItems: 'flex-start' }}>
               <Text strong style={{ ...labelStyle, marginTop: 5 }}>
-                {field.label} {field.required && <span style={{ color: '#ff4d4f' }}>*</span>}
+                {field.label}
               </Text>
               <div style={{ flex: 1 }}>
                 <InputNumber
@@ -154,7 +154,7 @@ const MonitorField = memo(function MonitorField({ field, control, error }: Monit
           render={({ field: rhfField }) => (
             <div style={{ display: 'flex', alignItems: 'start' }}>
               <Text strong style={{ ...labelStyle, marginTop: 5 }}>
-                {field.label} {field.required && <span style={{ color: '#ff4d4f' }}>*</span>}
+                {field.label}
               </Text>
               <div style={{ flex: 1 }}>
                 <TextArea
@@ -202,7 +202,7 @@ const MonitorField = memo(function MonitorField({ field, control, error }: Monit
           render={({ field: rhfField }) => (
             <div style={{ display: 'flex', alignItems: 'flex-start' }}>
               <Text strong style={{ ...labelStyle, marginTop: 5 }}>
-                {field.label} {field.required && <span style={{ color: '#ff4d4f' }}>*</span>}
+                {field.label}
               </Text>
               <div style={{ flex: 1 }}>
                 <Select
@@ -233,7 +233,7 @@ const MonitorField = memo(function MonitorField({ field, control, error }: Monit
           render={({ field: rhfField }) => (
             <div style={{ display: 'flex', alignItems: 'flex-start' }}>
               <Text strong style={{ ...labelStyle, marginTop: 5 }}>
-                {field.label} {field.required && <span style={{ color: '#ff4d4f' }}>*</span>}
+                {field.label}
               </Text>
               <div style={{ flex: 1 }}>
                 <Select

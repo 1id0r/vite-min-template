@@ -282,3 +282,86 @@ export const GeneralFieldConfig: FormFieldsConfig = {
 export function getMonitorFieldConfig(systemId: string): FormFieldsConfig {
   return MonitorFieldConfigs[systemId] ?? BasicMonitorFieldConfig
 }
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Application Configuration (merged from staticConfig.ts)
+// ─────────────────────────────────────────────────────────────────────────────
+import type { EntityConfig } from '../types/entity'
+
+export const STATIC_CONFIG: EntityConfig = {
+  categories: [
+    { 
+      id: 'databases', 
+      label: 'מסדי נתונים', 
+      systemIds: ['oracle_db', 'mongo_k', 'sql_server', 'redis', 'postgresql', 'eck', 'splunk'] 
+    },
+    { 
+      id: 'filesystems', 
+      label: 'אחסון נתונים', 
+      systemIds: ['s3_db', 'hdfs', 'nfs', 'cifs'] 
+    },
+    { 
+      id: 'transport', 
+      label: 'עיבוד ושינוע', 
+      systemIds: ['kafka', 'rabbitmq', 'spark_ocp4', 'airflow', 'nifi', 'ibm_mq'] 
+    },
+    { 
+      id: 'virtualization', 
+      label: 'וירטואליזציה', 
+      systemIds: ['vm_linux', 'vm_windows', 'os', 'pvc', 'dns'] 
+    },
+    { 
+      id: 'services', 
+      label: 'שירותים', 
+      systemIds: ['chevila', 'ribua', 'tardis_xport'] 
+    },
+    { 
+      id: 'general_category', 
+      label: 'כללי', 
+      systemIds: ['general'] 
+    },
+  ],
+  systems: {
+    redis: { id: 'redis', label: 'Redis' },
+    postgresql: { id: 'postgresql', label: 'PostgreSQL' },
+    eck: { id: 'eck', label: 'ECK' },
+    splunk: { id: 'splunk', label: 'Splunk' },
+    hdfs: { id: 'hdfs', label: 'HDFS' },
+    nifi: { id: 'nifi', label: 'NiFi' },
+    os: { id: 'os', label: 'Operating System' },
+    chevila: { id: 'chevila', label: 'חבילה' },
+    ribua: { id: 'ribua', label: 'ריבוע' },
+    s3_db: { id: 's3_db', label: 'S3' },
+    hadoop_hdfs: { id: 'hadoop_hdfs', label: 'Hadoop-HDFS' },
+    nfs: { id: 'nfs', label: 'NFS' },
+    cifs: { id: 'cifs', label: 'CIFS' },
+    kafka: { id: 'kafka', label: 'Kafka' },
+    rabbitmq: { id: 'rabbitmq', label: 'RabbitMQ' },
+    spark_ocp4: { id: 'spark_ocp4', label: 'Spark on OCP4' },
+    airflow: { id: 'airflow', label: 'Airflow' },
+    ibm_mq: { id: 'ibm_mq', label: 'IBM MQ' },
+    general: { id: 'general', label: 'כללי' },
+    oracle_db: { id: 'oracle_db', label: 'Oracle Database' },
+    mongo_k: { id: 'mongo_k', label: 'Mongo K' },
+    sql_server: { id: 'sql_server', label: 'SQL Server' },
+    vm_linux: { id: 'vm_linux', label: 'Linux' },
+    vm_windows: { id: 'vm_windows', label: 'Windows' },
+    pvc: { id: 'pvc', label: 'PVC' },
+    dns: { id: 'dns', label: 'DNS' },
+    ocp4: { id: 'ocp4', label: 'OCP4' },
+    gslb: { id: 'gslb', label: 'GSLB' },
+    avi: { id: 'avi', label: 'AVI' },
+    dp: { id: 'dp', label: 'DP' },
+    prophet: { id: 'prophet', label: 'Prophet' },
+    runai: { id: 'runai', label: 'RunAI' },
+    jupyter: { id: 'jupyter', label: 'Jupyter' },
+    llm: { id: 'llm', label: 'LLM' },
+    richard: { id: 'richard', label: 'Richard' },
+    solr: { id: 'solr', label: 'Solr' },
+    tardis_xport: { id: 'tardis_xport', label: 'Tardis Xport' },
+    s3_pipeline: { id: 's3_pipeline', label: 'S3 Pipeline' },
+    tiva: { id: 'tiva', label: 'Tiva' },
+    mishloach: { id: 'mishloach', label: 'Mishloach' },
+  },
+}
+
