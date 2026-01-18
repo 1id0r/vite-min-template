@@ -64,14 +64,13 @@ export const LinksSection = memo(function LinksSection() {
                   value={link.url}
                   onChange={(e) => handleLinkChange(index, 'url', e.target.value)}
                   status={link.url && !URL_REGEX.test(link.url) ? 'error' : undefined}
-                  style={{ direction: 'ltr' }}
+                  style={{ direction: 'rtl' }}
                 />
                 <Button
                   type='text'
-                  danger
                   icon={<IconX size={14} />}
                   onClick={() => handleRemoveLink(index)}
-                  style={{ marginRight: 8 }}
+                  style={{ marginRight: 8, color: '#6B7280' }}
                 />
               </div>
             </div>
