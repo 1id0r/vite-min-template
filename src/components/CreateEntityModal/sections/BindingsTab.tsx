@@ -1,12 +1,20 @@
+/**
+ * BindingsTab - Schema-Driven Bindings Management
+ *
+ * Simplified bindings tab using:
+ * - BindingFieldConfigs for field definitions
+ * - BindingForm for rendering fields
+ * - GenericRuleForm pattern for rules
+ */
+
 import { memo, useState, useMemo } from 'react'
-import { Collapse, Typography, Space, Select } from 'antd'
+import { Collapse, Typography, Space, Select, Button, Checkbox } from 'antd'
 import { useFormContext, useFieldArray, Controller } from 'react-hook-form'
-import { TreeStep } from '../TreeStep'
 import { IconPlus, IconX, IconChevronDown, IconChevronRight } from '@tabler/icons-react'
-import { Input, InputNumber, Button, Segmented } from 'antd'
-import { getRuleFieldGroups, FieldGroupSchemas } from '../../../schemas/ruleSchemas'
+import { TreeStep } from '../TreeStep'
+import { BindingForm, StandaloneRuleField, MAX_RULES_PER_TYPE } from '../shared'
 import { useRuleInstances } from '../hooks/useRuleInstances'
-import { StandaloneRuleField, MAX_RULES_PER_TYPE } from '../shared'
+import { getRuleFieldGroups, FieldGroupSchemas } from '../../../schemas/ruleSchemas'
 
 const { Text } = Typography
 const { Panel } = Collapse
@@ -27,20 +35,8 @@ export const BindingsTab = memo(function BindingsTab() {
   return (
     <div style={{ direction: 'rtl' }}>
       <Space direction='vertical' size='small' style={{ width: '100%' }}>
-        <div style={panelStyle}>
-          <Collapse defaultActiveKey={['urls']} ghost expandIconPosition='end'>
-            <Panel header={<Text strong>URL</Text>} key='urls'>
-              <URLSection />
-            </Panel>
-          </Collapse>
-        </div>
-        <div style={panelStyle}>
-          <Collapse ghost expandIconPosition='end'>
-            <Panel header={<Text strong>Elastic</Text>} key='elastic'>
-              <ElasticSection />
-            </Panel>
-          </Collapse>
-        </div>
+        <BindingSection type='url' title='URL' defaultOpen />
+        <BindingSection type='elastic' title='Elastic' />
         <div style={panelStyle}>
           <Collapse ghost expandIconPosition='end'>
             <Panel header={<Text strong>מדידות</Text>} key='measurements'>
@@ -56,110 +52,77 @@ export const BindingsTab = memo(function BindingsTab() {
 BindingsTab.displayName = 'BindingsTab'
 
 // ─────────────────────────────────────────────────────────────────────────────
-// URL Section
+// Generic Binding Section
 // ─────────────────────────────────────────────────────────────────────────────
 
-const URLSection = () => {
-  const { control } = useFormContext()
-  const { fields, append, remove } = useFieldArray({ control, name: 'urls' as any })
-
-  return (
-    <Space direction='vertical' style={{ width: '100%' }}>
-      {fields.map((field, index) => (
-        <BindingInstance
-          key={field.id}
-          type='url'
-          index={index}
-          control={control}
-          onRemove={() => remove(index)}
-          showDivider={index < fields.length - 1}
-        />
-      ))}
-      <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 8 }}>
-        <Button type='dashed' icon={<IconPlus size={14} />} onClick={() => append({ url: '', timeout: 30 })}>
-          הוסף URL
-        </Button>
-      </div>
-    </Space>
-  )
+interface BindingSectionProps {
+  type: 'url' | 'elastic'
+  title: string
+  defaultOpen?: boolean
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Elastic Section
-// ─────────────────────────────────────────────────────────────────────────────
-
-const ElasticSection = () => {
+const BindingSection = memo(function BindingSection({ type, title, defaultOpen }: BindingSectionProps) {
   const { control } = useFormContext()
-  const { fields, append, remove } = useFieldArray({ control, name: 'elastic' as any })
+  const fieldArrayName = type === 'url' ? 'urls' : 'elastic'
+  const { fields, append, remove } = useFieldArray({ control, name: fieldArrayName as any })
+
+  const getDefaultValue = () => {
+    if (type === 'url') return { url: '', timeout: 30 }
+    return { queryName: '', scheduleInterval: 5, scheduleUnit: 'minutes', timeout: 5, jsonQuery: '' }
+  }
 
   return (
-    <Space direction='vertical' style={{ width: '100%' }}>
-      {fields.length === 0 && (
-        <Text type='secondary' style={{ display: 'block', textAlign: 'center', padding: 16 }}>
-          לא נוספו הגדרות Elastic עדיין
-        </Text>
-      )}
-      {fields.map((field, index) => (
-        <BindingInstance
-          key={field.id}
-          type='elastic'
-          index={index}
-          control={control}
-          onRemove={() => remove(index)}
-          showDivider={index < fields.length - 1}
-        />
-      ))}
-      <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 8 }}>
-        <Button
-          type='dashed'
-          icon={<IconPlus size={14} />}
-          onClick={() =>
-            append({ queryName: '', scheduleInterval: 5, scheduleUnit: 'minutes', timeout: 5, jsonQuery: '' })
-          }
-        >
-          הוסף Elastic
-        </Button>
-      </div>
-    </Space>
+    <div style={panelStyle}>
+      <Collapse defaultActiveKey={defaultOpen ? [type] : []} ghost expandIconPosition='end'>
+        <Panel header={<Text strong>{title}</Text>} key={type}>
+          <Space direction='vertical' style={{ width: '100%' }}>
+            {fields.map((field, index) => (
+              <BindingInstance
+                key={field.id}
+                type={type}
+                index={index}
+                control={control}
+                fieldArrayName={fieldArrayName}
+                onRemove={() => remove(index)}
+                showDivider={index < fields.length - 1}
+              />
+            ))}
+            <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 8 }}>
+              <Button type='dashed' icon={<IconPlus size={14} />} onClick={() => append(getDefaultValue())}>
+                הוסף {title}
+              </Button>
+            </div>
+          </Space>
+        </Panel>
+      </Collapse>
+    </div>
   )
-}
+})
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Measurements Section
+// Binding Instance
 // ─────────────────────────────────────────────────────────────────────────────
 
-const MeasurementsSection = () => {
-  const { control } = useFormContext()
-  return (
-    <Controller
-      name='measurements'
-      control={control}
-      render={({ field }) => <TreeStep selection={field.value || []} onSelectionChange={field.onChange} />}
-    />
-  )
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Generic Binding Instance (URL or Elastic)
-// ─────────────────────────────────────────────────────────────────────────────
-
-const BindingInstance = ({
-  type,
-  index,
-  control,
-  onRemove,
-  showDivider,
-}: {
+interface BindingInstanceProps {
   type: 'url' | 'elastic'
   index: number
   control: any
+  fieldArrayName: string
   onRemove: () => void
   showDivider: boolean
-}) => {
+}
+
+const BindingInstance = memo(function BindingInstance({
+  type,
+  index,
+  control,
+  fieldArrayName,
+  onRemove,
+  showDivider,
+}: BindingInstanceProps) {
   const [isExpanded, setIsExpanded] = useState(true)
   const rules = useRuleInstances(type)
-
-  const label = type === 'url' ? 'URL' : `Elastic Query ${index + 1}`
+  const basePath = `${fieldArrayName}.${index}`
 
   return (
     <div
@@ -189,7 +152,7 @@ const BindingInstance = ({
         >
           <Button type='text' icon={<IconX size={14} />} onClick={onRemove} size='small' style={{ color: '#6B7280' }} />
           <div style={{ flex: 1, cursor: 'pointer' }} onClick={() => setIsExpanded(!isExpanded)}>
-            <Text strong>{label}</Text>
+            <Text strong>{type === 'url' ? 'URL' : `Elastic Query ${index + 1}`}</Text>
           </div>
           <Button
             type='text'
@@ -200,14 +163,14 @@ const BindingInstance = ({
           />
         </div>
 
-        {/* Fields */}
+        {/* Content */}
         {isExpanded && (
           <div style={{ padding: 16 }}>
-            {type === 'url' && <URLFields index={index} control={control} />}
-            {type === 'elastic' && <ElasticFields index={index} control={control} />}
+            {/* Schema-driven binding fields */}
+            <BindingForm bindingType={type} basePath={basePath} control={control} />
 
             {/* Rules Multi-Select */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16, marginTop: 8 }}>
               <Text strong style={{ whiteSpace: 'nowrap' }}>
                 חוק
               </Text>
@@ -219,6 +182,13 @@ const BindingInstance = ({
                 value={rules.selectedRules}
                 onChange={rules.handleSelectionChange}
                 maxTagCount='responsive'
+                menuItemSelectedIcon={null}
+                optionRender={(option) => (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <Checkbox checked={rules.selectedRules.includes(option.value as string)} />
+                    <span>{option.label}</span>
+                  </div>
+                )}
               />
             </div>
 
@@ -245,120 +215,28 @@ const BindingInstance = ({
       </div>
     </div>
   )
+})
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Measurements Section
+// ─────────────────────────────────────────────────────────────────────────────
+
+const MeasurementsSection = () => {
+  const { control } = useFormContext()
+  return (
+    <Controller
+      name='measurements'
+      control={control}
+      render={({ field }) => <TreeStep selection={field.value || []} onSelectionChange={field.onChange} />}
+    />
+  )
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Field Components
+// Rule Instance Group (for binding rules)
 // ─────────────────────────────────────────────────────────────────────────────
 
-const URLFields = ({ index, control }: { index: number; control: any }) => (
-  <>
-    <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 }}>
-      <Text style={{ width: 60, textAlign: 'left' }}>URL</Text>
-      <Controller
-        name={`urls.${index}.url`}
-        control={control}
-        render={({ field }) => <Input {...field} placeholder='הזן URL' style={{ flex: 1 }} />}
-      />
-    </div>
-    <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 }}>
-      <Text style={{ width: 60, textAlign: 'left' }}>timeout</Text>
-      <Controller
-        name={`urls.${index}.timeout`}
-        control={control}
-        render={({ field }) => <InputNumber {...field} min={0} placeholder='0-60' style={{ flex: 1 }} />}
-      />
-      <Text type='secondary'>שניות</Text>
-    </div>
-  </>
-)
-
-const ElasticFields = ({ index, control }: { index: number; control: any }) => (
-  <>
-    <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 }}>
-      <Text style={{ width: 100, textAlign: 'left' }}>שם שליפה</Text>
-      <Controller
-        name={`elastic.${index}.queryName`}
-        control={control}
-        render={({ field }) => <Input {...field} placeholder='הזן שם' style={{ flex: 1 }} />}
-      />
-    </div>
-    <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 }}>
-      <Text style={{ width: 100, textAlign: 'left' }}>תזמון שליפה</Text>
-      <Controller
-        name={`elastic.${index}.scheduleInterval`}
-        control={control}
-        render={({ field }) => <InputNumber {...field} min={1} style={{ width: 80 }} />}
-      />
-      <Controller
-        name={`elastic.${index}.scheduleUnit`}
-        control={control}
-        render={({ field }) => (
-          <div style={{ direction: 'ltr' }}>
-            <Segmented
-              value={field.value || 'minutes'}
-              onChange={field.onChange}
-              options={[
-                { label: 'דקות', value: 'minutes' },
-                { label: 'שעות', value: 'hours' },
-              ]}
-            />
-          </div>
-        )}
-      />
-    </div>
-    <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 }}>
-      <Text style={{ width: 100, textAlign: 'left' }}>timeout</Text>
-      <Controller
-        name={`elastic.${index}.timeout`}
-        control={control}
-        render={({ field }) => (
-          <div style={{ direction: 'ltr' }}>
-            <Segmented
-              value={field.value || 5}
-              onChange={field.onChange}
-              options={[
-                { label: '5 שניות', value: 5 },
-                { label: '15 שניות', value: 15 },
-                { label: '20 שניות', value: 20 },
-              ]}
-            />
-          </div>
-        )}
-      />
-    </div>
-    <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12, marginBottom: 16 }}>
-      <Text style={{ width: 100, textAlign: 'left', paddingTop: 8 }}>JSON Query</Text>
-      <Controller
-        name={`elastic.${index}.jsonQuery`}
-        control={control}
-        render={({ field }) => (
-          <Input.TextArea
-            {...field}
-            placeholder='{"query": {...}}'
-            style={{ flex: 1, fontFamily: 'monospace' }}
-            rows={4}
-          />
-        )}
-      />
-    </div>
-  </>
-)
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Rule Instance Group
-// ─────────────────────────────────────────────────────────────────────────────
-
-const RuleInstanceGroup = ({
-  ruleKey,
-  label,
-  indices,
-  onRemove,
-  onAddMore,
-  instanceSeverities,
-  onSeverityChange,
-  entityType,
-}: {
+interface RuleInstanceGroupProps {
   ruleKey: string
   label: string
   indices: number[]
@@ -367,7 +245,18 @@ const RuleInstanceGroup = ({
   instanceSeverities: Record<number, string>
   onSeverityChange: (idx: number, severity: string) => void
   entityType: 'url' | 'elastic'
-}) => {
+}
+
+const RuleInstanceGroup = memo(function RuleInstanceGroup({
+  label,
+  indices,
+  onRemove,
+  onAddMore,
+  instanceSeverities,
+  onSeverityChange,
+  entityType,
+  ruleKey,
+}: RuleInstanceGroupProps) {
   const [isExpanded, setIsExpanded] = useState(true)
   const isMaxReached = indices.length >= MAX_RULES_PER_TYPE
 
@@ -419,6 +308,7 @@ const RuleInstanceGroup = ({
               onRemove={() => onRemove(idx)}
               showDivider={i < indices.length - 1}
               disabledSeverities={getDisabledSeverities(idx)}
+              currentSeverity={instanceSeverities[idx]}
               onSeverityChange={(sev) => onSeverityChange(idx, sev)}
             />
           ))}
@@ -431,29 +321,33 @@ const RuleInstanceGroup = ({
       )}
     </div>
   )
-}
+})
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Rule Instance Item
 // ─────────────────────────────────────────────────────────────────────────────
 
-const RuleInstanceItem = ({
-  idx,
-  ruleKey,
-  entityType,
-  onRemove,
-  showDivider,
-  disabledSeverities,
-  onSeverityChange,
-}: {
+interface RuleInstanceItemProps {
   idx: number
   ruleKey: string
   entityType: 'url' | 'elastic'
   onRemove: () => void
   showDivider: boolean
   disabledSeverities: string[]
+  currentSeverity?: string
   onSeverityChange: (severity: string) => void
-}) => {
+}
+
+const RuleInstanceItem = memo(function RuleInstanceItem({
+  idx,
+  ruleKey,
+  entityType,
+  onRemove,
+  showDivider,
+  disabledSeverities,
+  currentSeverity,
+  onSeverityChange,
+}: RuleInstanceItemProps) {
   const [isExpanded, setIsExpanded] = useState(true)
 
   const fieldGroups = useMemo(() => getRuleFieldGroups(entityType, ruleKey), [entityType, ruleKey])
@@ -515,19 +409,18 @@ const RuleInstanceItem = ({
 
         {isExpanded && (
           <div style={{ padding: 16 }}>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
-              {allFields.map((field) => (
-                <StandaloneRuleField
-                  key={field.name}
-                  field={field}
-                  disabledSeverities={field.name === 'severity' ? disabledSeverities : []}
-                  onChange={field.name === 'severity' ? onSeverityChange : undefined}
-                />
-              ))}
-            </div>
+            {allFields.map((field) => (
+              <StandaloneRuleField
+                key={field.name}
+                field={field}
+                value={field.name === 'severity' ? currentSeverity : undefined}
+                disabledSeverities={field.name === 'severity' ? disabledSeverities : []}
+                onChange={field.name === 'severity' ? onSeverityChange : undefined}
+              />
+            ))}
           </div>
         )}
       </div>
     </div>
   )
-}
+})

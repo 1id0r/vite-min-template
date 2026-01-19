@@ -33,17 +33,20 @@
 // ─────────────────────────────────────────────────────────────────────────────
 export interface FieldConfig {
   name: string
-  type: 'text' | 'textarea' | 'number' | 'boolean' | 'select' | 'async-select' | 'links-array'
+  type: 'text' | 'textarea' | 'number' | 'boolean' | 'select' | 'async-select' | 'links-array' | 'segmented'
   label: string
   placeholder?: string
   required?: boolean
   colSpan?: number // For grid layout (1-12)
   disabled?: boolean
-  options?: { label: string; value: string }[] // For select fields
+  options?: { label: string; value: string | number }[] // For select/segmented fields
   asyncOptions?: {
     path: string
     placeholder?: string
   }
+  suffix?: string // Text to show after the input (e.g., "שניות")
+  min?: number // For number inputs
+  max?: number
 }
 
 export interface FormFieldsConfig {
@@ -365,3 +368,54 @@ export const STATIC_CONFIG: EntityConfig = {
   },
 }
 
+// ─────────────────────────────────────────────────────────────────────────────
+// Binding Field Configurations
+// ─────────────────────────────────────────────────────────────────────────────
+
+export const BindingFieldConfigs: Record<string, FormFieldsConfig> = {
+  url: {
+    title: 'URL',
+    fields: [
+      { name: 'url', type: 'text', label: 'URL', placeholder: 'הזן URL', required: true },
+      { name: 'timeout', type: 'number', label: 'timeout', min: 0, max: 60, suffix: 'שניות' },
+    ],
+  },
+  elastic: {
+    title: 'Elastic',
+    fields: [
+      { name: 'queryName', type: 'text', label: 'שם שליפה', placeholder: 'הזן שם', required: true },
+      { 
+        name: 'scheduleInterval', 
+        type: 'number', 
+        label: 'תזמון שליפה', 
+        min: 1 
+      },
+      { 
+        name: 'scheduleUnit', 
+        type: 'segmented', 
+        label: '', 
+        options: [
+          { label: 'דקות', value: 'minutes' },
+          { label: 'שעות', value: 'hours' },
+        ] 
+      },
+      { 
+        name: 'timeout', 
+        type: 'segmented', 
+        label: 'זמן המתנה', 
+        options: [
+          { label: '5', value: 5 },
+          { label: '15', value: 15 },
+          { label: '20', value: 20 },
+        ],
+        suffix: 'שניות'
+      },
+      { name: 'jsonQuery', type: 'textarea', label: 'JSON Query', placeholder: '{"query": {...}}' },
+    ],
+  },
+}
+
+// Helper to get binding field config
+export function getBindingFieldConfig(bindingType: string): FormFieldsConfig | undefined {
+  return BindingFieldConfigs[bindingType]
+}

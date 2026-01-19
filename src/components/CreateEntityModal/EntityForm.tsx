@@ -74,7 +74,7 @@ export const EntityForm = memo(function EntityForm({ onSave }: EntityFormProps) 
 
   // If we have submitted data, show the result summary
   if (submittedData) {
-    return <ResultSummary result={submittedData as any} onClose={() => setSubmittedData(null)} />
+    return <ResultSummary result={submittedData} onClose={() => setSubmittedData(null)} />
   }
 
   // Flow options for selector

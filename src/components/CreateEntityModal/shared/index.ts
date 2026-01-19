@@ -1,6 +1,7 @@
-// Shared components for rule management
 export { RuleField, StandaloneRuleField } from './RuleField'
 export { RuleGroup } from './RuleGroup'
+export { BindingForm } from './BindingForm'
+export { GenericFormField } from './GenericFormField'
 export { 
   SEVERITY_CONFIG, 
   SEVERITY_OPTIONS,

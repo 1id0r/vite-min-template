@@ -1,6 +1,6 @@
 import { memo, useMemo, useState } from 'react'
 import { useFormContext, useFieldArray } from 'react-hook-form'
-import { Select, Button, Space, Typography } from 'antd'
+import { Select, Button, Space, Typography, Checkbox } from 'antd'
 import { IconPlus, IconX, IconChevronRight, IconChevronDown } from '@tabler/icons-react'
 import { getEntityRules, getRuleFieldGroups, FieldGroupSchemas } from '../../../schemas/ruleSchemas'
 import { RuleField, MAX_RULES_PER_TYPE } from '../shared'
@@ -73,6 +73,13 @@ export const RulesTab = memo(function RulesTab({ entityType = 'linux' }: RulesTa
             showSearch
             filterOption={(input, opt) => (opt?.label ?? '').toLowerCase().includes(input.toLowerCase())}
             maxTagCount='responsive'
+            menuItemSelectedIcon={null}
+            optionRender={(option) => (
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <Checkbox checked={selectedRuleKeys.includes(option.value as string)} />
+                <span>{option.label}</span>
+              </div>
+            )}
           />
         </div>
 
@@ -268,17 +275,15 @@ const RuleInstance = ({
 
         {isExpanded && (
           <div style={{ padding: 16 }}>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
-              {allFields.map((field) => (
-                <RuleField
-                  key={field.name}
-                  basePath={`entityRules.${index}.data`}
-                  field={field}
-                  control={control}
-                  disabledSeverities={disabledSeverities}
-                />
-              ))}
-            </div>
+            {allFields.map((field) => (
+              <RuleField
+                key={field.name}
+                basePath={`entityRules.${index}.data`}
+                field={field}
+                control={control}
+                disabledSeverities={disabledSeverities}
+              />
+            ))}
           </div>
         )}
       </div>

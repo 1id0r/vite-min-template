@@ -610,6 +610,8 @@ export function getRuleFieldGroups(entityType: string, ruleName: string): FieldG
   return rules[ruleName].fieldGroups
 }
 
+
+
 // ─────────────────────────────────────────────────────────────────────────────
 // Type Inference Helpers
 // ─────────────────────────────────────────────────────────────────────────────
