@@ -1,0 +1,104 @@
+/* GenericButton Styles */
+/* Color Variables */
+:root {
+  --primer-blue: #001BB3;
+  --button-white: #ffffff;
+}
+
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 4px 16px;
+  height: 32px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: 1px solid transparent;
+  font-family: inherit;
+  line-height: 22px;
+}
+
+/* Variant: Filled */
+.filled {
+  background-color: var(--primer-blue);
+  color: var(--button-white);
+  border-color: var(--primer-blue);
+}
+
+.filled:hover:not(.disabled) {
+  background-color: #0022cc;
+  border-color: #0022cc;
+}
+
+.filled:active:not(.disabled) {
+  background-color: #001599;
+  border-color: #001599;
+}
+
+/* Variant: Outlined */
+.outlined {
+  background-color: var(--button-white);
+  color: var(--primer-blue);
+  border-color: var(--primer-blue);
+}
+
+.outlined:hover:not(.disabled) {
+  background-color: #f0f4ff;
+}
+
+.outlined:active:not(.disabled) {
+  background-color: #e0e8ff;
+}
+
+/* Variant: Link (borderless) */
+.link {
+  background-color: transparent;
+  color: var(--primer-blue);
+  border: none;
+  padding: 4px 8px;
+}
+
+.link:hover:not(.disabled) {
+  background-color: #f0f4ff;
+}
+
+.link:active:not(.disabled) {
+  background-color: #e0e8ff;
+}
+
+/* Button Types */
+.iconOnly {
+  padding: 10px;
+  aspect-ratio: 1;
+  min-width: 40px;
+  min-height: 40px;
+}
+
+.textOnly {
+  gap: 0;
+}
+
+.textWithIcon {
+  /* Default styles apply */
+}
+
+/* Text styling */
+.text {
+  white-space: nowrap;
+}
+
+/* Disabled state */
+.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Focus styles for accessibility */
+.button:focus-visible {
+  outline: 2px solid var(--primer-blue);
+  outline-offset: 2px;
+}

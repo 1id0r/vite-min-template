@@ -11,7 +11,8 @@
 
 import { memo, useState } from 'react'
 import { FormProvider, Controller } from 'react-hook-form'
-import { Button, Input, Typography, Space, Tabs } from 'antd'
+import { Input, Typography, Space, Tabs } from 'antd'
+import { GenericButton } from '../GenericButton'
 import { FlowSelector } from './FlowSelector'
 import { MonitorSection, CategorySystemSelector, LinksSection } from './sections'
 import { RulesTab } from './sections/RulesTab'
@@ -250,25 +251,19 @@ export const EntityForm = memo(function EntityForm({ onSave }: EntityFormProps) 
             gap: 12,
           }}
         >
-          {currentStep === 1 ? (
-            <Button
-              type='primary'
+          {currentStep === 1 ?
+            <GenericButton
+              variant='filled'
+              buttonType='textOnly'
+              text='הבא'
               onClick={handleNext}
               disabled={isNextDisabled}
-              style={{ width: 60, borderRadius: '8px' }}
-            >
-              הבא
-            </Button>
-          ) : (
-            <>
-              <Button onClick={handleBack} style={{ borderRadius: '8px' }}>
-                חזור
-              </Button>
-              <Button type='primary' onClick={handleSave} style={{ borderRadius: '8px' }}>
-                יצירת יישות
-              </Button>
+            />
+          : <>
+              <GenericButton variant='outlined' buttonType='textOnly' text='חזור' onClick={handleBack} />
+              <GenericButton variant='filled' buttonType='textOnly' text='יצירת יישות' onClick={handleSave} />
             </>
-          )}
+          }
         </div>
       </div>
     </FormProvider>

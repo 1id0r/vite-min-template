@@ -23,7 +23,7 @@ export const RulesTab = memo(function RulesTab({ entityType = 'linux' }: RulesTa
   const availableRules = useMemo(() => getEntityRules(entityType), [entityType])
   const ruleOptions = useMemo(
     () => Object.entries(availableRules).map(([key, def]) => ({ value: key, label: def.labelHe || def.label })),
-    [availableRules]
+    [availableRules],
   )
 
   const selectedRuleKeys = useMemo(() => [...new Set(fields.map((f: any) => f.ruleKey))], [fields])

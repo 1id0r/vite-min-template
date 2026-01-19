@@ -9,6 +9,7 @@ import { memo } from 'react'
 import { useFormContext } from 'react-hook-form'
 import { Input, Button, Space, Typography } from 'antd'
 import { IconPlus, IconX } from '@tabler/icons-react'
+import { GenericButton } from '../../GenericButton'
 import type { EntityFormData } from '../hooks/useEntityForm'
 
 const { Text } = Typography
@@ -32,7 +33,7 @@ export const LinksSection = memo(function LinksSection() {
   const handleRemoveLink = (index: number) => {
     setValue(
       'links',
-      links.filter((_, i) => i !== index)
+      links.filter((_, i) => i !== index),
     )
   }
 
@@ -91,14 +92,14 @@ export const LinksSection = memo(function LinksSection() {
 
         {/* Add Link Button */}
         <div style={{ display: 'flex', justifyContent: 'flex-start' }}>
-          <Button
-            type='link'
-            icon={<IconPlus size={14} />}
+          <GenericButton
+            variant='link'
+            buttonType='textWithIcon'
+            text='הוסף לינק'
+            icon={IconPlus}
+            iconSize={14}
             onClick={handleAddLink}
-            style={{ padding: 0, fontSize: '14px' }}
-          >
-            הוסף לינק
-          </Button>
+          />
         </div>
       </Space>
     </div>

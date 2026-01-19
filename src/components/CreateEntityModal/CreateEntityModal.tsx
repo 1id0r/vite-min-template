@@ -1,5 +1,7 @@
 import { useCallback, useState } from 'react'
-import { Button, Drawer } from 'antd'
+import { Drawer } from 'antd'
+import { IconPlus } from '@tabler/icons-react'
+import { GenericButton } from '../GenericButton'
 import { EntityForm } from './EntityForm'
 
 export function CreateEntityModal() {
@@ -17,9 +19,14 @@ export function CreateEntityModal() {
 
   return (
     <>
-      <Button type='primary' onClick={handleOpen}>
-        הוספת יישות +
-      </Button>
+      <GenericButton
+        variant='filled'
+        buttonType='textWithIcon'
+        text='הוספת יישות'
+        icon={IconPlus}
+        iconPosition='right'
+        onClick={handleOpen}
+      />
       <Drawer
         open={opened}
         onClose={handleClose}
