@@ -11,6 +11,7 @@ import { Controller } from 'react-hook-form'
 import { Input, InputNumber, Checkbox, Select, Segmented, Typography, Space, Button } from 'antd'
 import { IconPlus, IconX } from '@tabler/icons-react'
 import type { FieldConfig } from '../../../schemas/fieldConfigs'
+import { JsonEditor } from './JsonEditor'
 
 const { Text } = Typography
 const { TextArea } = Input
@@ -162,6 +163,16 @@ function renderInput(field: FieldConfig, value: any, onChange?: (val: any) => vo
 
     case 'links-array':
       return <LinksArrayField value={value} onChange={onChange} />
+
+    case 'json':
+      return (
+        <JsonEditor
+          value={value || ''}
+          onChange={commonProps.onChange}
+          placeholder={field.placeholder}
+          error={status === 'error' ? 'JSON לא תקין' : undefined}
+        />
+      )
 
     default:
       return <Input {...commonProps} value={value || ''} />

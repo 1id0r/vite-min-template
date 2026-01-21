@@ -33,7 +33,7 @@
 // ─────────────────────────────────────────────────────────────────────────────
 export interface FieldConfig {
   name: string
-  type: 'text' | 'textarea' | 'number' | 'boolean' | 'select' | 'async-select' | 'links-array' | 'segmented'
+  type: 'text' | 'textarea' | 'number' | 'boolean' | 'select' | 'async-select' | 'links-array' | 'segmented' | 'json'
   label: string
   placeholder?: string
   required?: boolean
@@ -410,7 +410,7 @@ export const BindingFieldConfigs: Record<string, FormFieldsConfig> = {
         ],
         suffix: 'שניות'
       },
-      { name: 'jsonQuery', type: 'textarea', label: 'JSON Query', placeholder: '{"query": {...}}' },
+      { name: 'jsonQuery', type: 'json', label: 'JSON Query', placeholder: '{"query": {...}}' },
     ],
   },
 }
