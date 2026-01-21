@@ -1,9 +1,9 @@
 import { memo, useMemo, useState } from 'react'
 import { useFormContext, useFieldArray } from 'react-hook-form'
 import { Select, Button, Space, Typography, Checkbox } from 'antd'
-import { IconPlus, IconX, IconChevronRight, IconChevronDown } from '@tabler/icons-react'
-import { getEntityRules, getRuleFieldGroups, FieldGroupSchemas } from '../../../schemas/ruleSchemas'
-import { RuleField, MAX_RULES_PER_TYPE } from '../shared'
+import { IconX, IconChevronDown, IconChevronRight } from '@tabler/icons-react'
+import { getEntityRules } from '../../../schemas/ruleSchemas'
+import { RuleField, RuleInstanceGroup, getRuleFields } from '../shared'
 import type { EntityFormData } from '../hooks/useEntityForm'
 
 const { Text } = Typography
@@ -86,13 +86,22 @@ export const RulesTab = memo(function RulesTab({ entityType = 'linux' }: RulesTa
         {fields.length > 0 && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
             {Object.entries(groupedRules).map(([ruleKey, group]) => (
-              <RuleTypeGroup
+              <RuleInstanceGroup
                 key={ruleKey}
                 ruleLabel={group.label}
                 indices={group.indices}
-                entityType={entityType}
                 onRemove={remove}
                 onAddMore={() => handleAddMoreOfType(ruleKey)}
+                renderInstance={(idx, showDivider) => (
+                  <RuleInstance
+                    key={idx}
+                    index={idx}
+                    entityType={entityType}
+                    onRemove={() => remove(idx)}
+                    showDivider={showDivider}
+                    siblingIndices={group.indices}
+                  />
+                )}
               />
             ))}
           </div>
@@ -103,83 +112,6 @@ export const RulesTab = memo(function RulesTab({ entityType = 'linux' }: RulesTa
 })
 
 RulesTab.displayName = 'RulesTab'
-
-// ─────────────────────────────────────────────────────────────────────────────
-// RuleTypeGroup - Expandable group with severity tracking
-// ─────────────────────────────────────────────────────────────────────────────
-
-const RuleTypeGroup = ({
-  ruleLabel,
-  indices,
-  entityType,
-  onRemove,
-  onAddMore,
-}: {
-  ruleLabel: string
-  indices: number[]
-  entityType: string
-  onRemove: (idx: number) => void
-  onAddMore: () => void
-}) => {
-  const [isExpanded, setIsExpanded] = useState(true)
-
-  const isMaxReached = indices.length >= MAX_RULES_PER_TYPE
-
-  return (
-    <div
-      style={{
-        direction: 'rtl',
-        border: '1px solid #fff',
-        boxShadow: '0 2px 4px rgba(0,0,0,0.12)',
-        borderRadius: 10,
-        overflow: 'hidden',
-      }}
-    >
-      <div
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: 8,
-          width: '100%',
-          padding: '10px 12px',
-          boxShadow: '0 2px 4px rgba(0,0,0,0.06)',
-          cursor: 'pointer',
-        }}
-        onClick={() => setIsExpanded(!isExpanded)}
-      >
-        <Button
-          type='text'
-          shape='circle'
-          size='small'
-          icon={isExpanded ? <IconChevronDown size={14} /> : <IconChevronRight size={14} />}
-        />
-        <Text strong style={{ flex: 1, wordBreak: 'break-word' }}>
-          {ruleLabel}
-        </Text>
-      </div>
-
-      {isExpanded && (
-        <div style={{ padding: 16 }}>
-          {indices.map((idx, i) => (
-            <RuleInstance
-              key={idx}
-              index={idx}
-              entityType={entityType}
-              onRemove={() => onRemove(idx)}
-              showDivider={i < indices.length - 1}
-              siblingIndices={indices}
-            />
-          ))}
-          <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 16 }}>
-            <Button type='dashed' icon={<IconPlus size={14} />} onClick={onAddMore} disabled={isMaxReached}>
-              {isMaxReached ? 'מקסימום 3 חוקים' : 'הוסף חוק'}
-            </Button>
-          </div>
-        </div>
-      )}
-    </div>
-  )
-}
 
 // ─────────────────────────────────────────────────────────────────────────────
 // RuleInstance - Individual rule with fields
@@ -202,36 +134,8 @@ const RuleInstance = ({
   const [isExpanded, setIsExpanded] = useState(true)
   const ruleKey = watch(`entityRules.${index}.ruleKey`)
 
-  const fieldGroups = useMemo(() => getRuleFieldGroups(entityType, ruleKey), [entityType, ruleKey])
-
-  const allFields = useMemo(() => {
-    const fields: Array<{
-      name: string
-      type: 'text' | 'number' | 'boolean' | 'select'
-      label: string
-      options?: string[]
-    }> = []
-    fieldGroups.forEach((groupName) => {
-      const schema = FieldGroupSchemas[groupName]
-      if (!schema) return
-      Object.entries(schema.shape).forEach(([fieldName, fieldSchema]: [string, any]) => {
-        let cur = fieldSchema
-        while (cur._def.typeName === 'ZodOptional' || cur._def.typeName === 'ZodNullable') cur = cur._def.innerType
-        const typeName = cur._def.typeName
-        let type: 'text' | 'number' | 'boolean' | 'select' = 'text'
-        if (typeName === 'ZodNumber') type = 'number'
-        if (typeName === 'ZodBoolean') type = 'boolean'
-        if (typeName === 'ZodEnum') type = 'select'
-        fields.push({
-          name: fieldName,
-          type,
-          label: fieldName,
-          options: typeName === 'ZodEnum' ? cur._def.values : undefined,
-        })
-      })
-    })
-    return fields
-  }, [fieldGroups])
+  // Use utility to get fields instead of inline derivation
+  const allFields = useMemo(() => getRuleFields(entityType, ruleKey), [entityType, ruleKey])
 
   // Watch sibling severities directly for real-time sync
   const siblingSeverities = siblingIndices

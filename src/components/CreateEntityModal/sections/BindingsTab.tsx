@@ -4,17 +4,17 @@
  * Simplified bindings tab using:
  * - BindingFieldConfigs for field definitions
  * - BindingForm for rendering fields
- * - GenericRuleForm pattern for rules
+ * - Shared RuleInstanceGroup for consistent UI
+ * - getRuleFields utility for field derivation
  */
 
 import { memo, useState, useMemo } from 'react'
-import { Collapse, Typography, Space, Select, Button, Checkbox } from 'antd'
+import { Collapse, Typography, Space, Select, Button, Checkbox, Modal } from 'antd'
 import { useFormContext, useFieldArray, Controller } from 'react-hook-form'
 import { IconPlus, IconX, IconChevronDown, IconChevronRight } from '@tabler/icons-react'
 import { TreeStep } from '../TreeStep'
-import { BindingForm, StandaloneRuleField, MAX_RULES_PER_TYPE } from '../shared'
+import { BindingForm, StandaloneRuleField, RuleInstanceGroup, getRuleFields } from '../shared'
 import { useRuleInstances } from '../hooks/useRuleInstances'
-import { getRuleFieldGroups, FieldGroupSchemas } from '../../../schemas/ruleSchemas'
 
 const { Text } = Typography
 const { Panel } = Collapse
@@ -62,13 +62,41 @@ interface BindingSectionProps {
 }
 
 const BindingSection = memo(function BindingSection({ type, title, defaultOpen }: BindingSectionProps) {
-  const { control } = useFormContext()
+  const { control, getValues } = useFormContext()
   const fieldArrayName = type === 'url' ? 'urls' : 'elastic'
   const { fields, append, remove } = useFieldArray({ control, name: fieldArrayName as any })
 
   const getDefaultValue = () => {
     if (type === 'url') return { url: '', timeout: 30 }
     return { queryName: '', scheduleInterval: 5, scheduleUnit: 'minutes', timeout: 5, jsonQuery: '' }
+  }
+
+  const handleRemove = (index: number) => {
+    // Get current values for this binding
+    const values = getValues(`${fieldArrayName}.${index}`)
+
+    // Check if binding has any content
+    const hasContent =
+      values &&
+      Object.entries(values).some(([key, value]) => {
+        // Ignore default/empty values
+        if (key === 'timeout' || key === 'scheduleInterval' || key === 'scheduleUnit') return false
+        return value && value !== ''
+      })
+
+    if (hasContent) {
+      Modal.confirm({
+        title: 'מחיקת הצמדה',
+        content: `האם אתה בטוח שברצונך למחוק את ה-${title} הזה? פעולה זו תמחק גם את כל החוקים המשויכים.`,
+        okText: 'מחק',
+        cancelText: 'ביטול',
+        okButtonProps: { danger: true },
+        onOk: () => remove(index),
+      })
+    } else {
+      // Empty binding - remove without confirmation
+      remove(index)
+    }
   }
 
   return (
@@ -83,7 +111,7 @@ const BindingSection = memo(function BindingSection({ type, title, defaultOpen }
                 index={index}
                 control={control}
                 fieldArrayName={fieldArrayName}
-                onRemove={() => remove(index)}
+                onRemove={() => handleRemove(index)}
                 showDivider={index < fields.length - 1}
               />
             ))}
@@ -100,7 +128,7 @@ const BindingSection = memo(function BindingSection({ type, title, defaultOpen }
 })
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Binding Instance
+// Binding Instance (URL or Elastic)
 // ─────────────────────────────────────────────────────────────────────────────
 
 interface BindingInstanceProps {
@@ -121,8 +149,10 @@ const BindingInstance = memo(function BindingInstance({
   showDivider,
 }: BindingInstanceProps) {
   const [isExpanded, setIsExpanded] = useState(true)
-  const rules = useRuleInstances(type)
   const basePath = `${fieldArrayName}.${index}`
+
+  // Use hook to manage rule instances and severities
+  const rules = useRuleInstances(type)
 
   return (
     <div
@@ -132,28 +162,17 @@ const BindingInstance = memo(function BindingInstance({
         borderBottom: showDivider ? '1px solid #e9ecef' : 'none',
       }}
     >
-      <div
-        style={{
-          border: '1px solid #e9ecef',
-          boxShadow: '0 2px 4px rgba(0,0,0,0.12)',
-          borderRadius: 8,
-          overflow: 'hidden',
-        }}
-      >
-        {/* Header */}
+      <div style={{ border: '1px solid #e9ecef', borderRadius: 8, overflow: 'hidden' }}>
         <div
           style={{
             display: 'flex',
             alignItems: 'center',
             gap: 8,
             padding: '10px 12px',
+            backgroundColor: '#fff',
             boxShadow: '0 1px 2px rgba(0,0,0,0.06)',
           }}
         >
-          <Button type='text' icon={<IconX size={14} />} onClick={onRemove} size='small' style={{ color: '#6B7280' }} />
-          <div style={{ flex: 1, cursor: 'pointer' }} onClick={() => setIsExpanded(!isExpanded)}>
-            <Text strong>{type === 'url' ? 'URL' : `Elastic Query ${index + 1}`}</Text>
-          </div>
           <Button
             type='text'
             shape='circle'
@@ -161,12 +180,16 @@ const BindingInstance = memo(function BindingInstance({
             onClick={() => setIsExpanded(!isExpanded)}
             icon={isExpanded ? <IconChevronDown size={14} /> : <IconChevronRight size={14} />}
           />
+          <div style={{ flex: 1, cursor: 'pointer' }} onClick={() => setIsExpanded(!isExpanded)}>
+            <Text style={{ color: '#6B7280' }}>
+              {type === 'url' ? 'URL' : 'Elastic Query'} {index + 1}
+            </Text>
+          </div>
+          <Button type='text' icon={<IconX size={14} />} onClick={onRemove} size='small' style={{ color: '#6B7280' }} />
         </div>
 
-        {/* Content */}
         {isExpanded && (
-          <div style={{ padding: 16 }}>
-            {/* Schema-driven binding fields */}
+          <div style={{ direction: 'rtl', padding: 16 }}>
             <BindingForm bindingType={type} basePath={basePath} control={control} />
 
             {/* Rules Multi-Select */}
@@ -192,20 +215,30 @@ const BindingInstance = memo(function BindingInstance({
               />
             </div>
 
-            {/* Rule Instances */}
+            {/* Rule Instances using shared RuleInstanceGroup */}
             {rules.ruleInstances.length > 0 && (
               <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
                 {Object.entries(rules.groupedInstances).map(([ruleKey, group]) => (
                   <RuleInstanceGroup
                     key={ruleKey}
-                    ruleKey={ruleKey}
-                    label={group.label}
+                    ruleLabel={group.label}
                     indices={group.indices}
-                    onRemove={rules.handleRemove}
                     onAddMore={() => rules.handleAddMore(ruleKey)}
-                    instanceSeverities={rules.instanceSeverities}
-                    onSeverityChange={rules.handleSeverityChange}
-                    entityType={type}
+                    renderInstance={(idx, showDivider) => (
+                      <RuleInstanceItem
+                        key={idx}
+                        idx={idx}
+                        ruleKey={ruleKey}
+                        entityType={type}
+                        onRemove={() => rules.handleRemove(idx)}
+                        showDivider={showDivider}
+                        disabledSeverities={Object.entries(rules.instanceSeverities)
+                          .filter(([i]) => Number(i) !== idx)
+                          .map(([, sev]) => sev)}
+                        currentSeverity={rules.instanceSeverities[idx]}
+                        onSeverityChange={(sev) => rules.handleSeverityChange(idx, sev)}
+                      />
+                    )}
                   />
                 ))}
               </div>
@@ -233,98 +266,7 @@ const MeasurementsSection = () => {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Rule Instance Group (for binding rules)
-// ─────────────────────────────────────────────────────────────────────────────
-
-interface RuleInstanceGroupProps {
-  ruleKey: string
-  label: string
-  indices: number[]
-  onRemove: (idx: number) => void
-  onAddMore: () => void
-  instanceSeverities: Record<number, string>
-  onSeverityChange: (idx: number, severity: string) => void
-  entityType: 'url' | 'elastic'
-}
-
-const RuleInstanceGroup = memo(function RuleInstanceGroup({
-  label,
-  indices,
-  onRemove,
-  onAddMore,
-  instanceSeverities,
-  onSeverityChange,
-  entityType,
-  ruleKey,
-}: RuleInstanceGroupProps) {
-  const [isExpanded, setIsExpanded] = useState(true)
-  const isMaxReached = indices.length >= MAX_RULES_PER_TYPE
-
-  const getDisabledSeverities = (idx: number) =>
-    Object.entries(instanceSeverities)
-      .filter(([i]) => Number(i) !== idx)
-      .map(([, sev]) => sev)
-
-  return (
-    <div
-      style={{
-        direction: 'rtl',
-        border: '1px solid #fff',
-        boxShadow: '0 2px 4px rgba(0,0,0,0.12)',
-        borderRadius: 10,
-        overflow: 'hidden',
-      }}
-    >
-      <div
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: 8,
-          padding: '10px 12px',
-          boxShadow: '0 2px 4px rgba(0,0,0,0.06)',
-          cursor: 'pointer',
-        }}
-        onClick={() => setIsExpanded(!isExpanded)}
-      >
-        <Button
-          type='text'
-          shape='circle'
-          size='small'
-          icon={isExpanded ? <IconChevronDown size={14} /> : <IconChevronRight size={14} />}
-        />
-        <Text strong style={{ flex: 1, wordBreak: 'break-word' }}>
-          {label}
-        </Text>
-      </div>
-
-      {isExpanded && (
-        <div style={{ padding: 16 }}>
-          {indices.map((idx, i) => (
-            <RuleInstanceItem
-              key={idx}
-              idx={idx}
-              ruleKey={ruleKey}
-              entityType={entityType}
-              onRemove={() => onRemove(idx)}
-              showDivider={i < indices.length - 1}
-              disabledSeverities={getDisabledSeverities(idx)}
-              currentSeverity={instanceSeverities[idx]}
-              onSeverityChange={(sev) => onSeverityChange(idx, sev)}
-            />
-          ))}
-          <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 16 }}>
-            <Button type='link' icon={<IconPlus size={14} />} onClick={onAddMore} disabled={isMaxReached}>
-              {isMaxReached ? 'מקסימום 3 חוקים' : 'הוסף חומרה'}
-            </Button>
-          </div>
-        </div>
-      )}
-    </div>
-  )
-})
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Rule Instance Item
+// Rule Instance Item - Using shared getRuleFields utility
 // ─────────────────────────────────────────────────────────────────────────────
 
 interface RuleInstanceItemProps {
@@ -350,30 +292,8 @@ const RuleInstanceItem = memo(function RuleInstanceItem({
 }: RuleInstanceItemProps) {
   const [isExpanded, setIsExpanded] = useState(true)
 
-  const fieldGroups = useMemo(() => getRuleFieldGroups(entityType, ruleKey), [entityType, ruleKey])
-  const allFields = useMemo(() => {
-    const fields: Array<{
-      name: string
-      type: 'text' | 'number' | 'boolean' | 'select'
-      label: string
-      options?: string[]
-    }> = []
-    fieldGroups.forEach((groupName) => {
-      const schema = FieldGroupSchemas[groupName]
-      if (!schema) return
-      Object.entries(schema.shape).forEach(([name, fieldSchema]: [string, any]) => {
-        let cur = fieldSchema
-        while (cur._def.typeName === 'ZodOptional' || cur._def.typeName === 'ZodNullable') cur = cur._def.innerType
-        const typeName = cur._def.typeName
-        let type: 'text' | 'number' | 'boolean' | 'select' = 'text'
-        if (typeName === 'ZodNumber') type = 'number'
-        if (typeName === 'ZodBoolean') type = 'boolean'
-        if (typeName === 'ZodEnum') type = 'select'
-        fields.push({ name, type, label: name, options: typeName === 'ZodEnum' ? cur._def.values : undefined })
-      })
-    })
-    return fields
-  }, [fieldGroups])
+  // Use shared utility instead of inline field derivation
+  const allFields = useMemo(() => getRuleFields(entityType, ruleKey), [entityType, ruleKey])
 
   return (
     <div

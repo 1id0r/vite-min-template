@@ -2,6 +2,8 @@ export { RuleField, StandaloneRuleField } from './RuleField'
 export { RuleGroup } from './RuleGroup'
 export { BindingForm } from './BindingForm'
 export { GenericFormField } from './GenericFormField'
+export { RuleInstanceGroup } from './RuleInstanceGroup'
+export { getRuleFields, type RuleFieldDef } from './ruleFieldUtils'
 export { 
   SEVERITY_CONFIG, 
   SEVERITY_OPTIONS,
