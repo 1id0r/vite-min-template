@@ -138,10 +138,7 @@ export const RabbitMonitorSchema = z.object({
 })
 
 // Spark
-export const SparkMonitorSchema = z.object({
-  namespace: z.string().min(1, 'Namespace is required'),
-  applicationName: z.string().min(1, 'Application name is required'),
-})
+
 
 // Airflow
 export const AirflowMonitorSchema = z.object({
@@ -208,10 +205,7 @@ export const VMWindowsMonitorSchema = z.object({
 })
 
 // OCP4
-export const OCP4MonitorSchema = z.object({
-  alertChannel: z.string().optional(),
-  enableClusterLogging: z.boolean().optional(),
-})
+
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Monitor Schema Registry - Maps system ID to schema
@@ -222,7 +216,7 @@ export const MonitorSchemaRegistry: Record<string, z.ZodObject<any>> = {
   mongo_k: MongoMonitorSchema,
   redis: RedisMonitorSchema,
   postgresql: PostgresMonitorSchema,
-  eck: ECKMonitorSchema,
+  elastic: ECKMonitorSchema,
   sql_server: SQLMonitorSchema,
   s3_db: S3MonitorSchema,
   hdfs: HDFSMonitorSchema,
@@ -231,7 +225,6 @@ export const MonitorSchemaRegistry: Record<string, z.ZodObject<any>> = {
   cifs: CIFSMonitorSchema,
   kafka: KafkaMonitorSchema,
   rabbitmq: RabbitMonitorSchema,
-  spark_ocp4: SparkMonitorSchema,
   airflow: AirflowMonitorSchema,
   nifi: NiFiMonitorSchema,
   ibm_mq: IBMMQMonitorSchema,
@@ -242,7 +235,6 @@ export const MonitorSchemaRegistry: Record<string, z.ZodObject<any>> = {
   ribua: RibuaMonitorSchema,
   vm_linux: VMLinuxMonitorSchema,
   vm_windows: VMWindowsMonitorSchema,
-  ocp4: OCP4MonitorSchema,
   // All other systems use basic schema
   splunk: BasicMonitorSchema,
   general: BasicMonitorSchema,
