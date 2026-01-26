@@ -77,8 +77,8 @@ export const EntityForm = memo(function EntityForm({ onSave }: EntityFormProps) 
 
   // Flow options for selector
   const flowOptions = [
-    { value: 'monitor', label: 'מוצר פעיל' },
-    { value: 'display', label: 'מוצר תצוגה' },
+    { value: 'monitor', label: 'יישות ניטור' },
+    { value: 'display', label: 'יישות תצוגה' },
   ]
 
   const handleNext = () => {
