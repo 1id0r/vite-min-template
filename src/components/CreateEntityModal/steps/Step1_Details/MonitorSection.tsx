@@ -8,9 +8,9 @@
 import { memo, useMemo } from 'react'
 import { useFormContext } from 'react-hook-form'
 import { Typography, Button } from 'antd'
-import { getMonitorFieldConfig } from '../../../schemas/fieldConfigs'
-import type { EntityFormData } from '../hooks/useEntityForm'
-import { GenericFormField } from '../shared'
+import { getMonitorFieldConfig } from '../../../../schemas/fieldConfigs'
+import type { EntityFormData } from '../../hooks/useEntityForm'
+import { GenericFormField } from '../../shared'
 
 const { Text } = Typography
 

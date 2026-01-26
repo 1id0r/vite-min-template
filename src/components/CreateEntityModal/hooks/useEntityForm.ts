@@ -18,7 +18,7 @@ import { z } from 'zod'
 import { LinkSchema, TreeSelectionSchema } from '../../../schemas/formSchemas'
 import type { Attachment } from '../../../types/entity'
 import type { TreeSelection } from '../../../types/tree'
-import { STATIC_CONFIG } from '../../../schemas/fieldConfigs'
+import { STATIC_CONFIG, getMonitorFieldConfig } from '../../../schemas/fieldConfigs'
 import type { FlowId, EntityFormData, UseEntityFormResult } from '../types/entityForm'
 
 // Re-export types for convenience
@@ -115,7 +115,11 @@ export function useEntityForm(onSave?: (data: EntityFormData) => void): UseEntit
   const showSystemSelector = flow === 'monitor'
   const showGeneralSection = flow === 'display' || Boolean(systemId)
   const showIconMenu = flow === 'display' || (flow === 'monitor' && systemId === 'general')
-  const showMonitorSection = flow === 'monitor' && Boolean(systemId) && systemId !== 'general'
+  const showMonitorSection = useMemo(() => {
+    if (flow !== 'monitor' || !systemId || systemId === 'general') return false
+    const config = getMonitorFieldConfig(systemId)
+    return config.fields.length > 0
+  }, [flow, systemId])
   const showBindingsPanel = flow === 'monitor' && Boolean(systemId)
 
   // ─────────────────────────────────────────────────────────────────────────

@@ -45,14 +45,8 @@ export type GeneralFormData = z.infer<typeof GeneralFormSchema>
 // Monitor Form Schemas (Step 3 - Dynamic per system)
 // ─────────────────────────────────────────────────────────────────────────────
 
-// Basic monitor form (used for most systems)
-export const BasicMonitorSchema = z.object({
-  identifier: z.string().min(1, 'Identifier is required'),
-  region: z.string().min(1, 'Region is required'),
-  capacity: z.number().int().min(0).optional(),
-  alertChannel: z.string().optional(),
-  enableTelemetry: z.boolean().optional(),
-})
+// Basic monitor form (used for most systems - no fields by default)
+export const BasicMonitorSchema = z.object({})
 
 // Oracle
 export const OracleMonitorSchema = z.object({

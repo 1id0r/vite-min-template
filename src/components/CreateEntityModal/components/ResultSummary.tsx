@@ -8,8 +8,8 @@
 import { useState } from 'react'
 import { Alert, Space, message } from 'antd'
 import { IconCopy, IconCheck } from '@tabler/icons-react'
-import { GenericButton } from '../GenericButton'
-import type { EntityFormData } from './hooks/useEntityForm'
+import { GenericButton } from '../../GenericButton'
+import type { EntityFormData } from '../hooks/useEntityForm'
 
 interface ResultSummaryProps {
   result: EntityFormData | null

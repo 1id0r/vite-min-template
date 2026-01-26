@@ -9,8 +9,8 @@ import { memo } from 'react'
 import { useFormContext } from 'react-hook-form'
 import { Input, Button, Space, Typography } from 'antd'
 import { IconPlus, IconX } from '@tabler/icons-react'
-import { GenericButton } from '../../GenericButton'
-import type { EntityFormData } from '../hooks/useEntityForm'
+import { GenericButton } from '../../../GenericButton'
+import type { EntityFormData } from '../../hooks/useEntityForm'
 
 const { Text } = Typography
 

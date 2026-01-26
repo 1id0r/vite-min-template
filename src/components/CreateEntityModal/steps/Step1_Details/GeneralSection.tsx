@@ -8,9 +8,9 @@
 import { memo } from 'react'
 import { useFormContext } from 'react-hook-form'
 import { Row, Col, Typography, Divider } from 'antd'
-import type { EntityFormData } from '../hooks/useEntityForm'
-import { GenericFormField } from '../shared'
-import { GeneralFieldConfig } from '../../../schemas/fieldConfigs'
+import type { EntityFormData } from '../../hooks/useEntityForm'
+import { GenericFormField } from '../../shared'
+import { GeneralFieldConfig } from '../../../../schemas/fieldConfigs'
 
 const { Text } = Typography
 

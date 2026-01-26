@@ -8,7 +8,7 @@
 
 import { memo, useMemo } from 'react'
 import { Select, Space, Typography } from 'antd'
-import type { CategoryDefinition, SystemDefinition } from '../../../types/entity'
+import type { CategoryDefinition, SystemDefinition } from '../../../../types/entity'
 
 const { Text } = Typography
 

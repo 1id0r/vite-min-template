@@ -2,9 +2,9 @@ import { memo, useMemo, useState } from 'react'
 import { useFormContext, useFieldArray } from 'react-hook-form'
 import { Select, Button, Space, Typography, Checkbox } from 'antd'
 import { IconX, IconChevronDown, IconChevronRight } from '@tabler/icons-react'
-import { getEntityRules } from '../../../schemas/ruleSchemas'
-import { RuleField, RuleInstanceGroup, getRuleFields } from '../shared'
-import type { EntityFormData } from '../hooks/useEntityForm'
+import { getEntityRules } from '../../../../schemas/ruleSchemas'
+import { RuleField, RuleInstanceGroup, getRuleFields } from '../../shared'
+import type { EntityFormData } from '../../hooks/useEntityForm'
 
 const { Text } = Typography
 

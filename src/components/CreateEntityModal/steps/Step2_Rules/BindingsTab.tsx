@@ -12,9 +12,9 @@ import { memo, useState, useMemo } from 'react'
 import { Collapse, Typography, Space, Select, Button, Checkbox, Modal } from 'antd'
 import { useFormContext, useFieldArray, Controller } from 'react-hook-form'
 import { IconPlus, IconX, IconChevronDown, IconChevronRight } from '@tabler/icons-react'
-import { TreeStep } from '../TreeStep'
-import { BindingForm, StandaloneRuleField, RuleInstanceGroup, getRuleFields } from '../shared'
-import { useRuleInstances } from '../hooks/useRuleInstances'
+import { TreeStep } from './TreeStep'
+import { BindingForm, StandaloneRuleField, RuleInstanceGroup, getRuleFields } from '../../shared'
+import { useRuleInstances } from '../../hooks/useRuleInstances'
 
 const { Text } = Typography
 const { Panel } = Collapse

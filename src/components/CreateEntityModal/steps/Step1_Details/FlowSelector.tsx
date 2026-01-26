@@ -6,7 +6,7 @@
 
 import { memo } from 'react'
 import { Radio } from 'antd'
-import type { FlowId, FlowOption } from './types'
+import type { FlowId, FlowOption } from '../../types'
 
 export interface FlowSelectorProps {
   flow: FlowId

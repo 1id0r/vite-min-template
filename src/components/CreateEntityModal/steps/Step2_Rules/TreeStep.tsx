@@ -1,8 +1,8 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Input, Button, Tag, Space, Spin, Card, Typography } from 'antd'
 import { IconSearch, IconPlus, IconMinus, IconChevronDown, IconChevronRight } from '@tabler/icons-react'
-import type { ApiTreeNode, TreeSelectionList } from '../../types/tree'
-import { fetchTreeNodes } from '../../api/client'
+import type { ApiTreeNode, TreeSelectionList } from '../../../../types/tree'
+import { fetchTreeNodes } from '../../../../api/client'
 
 const { Text } = Typography
 
@@ -167,7 +167,10 @@ export function TreeStep({ selection, onSelectionChange }: TreeStepProps) {
             padding: '10px 12px',
             borderRadius: 10,
             border: isSelected ? '1.5px solid #4c6ef5' : '1px solid #e9ecef',
-            backgroundColor: isSelected ? '#f0f4ff' : isOpen ? '#f9fafb' : '#ffffff',
+            backgroundColor:
+              isSelected ? '#f0f4ff'
+              : isOpen ? '#f9fafb'
+              : '#ffffff',
             transition: 'all 0.15s ease',
             boxShadow: isSelected ? '0 2px 6px rgba(76, 110, 245, 0.12)' : '0 1px 3px rgba(0,0,0,0.04)',
           }}
@@ -207,7 +210,7 @@ export function TreeStep({ selection, onSelectionChange }: TreeStepProps) {
               marginTop: 8,
               paddingRight: 16,
               borderRight: '2px solid #e9ecef',
-              direction: 'ltr',
+              direction: 'rtl',
             }}
           >
             {node.children.map((c) => (
@@ -238,23 +241,22 @@ export function TreeStep({ selection, onSelectionChange }: TreeStepProps) {
           בחירות
         </Text>
         <Card size='small'>
-          {selection.length === 0 ? (
+          {selection.length === 0 ?
             <Text type='secondary' style={{ fontSize: 12 }}>
               הוסיפו פריטים באמצעות הסימן +
             </Text>
-          ) : (
-            <Space size={4} wrap>
+          : <Space size={4} wrap>
               {selection.map((item) => (
                 <Tag key={item.vid} color='blue' closable onClose={() => removeSelection(item.vid)}>
                   {item.displayName}
                 </Tag>
               ))}
             </Space>
-          )}
+          }
         </Card>
       </div>
 
-      {isSearching ? (
+      {isSearching ?
         <div>
           <Space align='center' style={{ marginBottom: 8 }}>
             <Text strong style={{ fontSize: 14 }}>
@@ -278,8 +280,7 @@ export function TreeStep({ selection, onSelectionChange }: TreeStepProps) {
             ))}
           </div>
         </div>
-      ) : (
-        <div>
+      : <div>
           <Text type='secondary' style={{ fontSize: 14, display: 'block', marginBottom: 8 }}>
             הרחיבו ענפים ובחרו באמצעות +
           </Text>
@@ -289,7 +290,7 @@ export function TreeStep({ selection, onSelectionChange }: TreeStepProps) {
             ))}
           </div>
         </div>
-      )}
+      }
     </Space>
   )
 }
