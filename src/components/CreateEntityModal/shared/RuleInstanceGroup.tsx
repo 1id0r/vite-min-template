@@ -13,15 +13,10 @@ import { MAX_RULES_PER_TYPE } from './constants'
 const { Text } = Typography
 
 interface RuleInstanceGroupProps {
-  /** Label for the group header */
   ruleLabel: string
-  /** Indices of rule instances in this group */
   indices: number[]
-  /** Callback when remove button is clicked (optional - removal can be handled in renderInstance) */
   onRemove?: (idx: number) => void
-  /** Callback when "add more" is clicked */
   onAddMore: () => void
-  /** Render function for each rule instance */
   renderInstance: (idx: number, showDivider: boolean) => React.ReactNode
 }
 
