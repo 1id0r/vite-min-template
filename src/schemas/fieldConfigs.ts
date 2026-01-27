@@ -33,7 +33,7 @@
 // ─────────────────────────────────────────────────────────────────────────────
 export interface FieldConfig {
   name: string
-  type: 'text' | 'textarea' | 'number' | 'boolean' | 'select' | 'async-select' | 'links-array' | 'segmented' | 'json'
+  type: 'text' | 'textarea' | 'number' | 'boolean' | 'select' | 'async-select' | 'links-array' | 'segmented' | 'json' | 'severity' | 'time'
   label: string
   placeholder?: string
   required?: boolean
@@ -56,14 +56,6 @@ export interface FormFieldsConfig {
 
 // Monitor field configurations by system ID
 export const MonitorFieldConfigs: Record<string, FormFieldsConfig> = {
-  oracle_db: {
-    title: 'Oracle monitoring',
-    fields: [
-      { name: 'dc', type: 'text', label: 'DC', placeholder: 'dc-01', required: true, colSpan: 4 },
-      { name: 'host', type: 'text', label: 'Host', required: true, colSpan: 4 },
-      { name: 'database', type: 'text', label: 'Database', required: true, colSpan: 4 },
-    ],
-  },
   mongo_k: {
     title: 'Mongo monitoring',
     fields: [
@@ -87,7 +79,7 @@ export const MonitorFieldConfigs: Record<string, FormFieldsConfig> = {
     title: 'Elastic',
     fields: [
       { name: 'node', type: 'text', label: 'Node', required: true, colSpan: 4 },
-      { name: 'buckets_names', type: 'textarea', label: 'Buckets Names (comma separated)', required: true, colSpan: 4, placeholder: 'bucket1, bucket2' },
+      { name: 'buckets_names', type: 'textarea', label: 'Buckets Names (comma separated)', required: false, colSpan: 4, placeholder: 'bucket1, bucket2' },
       { name: 'query_id', type: 'text', label: 'Query ID', required: true, colSpan: 4 },
     ],
   },
@@ -98,7 +90,7 @@ export const MonitorFieldConfigs: Record<string, FormFieldsConfig> = {
       { name: 'hosts', type: 'textarea', label: 'Hosts (comma separated)', required: true, colSpan: 6, placeholder: 'host1, host2, host3' },
     ],
   },
-  s3_db: {
+  s3: {
     title: 'S3 monitoring',
     fields: [
       { name: 'account', type: 'text', label: 'Account', required: true, colSpan: 12 },
@@ -111,55 +103,12 @@ export const MonitorFieldConfigs: Record<string, FormFieldsConfig> = {
       { name: 'hierarchy', type: 'text', label: 'Hierarchy', required: true, colSpan: 6 },
     ],
   },
-  hadoop_hdfs: {
-    title: 'HDFS monitoring',
-    fields: [
-      { name: 'network', type: 'text', label: 'Network', required: true, colSpan: 4 },
-      { name: 'dc', type: 'text', label: 'DC', required: true, colSpan: 4 },
-      { name: 'url', type: 'text', label: 'URL', required: true, colSpan: 4 },
-    ],
-  },
-  nfs: {
-    title: 'NFS monitoring',
-    fields: [
-      { name: 'network', type: 'text', label: 'Network', required: true, colSpan: 4 },
-      { name: 'dc', type: 'text', label: 'DC', required: true, colSpan: 4 },
-      { name: 'route', type: 'text', label: 'Route', required: true, colSpan: 4 },
-    ],
-  },
-  cifs: {
-    title: 'CIFS monitoring',
-    fields: [
-      { name: 'network', type: 'text', label: 'Network', required: true, colSpan: 4 },
-      { name: 'dc', type: 'text', label: 'DC', required: true, colSpan: 4 },
-      { name: 'route', type: 'text', label: 'Route', required: true, colSpan: 4 },
-    ],
-  },
   kafka: {
     title: 'Kafka monitoring',
     fields: [
       { name: 'cluster', type: 'text', label: 'Cluster', required: true, colSpan: 4 },
       { name: 'consumer_group', type: 'text', label: 'Consumer Group', required: true, colSpan: 4 },
       { name: 'topic', type: 'text', label: 'Topic', required: true, colSpan: 4 },
-    ],
-  },
-  rabbitmq: {
-    title: 'RabbitMQ monitoring',
-    fields: [
-      { name: 'network', type: 'text', label: 'Network', required: true, colSpan: 4 },
-      { name: 'dc', type: 'text', label: 'DC', required: true, colSpan: 4 },
-      { name: 'queue', type: 'text', label: 'שם תור', required: true, colSpan: 4 },
-    ],
-  },
-
-  airflow: {
-    title: 'Airflow monitoring',
-    fields: [
-      { name: 'network', type: 'text', label: 'Network', required: true, colSpan: 6 },
-      { name: 'dc', type: 'text', label: 'DC', required: true, colSpan: 6 },
-      { name: 'dag', type: 'text', label: 'DAG', required: true, colSpan: 6 },
-      { name: 'task', type: 'text', label: 'Task', required: true, colSpan: 6 },
-      { name: 'isSparkDag', type: 'boolean', label: "Is Spark's DAG", colSpan: 6 },
     ],
   },
   nifi: {
@@ -170,22 +119,6 @@ export const MonitorFieldConfigs: Record<string, FormFieldsConfig> = {
       { name: 'componentId', type: 'text', label: 'Component ID', required: true, colSpan: 4 },
     ],
   },
-  ibm_mq: {
-    title: 'IBM MQ monitoring',
-    fields: [
-      { name: 'queueManagers', type: 'text', label: 'Queue manager(s)', required: true, colSpan: 6 },
-      { name: 'queueName', type: 'text', label: 'Queue name', required: true, colSpan: 6 },
-    ],
-  },
-  os: {
-    title: 'OS monitoring',
-    fields: [
-      { name: 'environment', type: 'text', label: 'Environment', required: true, colSpan: 6 },
-      { name: 'namespace', type: 'text', label: 'Namespace', required: true, colSpan: 6 },
-      { name: 'workland', type: 'text', label: 'Workland', required: true, colSpan: 6 },
-      { name: 'type', type: 'text', label: 'Type', required: true, colSpan: 6 },
-    ],
-  },
   pvc: {
     title: 'PVC monitoring',
     fields: [
@@ -194,33 +127,13 @@ export const MonitorFieldConfigs: Record<string, FormFieldsConfig> = {
       { name: 'pvc', type: 'text', label: 'PVC', required: true, colSpan: 4 },
     ],
   },
-  dns: {
-    title: 'DNS monitoring',
-    fields: [
-      { name: 'dns', type: 'text', label: 'DNS', required: true, colSpan: 6 },
-    ],
-  },
-  chevila: {
-    title: 'Package monitoring',
-    fields: [
-      { name: 'entityName', type: 'text', label: 'שם יישות', required: true, colSpan: 6 },
-      { name: 'identifier', type: 'text', label: 'מזהה', required: true, colSpan: 6 },
-    ],
-  },
-  ribua: {
-    title: 'ריבוע ניטור',
-    fields: [
-      { name: 'name', type: 'text', label: 'שם', required: true, colSpan: 6 },
-      { name: 'identifier', type: 'text', label: 'מזהה', required: true, colSpan: 6 },
-    ],
-  },
-  vm_linux: {
+  linux: {
     title: 'Linux VM monitoring',
     fields: [
       { name: 'server_name', type: 'text', label: 'Server Name', required: true, colSpan: 12 },
     ],
   },
-  vm_windows: {
+  windows: {
     title: 'Windows VM monitoring',
     fields: [
       { name: 'server_name', type: 'text', label: 'Server Name', required: true, colSpan: 12 },
@@ -260,8 +173,8 @@ export const MonitorFieldConfigs: Record<string, FormFieldsConfig> = {
   groove: {
     title: 'Groove',
     fields: [
-      { name: 'havila', type: 'text', label: 'חבילה', required: true, colSpan: 6 },
-      { name: 'ribua', type: 'text', label: 'ריבוע', required: true, colSpan: 6 },
+      { name: 'cube_name', type: 'text', label: 'Cube Name', required: true, colSpan: 6 },
+      { name: 'timed_package_id', type: 'text', label: 'Timed Package ID', required: true, colSpan: 6 },
     ],
   },
   url_entity: {
@@ -313,7 +226,7 @@ export const STATIC_CONFIG: EntityConfig = {
     { 
       id: 'filesystems', 
       label: 'אחסון נתונים', 
-      systemIds: ['s3_db', 'hdfs', 'share'] 
+      systemIds: ['s3', 'hdfs', 'share'] 
     },
     { 
       id: 'transport', 
@@ -323,7 +236,7 @@ export const STATIC_CONFIG: EntityConfig = {
     { 
       id: 'virtualization', 
       label: 'וירטואליזציה', 
-      systemIds: ['vm_linux', 'vm_windows', 'pvc', 'openshift'] 
+      systemIds: ['linux', 'windows', 'pvc', 'openshift'] 
     },
     { 
       id: 'services', 
@@ -335,42 +248,15 @@ export const STATIC_CONFIG: EntityConfig = {
     redis: { id: 'redis', label: 'Redis' },
     postgresql: { id: 'postgresql', label: 'PostgreSQL' },
     elastic: { id: 'elastic', label: 'Elastic' },
-    splunk: { id: 'splunk', label: 'Splunk' },
     hdfs: { id: 'hdfs', label: 'HDFS' },
     nifi: { id: 'nifi', label: 'NiFi' },
-    os: { id: 'os', label: 'Operating System' },
-    chevila: { id: 'chevila', label: 'חבילה' },
-    ribua: { id: 'ribua', label: 'ריבוע' },
-    s3_db: { id: 's3_db', label: 'S3' },
-    hadoop_hdfs: { id: 'hadoop_hdfs', label: 'Hadoop-HDFS' },
-    nfs: { id: 'nfs', label: 'NFS' },
-    cifs: { id: 'cifs', label: 'CIFS' },
+    s3: { id: 's3', label: 'S3' },
     kafka: { id: 'kafka', label: 'Kafka' },
-    rabbitmq: { id: 'rabbitmq', label: 'RabbitMQ' },
-    airflow: { id: 'airflow', label: 'Airflow' },
-    ibm_mq: { id: 'ibm_mq', label: 'IBM MQ' },
-    general: { id: 'general', label: 'כללי' },
-    oracle_db: { id: 'oracle_db', label: 'Oracle Database' },
     mongo_k: { id: 'mongo_k', label: 'Mongo K' },
     sql_server: { id: 'sql_server', label: 'SQL Server' },
     vm_linux: { id: 'vm_linux', label: 'Linux' },
     vm_windows: { id: 'vm_windows', label: 'Windows' },
     pvc: { id: 'pvc', label: 'PVC' },
-    dns: { id: 'dns', label: 'DNS' },
-    gslb: { id: 'gslb', label: 'GSLB' },
-    avi: { id: 'avi', label: 'AVI' },
-    dp: { id: 'dp', label: 'DP' },
-    prophet: { id: 'prophet', label: 'Prophet' },
-    runai: { id: 'runai', label: 'RunAI' },
-    jupyter: { id: 'jupyter', label: 'Jupyter' },
-    llm: { id: 'llm', label: 'LLM' },
-    richard: { id: 'richard', label: 'Richard' },
-    solr: { id: 'solr', label: 'Solr' },
-    tardis_xport: { id: 'tardis_xport', label: 'Tardis Xport' },
-    s3_pipeline: { id: 's3_pipeline', label: 'S3 Pipeline' },
-    tiva: { id: 'tiva', label: 'Tiva' },
-    mishloach: { id: 'mishloach', label: 'Mishloach' },
-    // New entity types
     openshift: { id: 'openshift', label: 'OpenShift' },
     data: { id: 'data', label: 'Data' },
     share: { id: 'share', label: 'Share' },
@@ -430,4 +316,46 @@ export const BindingFieldConfigs: Record<string, FormFieldsConfig> = {
 // Helper to get binding field config
 export function getBindingFieldConfig(bindingType: string): FormFieldsConfig | undefined {
   return BindingFieldConfigs[bindingType]
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Rule Field Configurations
+// ─────────────────────────────────────────────────────────────────────────────
+
+export const RuleFieldConfigs: Record<string, FormFieldsConfig> = {
+  generic: {
+    title: 'שדות כלליים',
+    fields: [
+      { name: 'functionality', type: 'text', label: 'פונקציונליות', colSpan: 12 },
+      { name: 'details', type: 'text', label: 'פרטים', colSpan: 12 },
+      { name: 'severity', type: 'severity', label: 'חומרה', colSpan: 12 },
+      { name: 'duration', type: 'number', label: 'משך זמן', colSpan: 6, suffix: 'דקות' },
+    ],
+  },
+  dynamic: {
+    title: 'שדות דינמיים',
+    fields: [
+      { name: 'threshold', type: 'number', label: 'סף', colSpan: 6 },
+      { name: 'is_same_date', type: 'boolean', label: 'אותו תאריך', colSpan: 6 },
+      { name: 'start_time', type: 'time', label: 'שעת התחלה', colSpan: 6 },
+      { name: 'end_time', type: 'time', label: 'שעת סיום', colSpan: 6 },
+    ],
+  },
+  threshold: {
+    title: 'סף',
+    fields: [
+      { name: 'threshold', type: 'number', label: 'סף', colSpan: 12 },
+    ],
+  },
+  volume: {
+    title: 'יחידת נפח',
+    fields: [
+      { name: 'volume_unit', type: 'text', label: 'יחידת נפח', colSpan: 12, placeholder: 'MB, GB, etc.' },
+    ],
+  },
+}
+
+// Helper to get rule field config by field group name
+export function getRuleFieldConfig(fieldGroupName: string): FormFieldsConfig | undefined {
+  return RuleFieldConfigs[fieldGroupName]
 }

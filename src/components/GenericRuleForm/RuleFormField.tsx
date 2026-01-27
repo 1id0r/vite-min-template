@@ -6,7 +6,7 @@
  */
 
 import { memo } from 'react'
-import { Input, InputNumber, Checkbox, Select, Typography } from 'antd'
+import { Input, InputNumber, Checkbox, Select, TimePicker, Typography } from 'antd'
 import type { RuleFormFieldProps } from './types'
 
 const { Text } = Typography
@@ -105,6 +105,18 @@ export const RuleFormField = memo(function RuleFormField({
             style={{ width: '100%' }}
             options={field.options?.map((opt) => ({ value: opt, label: opt }))}
             placeholder={field.placeholder}
+          />
+        )
+
+      case 'time':
+        return (
+          <TimePicker
+            value={value}
+            onChange={onChange}
+            disabled={disabled}
+            format='HH:mm'
+            style={{ width: '100%' }}
+            placeholder={field.placeholder || 'HH:mm'}
           />
         )
 

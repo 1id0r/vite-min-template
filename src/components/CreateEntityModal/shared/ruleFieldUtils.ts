@@ -6,11 +6,32 @@
 
 import { getRuleFieldGroups, FieldGroupSchemas } from '../../../schemas/ruleSchemas'
 
+export type FieldType = 'text' | 'number' | 'boolean' | 'select' | 'severity' | 'time'
+
 export interface RuleFieldDef {
   name: string
-  type: 'text' | 'number' | 'boolean' | 'select'
+  type: FieldType
   label: string
   options?: string[]
+}
+
+/** Field names that should be rendered as time pickers */
+const TIME_FIELD_NAMES = ['start_time', 'end_time']
+
+/** Field names that should be rendered as select dropdowns with predefined options */
+const SELECT_FIELD_NAMES: Record<string, string[]> = {
+  volume_unit: ['KB', 'MB', 'GB', 'TB'],
+  time_unit: ['seconds', 'minutes', 'hours', 'days'],
+}
+
+/** Severity enum values to detect severity fields */
+const SEVERITY_VALUES = ['critical', 'major', 'info']
+
+/**
+ * Detect if an enum field is a severity field
+ */
+function isSeverityEnum(values: string[]): boolean {
+  return SEVERITY_VALUES.every(v => values.includes(v)) && values.length === SEVERITY_VALUES.length
 }
 
 /**
@@ -33,17 +54,36 @@ export function getRuleFields(entityType: string, ruleKey: string): RuleFieldDef
       }
 
       const typeName = cur._def.typeName
-      let type: 'text' | 'number' | 'boolean' | 'select' = 'text'
+      let type: FieldType = 'text'
+      let options: string[] | undefined = undefined
 
-      if (typeName === 'ZodNumber') type = 'number'
-      if (typeName === 'ZodBoolean') type = 'boolean'
-      if (typeName === 'ZodEnum') type = 'select'
+      // Determine field type based on Zod schema and field name
+      if (typeName === 'ZodNumber') {
+        type = 'number'
+      } else if (typeName === 'ZodBoolean') {
+        type = 'boolean'
+      } else if (typeName === 'ZodEnum') {
+        const enumValues = cur._def.values as string[]
+        if (isSeverityEnum(enumValues)) {
+          type = 'severity'
+        } else {
+          type = 'select'
+          options = enumValues
+        }
+      } else if (TIME_FIELD_NAMES.includes(fieldName)) {
+        // Time fields detected by name
+        type = 'time'
+      } else if (SELECT_FIELD_NAMES[fieldName]) {
+        // Select fields with predefined options detected by name
+        type = 'select'
+        options = SELECT_FIELD_NAMES[fieldName]
+      }
 
       fields.push({
         name: fieldName,
         type,
         label: fieldName,
-        options: typeName === 'ZodEnum' ? cur._def.values : undefined,
+        options,
       })
     })
   })

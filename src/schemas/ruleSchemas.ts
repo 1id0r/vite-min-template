@@ -28,6 +28,12 @@ export type Severity = z.infer<typeof SeverityEnum>
 /**
  * Generic Fields - Common metadata fields for most rules
  * Used in almost every rule configuration
+ * 
+ * UI NOTES:
+ * - functionality: text input
+ * - details: text input
+ * - severity: rendered as badges component (critical/major/info)
+ * - duration: number input (half row layout)
  */
 export const GenericRuleFieldsSchema = z.object({
   functionality: z.string().optional(),
@@ -41,12 +47,18 @@ export type GenericRuleFields = z.infer<typeof GenericRuleFieldsSchema>
 /**
  * Dynamic Fields - Time-based configuration fields
  * Controls when and how the rule is evaluated
+ * 
+ * UI NOTES:
+ * - threshold: number input
+ * - is_same_date: boolean (checkbox)
+ * - start_time: hour picker (HH:mm format)
+ * - end_time: hour picker (HH:mm format)
  */
 export const DynamicRuleFieldsSchema = z.object({
   threshold: z.number().optional(),
+  is_same_date: z.boolean().optional(),
   start_time: z.string().optional(), // HH:mm format
   end_time: z.string().optional(),   // HH:mm format
-  is_same_date: z.boolean().optional(),
 })
 
 export type DynamicRuleFields = z.infer<typeof DynamicRuleFieldsSchema>
@@ -163,6 +175,7 @@ export type MongoKVolumeFields = z.infer<typeof MongoKVolumeFieldsSchema>
 export const FieldGroupSchemas = {
   generic: GenericRuleFieldsSchema,
   dynamic: DynamicRuleFieldsSchema,
+  threshold: ElasticThresholdFieldsSchema, // Standalone threshold field
   service: ServiceRuleFieldsSchema,
   mongok: MongoKRuleFieldsSchema,
   volume: VolumeRuleFieldsSchema,
@@ -238,11 +251,6 @@ export const EntityRuleRegistry: Record<string, Record<string, RuleDefinition>> 
       label: 'Absent Service',
       labelHe: 'שירות חסר',
       fieldGroups: ['generic', 'service'],
-    },
-    storage_usage: {
-      label: 'Storage Usage',
-      labelHe: 'שימוש באחסון',
-      fieldGroups: ['generic', 'dynamic'],
     },
     diskusage: {
       label: 'Disk Usage',
@@ -353,7 +361,7 @@ export const EntityRuleRegistry: Record<string, Record<string, RuleDefinition>> 
     pod_pending: {
       label: 'Pod Pending',
       labelHe: 'פוד ממתין',
-      fieldGroups: ['generic'],
+      fieldGroups: ['generic', 'elasticThreshold'],
     },
     pods_not_running: {
       label: 'Pods Not Running',
@@ -377,7 +385,7 @@ export const EntityRuleRegistry: Record<string, Record<string, RuleDefinition>> 
     },
     pod_restarts: {
       label: 'Pod Restarts',
-      labelHe: 'פוד מתחיל מחדש',
+      labelHe: 'פוד מתרסט',
       fieldGroups: ['generic'],
     },
   },
@@ -439,7 +447,7 @@ export const EntityRuleRegistry: Record<string, Record<string, RuleDefinition>> 
   pvc: {
     pvc_usage: {
       label: 'PVC Usage',
-      labelHe: 'שימוש PVC',
+      labelHe: 'שימוש pvc',
       fieldGroups: ['mongok'],
     },
   },

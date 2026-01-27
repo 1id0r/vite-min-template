@@ -48,12 +48,6 @@ export type GeneralFormData = z.infer<typeof GeneralFormSchema>
 // Basic monitor form (used for most systems - no fields by default)
 export const BasicMonitorSchema = z.object({})
 
-// Oracle
-export const OracleMonitorSchema = z.object({
-  dc: z.string().min(1, 'DC is required'),
-  host: z.string().min(1, 'Host is required'),
-  database: z.string().min(1, 'Database is required'),
-})
 
 // MongoDB
 export const MongoMonitorSchema = z.object({
@@ -103,19 +97,6 @@ export const HDFSMonitorSchema = z.object({
   url: z.string().min(1, 'URL is required'),
 })
 
-// NFS
-export const NFSMonitorSchema = z.object({
-  network: z.string().min(1, 'Network is required'),
-  dc: z.string().min(1, 'DC is required'),
-  route: z.string().min(1, 'Route is required'),
-})
-
-// CIFS
-export const CIFSMonitorSchema = z.object({
-  network: z.string().min(1, 'Network is required'),
-  dc: z.string().min(1, 'DC is required'),
-  route: z.string().min(1, 'Route is required'),
-})
 
 // Kafka
 export const KafkaMonitorSchema = z.object({
@@ -124,23 +105,12 @@ export const KafkaMonitorSchema = z.object({
   consumer: z.string().min(1, 'Consumer is required'),
 })
 
-// RabbitMQ
-export const RabbitMonitorSchema = z.object({
-  network: z.string().min(1, 'Network is required'),
-  dc: z.string().min(1, 'DC is required'),
-  queue: z.string().min(1, 'שם תור הוא שדה חובה'),
-})
 
-// Spark
-
-
-// Airflow
-export const AirflowMonitorSchema = z.object({
-  network: z.string().min(1, 'Network is required'),
-  dc: z.string().min(1, 'DC is required'),
-  dag: z.string().min(1, 'DAG is required'),
-  task: z.string().min(1, 'Task is required'),
-  isSparkDag: z.boolean().optional(),
+// PVC
+export const PVCMonitorSchema = z.object({
+  environment: z.string().min(1, 'Environment is required'),
+  namespace: z.string().min(1, 'Namespace is required'),
+  pvc: z.string().min(1, 'PVC is required'),
 })
 
 // NiFi
@@ -150,43 +120,6 @@ export const NiFiMonitorSchema = z.object({
   componentId: z.string().min(1, 'Component ID is required'),
 })
 
-// IBM MQ
-export const IBMMQMonitorSchema = z.object({
-  queueManagers: z.string().min(1, 'Queue manager(s) is required'),
-  queueName: z.string().min(1, 'Queue name is required'),
-})
-
-// OS
-export const OSMonitorSchema = z.object({
-  environment: z.string().min(1, 'Environment is required'),
-  namespace: z.string().min(1, 'Namespace is required'),
-  workland: z.string().min(1, 'Workland is required'),
-  type: z.string().min(1, 'Type is required'),
-})
-
-// PVC
-export const PVCMonitorSchema = z.object({
-  environment: z.string().min(1, 'Environment is required'),
-  namespace: z.string().min(1, 'Namespace is required'),
-  pvc: z.string().min(1, 'PVC is required'),
-})
-
-// DNS
-export const DNSMonitorSchema = z.object({
-  dns: z.string().min(1, 'DNS is required'),
-})
-
-// Chevila (Package)
-export const ChevilaMonitorSchema = z.object({
-  entityName: z.string().min(1, 'שם יישות הוא שדה חובה'),
-  identifier: z.string().min(1, 'מזהה הוא שדה חובה'),
-})
-
-// Ribua
-export const RibuaMonitorSchema = z.object({
-  name: z.string().min(1, 'שם הוא שדה חובה'),
-  identifier: z.string().min(1, 'מזהה הוא שדה חובה'),
-})
 
 // VM Linux
 export const VMLinuxMonitorSchema = z.object({
@@ -206,7 +139,6 @@ export const VMWindowsMonitorSchema = z.object({
 // ─────────────────────────────────────────────────────────────────────────────
 
 export const MonitorSchemaRegistry: Record<string, z.ZodObject<any>> = {
-  oracle_db: OracleMonitorSchema,
   mongo_k: MongoMonitorSchema,
   redis: RedisMonitorSchema,
   postgresql: PostgresMonitorSchema,
@@ -214,37 +146,11 @@ export const MonitorSchemaRegistry: Record<string, z.ZodObject<any>> = {
   sql_server: SQLMonitorSchema,
   s3_db: S3MonitorSchema,
   hdfs: HDFSMonitorSchema,
-  hadoop_hdfs: HDFSMonitorSchema,
-  nfs: NFSMonitorSchema,
-  cifs: CIFSMonitorSchema,
   kafka: KafkaMonitorSchema,
-  rabbitmq: RabbitMonitorSchema,
-  airflow: AirflowMonitorSchema,
   nifi: NiFiMonitorSchema,
-  ibm_mq: IBMMQMonitorSchema,
-  os: OSMonitorSchema,
-  pvc: PVCMonitorSchema,
-  dns: DNSMonitorSchema,
-  chevila: ChevilaMonitorSchema,
-  ribua: RibuaMonitorSchema,
+  pvc: PVCMonitorSchema, // Re-added PVC manually since it was deleted in the chunk above
   vm_linux: VMLinuxMonitorSchema,
   vm_windows: VMWindowsMonitorSchema,
-  // All other systems use basic schema
-  splunk: BasicMonitorSchema,
-  general: BasicMonitorSchema,
-  gslb: BasicMonitorSchema,
-  avi: BasicMonitorSchema,
-  dp: BasicMonitorSchema,
-  prophet: BasicMonitorSchema,
-  runai: BasicMonitorSchema,
-  jupyter: BasicMonitorSchema,
-  llm: BasicMonitorSchema,
-  richard: BasicMonitorSchema,
-  solr: BasicMonitorSchema,
-  tardis_xport: BasicMonitorSchema,
-  s3_pipeline: BasicMonitorSchema,
-  tiva: BasicMonitorSchema,
-  mishloach: BasicMonitorSchema,
 }
 
 // Helper to get monitor schema by system ID

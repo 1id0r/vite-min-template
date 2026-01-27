@@ -1,12 +1,15 @@
 import { Controller } from 'react-hook-form'
-import { Input, InputNumber, Checkbox, Select, Typography } from 'antd'
+import { Input, InputNumber, Checkbox, Select, Typography, TimePicker } from 'antd'
+import dayjs from 'dayjs'
 import { SEVERITY_CONFIG, formatLabel } from './constants'
+import type { FieldType } from './ruleFieldUtils'
+import './RuleField.css'
 
 const { Text } = Typography
 
 interface FieldDef {
   name: string
-  type: 'text' | 'number' | 'boolean' | 'select'
+  type: FieldType
   label: string
   options?: string[]
 }
@@ -32,7 +35,16 @@ export const RuleField = ({ basePath, field, control, disabledSeverities = [] }:
         {formatLabel(field.label)}
       </Text>
 
-      <div style={{ flex: 1 }}>
+      {/* Use quarter width for compact fields */}
+      <div
+        style={{
+          flex: 1,
+          maxWidth:
+            ['time', 'number'].includes(field.type) || ['duration', 'threshold', 'volume_unit'].includes(field.name) ?
+              '25%'
+            : undefined,
+        }}
+      >
         <Controller
           name={name}
           control={control}
@@ -44,49 +56,61 @@ export const RuleField = ({ basePath, field, control, disabledSeverities = [] }:
               case 'boolean':
                 return <Checkbox checked={rhfField.value} onChange={(e) => rhfField.onChange(e.target.checked)} />
 
+              case 'time':
+                return (
+                  <TimePicker
+                    value={rhfField.value ? dayjs(rhfField.value, 'HH:mm') : undefined}
+                    onChange={(time) => rhfField.onChange(time ? time.format('HH:mm') : undefined)}
+                    format='HH:mm'
+                    style={{ width: '100%', direction: 'ltr' }}
+                    classNames={{ popup: 'ltr-time-picker' }}
+                    placeholder='HH:mm'
+                  />
+                )
+
+              case 'severity':
+                return (
+                  <div style={{ display: 'flex', gap: 8 }}>
+                    {(['critical', 'major', 'info'] as const).map((sev) => {
+                      const config = SEVERITY_CONFIG[sev]
+                      const isDisabled = disabledSeverities.includes(sev)
+                      const isSelected = rhfField.value === sev
+                      return (
+                        <div
+                          key={sev}
+                          onClick={() => !isDisabled && rhfField.onChange(sev)}
+                          style={{
+                            padding: '6px 16px',
+                            borderRadius: 16,
+                            cursor: isDisabled ? 'not-allowed' : 'pointer',
+                            backgroundColor:
+                              isSelected ? config.color
+                              : isDisabled ? '#f5f5f5'
+                              : '#fafafa',
+                            color:
+                              isSelected ? '#fff'
+                              : isDisabled ? '#bfbfbf'
+                              : '#595959',
+                            border: `1px solid ${
+                              isSelected ? config.color
+                              : isDisabled ? '#d9d9d9'
+                              : '#e8e8e8'
+                            }`,
+                            opacity: isDisabled ? 0.5 : 1,
+                            fontWeight: isSelected ? 600 : 400,
+                            fontSize: 13,
+                            transition: 'all 0.2s ease',
+                            textDecoration: isDisabled ? 'line-through' : 'none',
+                          }}
+                        >
+                          {config.label}
+                        </div>
+                      )
+                    })}
+                  </div>
+                )
+
               case 'select':
-                if (field.name === 'severity') {
-                  return (
-                    <div style={{ display: 'flex', gap: 8 }}>
-                      {(['critical', 'major', 'info'] as const).map((sev) => {
-                        const config = SEVERITY_CONFIG[sev]
-                        const isDisabled = disabledSeverities.includes(sev)
-                        const isSelected = rhfField.value === sev
-                        return (
-                          <div
-                            key={sev}
-                            onClick={() => !isDisabled && rhfField.onChange(sev)}
-                            style={{
-                              padding: '6px 16px',
-                              borderRadius: 16,
-                              cursor: isDisabled ? 'not-allowed' : 'pointer',
-                              backgroundColor:
-                                isSelected ? config.color
-                                : isDisabled ? '#f5f5f5'
-                                : '#fafafa',
-                              color:
-                                isSelected ? '#fff'
-                                : isDisabled ? '#bfbfbf'
-                                : '#595959',
-                              border: `1px solid ${
-                                isSelected ? config.color
-                                : isDisabled ? '#d9d9d9'
-                                : '#e8e8e8'
-                              }`,
-                              opacity: isDisabled ? 0.5 : 1,
-                              fontWeight: isSelected ? 600 : 400,
-                              fontSize: 13,
-                              transition: 'all 0.2s ease',
-                              textDecoration: isDisabled ? 'line-through' : 'none',
-                            }}
-                          >
-                            {config.label}
-                          </div>
-                        )
-                      })}
-                    </div>
-                  )
-                }
                 return (
                   <Select
                     {...rhfField}
@@ -95,7 +119,7 @@ export const RuleField = ({ basePath, field, control, disabledSeverities = [] }:
                   />
                 )
 
-              default:
+              default: // text
                 return <Input {...rhfField} />
             }
           }}
@@ -122,69 +146,80 @@ export const StandaloneRuleField = ({
   disabledSeverities?: string[]
 }) => {
   const renderInput = () => {
-    if (field.type === 'number') {
-      return <InputNumber min={0} style={{ width: '100%' }} value={value} onChange={onChange} />
-    }
+    switch (field.type) {
+      case 'number':
+        return <InputNumber min={0} style={{ width: '100%' }} value={value} onChange={onChange} />
 
-    if (field.type === 'boolean') {
-      return <Checkbox checked={value} onChange={(e) => onChange?.(e.target.checked)} />
-    }
+      case 'boolean':
+        return <Checkbox checked={value} onChange={(e) => onChange?.(e.target.checked)} />
 
-    if (field.type === 'select' && field.name === 'severity') {
-      return (
-        <div style={{ display: 'flex', gap: 8 }}>
-          {(['critical', 'major', 'info'] as const).map((sev) => {
-            const config = SEVERITY_CONFIG[sev]
-            const isDisabled = disabledSeverities.includes(sev)
-            const isSelected = value === sev
-            return (
-              <div
-                key={sev}
-                onClick={() => !isDisabled && onChange?.(sev)}
-                style={{
-                  padding: '6px 16px',
-                  borderRadius: 16,
-                  cursor: isDisabled ? 'not-allowed' : 'pointer',
-                  backgroundColor:
-                    isSelected ? config.color
-                    : isDisabled ? '#f5f5f5'
-                    : '#fafafa',
-                  color:
-                    isSelected ? '#fff'
-                    : isDisabled ? '#bfbfbf'
-                    : '#595959',
-                  border: `1px solid ${
-                    isSelected ? config.color
-                    : isDisabled ? '#d9d9d9'
-                    : '#e8e8e8'
-                  }`,
-                  opacity: isDisabled ? 0.5 : 1,
-                  fontWeight: isSelected ? 600 : 400,
-                  fontSize: 13,
-                  transition: 'all 0.2s ease',
-                  textDecoration: isDisabled ? 'line-through' : 'none',
-                }}
-              >
-                {config.label}
-              </div>
-            )
-          })}
-        </div>
-      )
-    }
+      case 'time':
+        return (
+          <TimePicker
+            value={value ? dayjs(value, 'HH:mm') : undefined}
+            onChange={(time) => onChange?.(time ? time.format('HH:mm') : undefined)}
+            format='HH:mm'
+            style={{ width: '100%', direction: 'ltr' }}
+            classNames={{ popup: 'ltr-time-picker' }}
+            placeholder='HH:mm'
+          />
+        )
 
-    if (field.type === 'select' && field.name !== 'severity') {
-      return (
-        <Select
-          style={{ width: '100%' }}
-          value={value}
-          onChange={onChange}
-          options={field.options?.map((opt) => ({ value: opt, label: opt }))}
-        />
-      )
-    }
+      case 'severity':
+        return (
+          <div style={{ display: 'flex', gap: 8 }}>
+            {(['critical', 'major', 'info'] as const).map((sev) => {
+              const config = SEVERITY_CONFIG[sev]
+              const isDisabled = disabledSeverities.includes(sev)
+              const isSelected = value === sev
+              return (
+                <div
+                  key={sev}
+                  onClick={() => !isDisabled && onChange?.(sev)}
+                  style={{
+                    padding: '6px 16px',
+                    borderRadius: 16,
+                    cursor: isDisabled ? 'not-allowed' : 'pointer',
+                    backgroundColor:
+                      isSelected ? config.color
+                      : isDisabled ? '#f5f5f5'
+                      : '#fafafa',
+                    color:
+                      isSelected ? '#fff'
+                      : isDisabled ? '#bfbfbf'
+                      : '#595959',
+                    border: `1px solid ${
+                      isSelected ? config.color
+                      : isDisabled ? '#d9d9d9'
+                      : '#e8e8e8'
+                    }`,
+                    opacity: isDisabled ? 0.5 : 1,
+                    fontWeight: isSelected ? 600 : 400,
+                    fontSize: 13,
+                    transition: 'all 0.2s ease',
+                    textDecoration: isDisabled ? 'line-through' : 'none',
+                  }}
+                >
+                  {config.label}
+                </div>
+              )
+            })}
+          </div>
+        )
 
-    return <Input value={value} onChange={(e) => onChange?.(e.target.value)} />
+      case 'select':
+        return (
+          <Select
+            style={{ width: '100%' }}
+            value={value}
+            onChange={onChange}
+            options={field.options?.map((opt) => ({ value: opt, label: opt }))}
+          />
+        )
+
+      default: // text
+        return <Input value={value} onChange={(e) => onChange?.(e.target.value)} />
+    }
   }
 
   return (
@@ -192,7 +227,18 @@ export const StandaloneRuleField = ({
       <Text strong style={{ fontSize: 14, width: 100, marginLeft: 12, flexShrink: 0 }}>
         {formatLabel(field.label)}
       </Text>
-      <div style={{ flex: 1 }}>{renderInput()}</div>
+      {/* Use quarter width for compact fields */}
+      <div
+        style={{
+          flex: 1,
+          maxWidth:
+            ['time', 'number'].includes(field.type) || ['duration', 'threshold', 'volume_unit'].includes(field.name) ?
+              '25%'
+            : undefined,
+        }}
+      >
+        {renderInput()}
+      </div>
     </div>
   )
 }

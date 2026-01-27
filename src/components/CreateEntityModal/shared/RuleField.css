@@ -1,0 +1,10 @@
+/* RuleField component styles */
+
+/* Fix TimePicker popup direction in RTL layouts */
+.ltr-time-picker {
+    direction: ltr !important;
+}
+
+.ltr-time-picker .ant-picker-panel {
+    direction: ltr !important;
+}

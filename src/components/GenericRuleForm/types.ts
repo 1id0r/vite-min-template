@@ -4,7 +4,7 @@
  * Shared types for the generic rule form component.
  */
 
-export type FieldType = 'text' | 'number' | 'boolean' | 'select' | 'severity'
+export type FieldType = 'text' | 'number' | 'boolean' | 'select' | 'severity' | 'time'
 
 export interface RuleFieldDef {
   name: string
