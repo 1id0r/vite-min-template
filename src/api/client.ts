@@ -8,6 +8,10 @@ const baseUrl =
 const treeRoute =
   (import.meta.env.VITE_TREE_ROUTE as string | undefined)?.trim() || "/tree";
 const treeAppToken = (import.meta.env.VITE_TREE_APP_TOKEN as string | undefined) || "123LIDOR";
+const clustersApiUrl = (import.meta.env.VITE_CLUSTERS_API_URL as string | undefined) || "";
+
+// Mock clusters for dev mode (when no API URL is configured)
+export const MOCK_CLUSTERS = ['cluster-dev-1', 'cluster-dev-2', 'cluster-dev-3', 'cluster-dev-4'];
 
 export async function request<T>(path: string, init?: RequestInit): Promise<T> {
   const response = await fetch(`${baseUrl}${path}`, {
@@ -43,6 +47,28 @@ export async function fetchEntityConfig(): Promise<EntityConfig> {
 
 export async function fetchOwningTeams(): Promise<string[]> {
   return request<string[]>("/owning-teams");
+}
+
+/**
+ * Fetch cluster list from API or return mock data if no URL configured
+ */
+export async function fetchClusters(): Promise<string[]> {
+  // Use mock data if no API URL is configured
+  if (!clustersApiUrl) {
+    return MOCK_CLUSTERS;
+  }
+
+  try {
+    const response = await fetch(clustersApiUrl);
+    if (!response.ok) {
+      throw new Error(`Clusters request failed with status ${response.status}`);
+    }
+    const data = await response.json();
+    return data.cluster || [];
+  } catch (error) {
+    console.warn("Failed to fetch clusters, falling back to mock data:", error);
+    return MOCK_CLUSTERS;
+  }
 }
 
 export async function fetchTreeNodes(

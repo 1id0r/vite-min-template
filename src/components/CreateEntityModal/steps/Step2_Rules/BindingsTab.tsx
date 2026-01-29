@@ -68,7 +68,7 @@ const BindingSection = memo(function BindingSection({ type, title, defaultOpen }
 
   const getDefaultValue = () => {
     if (type === 'url') return { url: '', timeout: 30 }
-    return { queryName: '', scheduleInterval: 5, scheduleUnit: 'minutes', timeout: 5, jsonQuery: '' }
+    return { cluster: '', queryName: '', scheduleInterval: 5, scheduleUnit: 'minutes', timeout: 5, jsonQuery: '' }
   }
 
   const handleRemove = (index: number) => {

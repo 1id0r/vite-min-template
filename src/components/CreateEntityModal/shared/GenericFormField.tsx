@@ -12,6 +12,7 @@ import { Input, InputNumber, Checkbox, Select, Segmented, Typography, Space, But
 import { IconPlus, IconX } from '@tabler/icons-react'
 import type { FieldConfig } from '../../../schemas/fieldConfigs'
 import { JsonEditor } from './JsonEditor'
+import { AsyncClusterSelect } from './AsyncClusterSelect'
 
 const { Text } = Typography
 const { TextArea } = Input
@@ -159,7 +160,7 @@ function renderInput(field: FieldConfig, value: any, onChange?: (val: any) => vo
       )
 
     case 'async-select':
-      return <Select {...commonProps} options={[]} showSearch value={value || undefined} />
+      return <AsyncClusterSelect value={value} onChange={onChange} />
 
     case 'links-array':
       return <LinksArrayField value={value} onChange={onChange} />

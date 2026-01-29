@@ -78,6 +78,7 @@ export const MonitorFieldConfigs: Record<string, FormFieldsConfig> = {
   elastic: {
     title: 'Elastic',
     fields: [
+      { name: 'cluster', type: 'async-select', label: 'Cluster', required: true, colSpan: 4 },
       { name: 'node', type: 'text', label: 'Node', required: true, colSpan: 4 },
       { name: 'buckets_names', type: 'textarea', label: 'Buckets Names (comma separated)', required: false, colSpan: 4, placeholder: 'bucket1, bucket2' },
       { name: 'query_id', type: 'text', label: 'Query ID', required: true, colSpan: 4 },
@@ -281,6 +282,7 @@ export const BindingFieldConfigs: Record<string, FormFieldsConfig> = {
   elastic: {
     title: 'Elastic',
     fields: [
+      { name: 'cluster', type: 'async-select', label: 'Cluster', required: true, colSpan: 4 },
       { name: 'queryName', type: 'text', label: 'שם שליפה', placeholder: 'הזן שם', required: true },
       { 
         name: 'scheduleInterval', 
