@@ -40,6 +40,15 @@ export interface RuleFieldDef {
 /** Field names that should be rendered as time pickers */
 const TIME_FIELD_NAMES = ['start_time', 'end_time']
 
+/** Field names that should be rendered as severity pills */
+const SEVERITY_FIELD_NAMES = ['severity']
+
+/** Field names that should be rendered as number inputs */
+const NUMBER_FIELD_NAMES = ['threshold', 'duration', 'time_interval', 'expected_mean', 'amount_user', 'amount_running', 'pods_threshold']
+
+/** Field names that should be rendered as boolean checkboxes */
+const BOOLEAN_FIELD_NAMES = ['is_same_date', 'functionality']
+
 /** Severity enum values to detect severity fields */
 const SEVERITY_VALUES = ['critical', 'major', 'info']
 
@@ -101,8 +110,19 @@ export function getRuleFields(entityType: string, ruleKey: string): RuleFieldDef
           // Field config provides options = select
           type = 'select'
           options = fieldConfig.options
+        } 
+        // Fallback: name-based detection (for Zod version compatibility)
+        else if (SEVERITY_FIELD_NAMES.includes(fieldName)) {
+          type = 'severity'
+        } else if (NUMBER_FIELD_NAMES.includes(fieldName)) {
+          type = 'number'
+        } else if (BOOLEAN_FIELD_NAMES.includes(fieldName)) {
+          type = 'boolean'
         }
       }
+
+      // DEBUG: Log field type detection
+      console.log(`[RuleField] ${fieldName}: zodType=${typeName} → resolvedType=${type}`, fieldConfig.type ? '(from config)' : '')
 
       // Build field definition, merging with config
       const fieldDef: RuleFieldDef = {
