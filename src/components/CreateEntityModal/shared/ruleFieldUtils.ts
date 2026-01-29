@@ -5,24 +5,40 @@
  */
 
 import { getRuleFieldGroups, FieldGroupSchemas } from '../../../schemas/ruleSchemas'
+import { RULE_FIELD_CONFIG } from './ruleFieldConfig'
 
 export type FieldType = 'text' | 'number' | 'boolean' | 'select' | 'severity' | 'time'
 
+/**
+ * Validation rules for a field
+ */
+export interface FieldValidation {
+  noHebrew?: boolean      // Cannot include Hebrew characters
+  noQuotes?: boolean      // Cannot include ' " `
+  range?: [number, number] // Min/Max range
+}
+
+/**
+ * Field definition with validation and display configuration
+ */
 export interface RuleFieldDef {
   name: string
   type: FieldType
   label: string
   options?: string[]
+  // Validation & Display Config
+  required?: boolean
+  placeholder?: string
+  min?: number
+  max?: number
+  defaultValue?: any
+  suffix?: string
+  tooltip?: string
+  validation?: FieldValidation
 }
 
 /** Field names that should be rendered as time pickers */
 const TIME_FIELD_NAMES = ['start_time', 'end_time']
-
-/** Field names that should be rendered as select dropdowns with predefined options */
-const SELECT_FIELD_NAMES: Record<string, string[]> = {
-  volume_unit: ['KB', 'MB', 'GB', 'TB'],
-  time_unit: ['seconds', 'minutes', 'hours', 'days'],
-}
 
 /** Severity enum values to detect severity fields */
 const SEVERITY_VALUES = ['critical', 'major', 'info']
@@ -36,7 +52,7 @@ function isSeverityEnum(values: string[]): boolean {
 
 /**
  * Get all fields for a specific rule type
- * Handles Zod schema introspection and type inference
+ * Handles Zod schema introspection, type inference, and field config merging
  */
 export function getRuleFields(entityType: string, ruleKey: string): RuleFieldDef[] {
   const fieldGroups = getRuleFieldGroups(entityType, ruleKey)
@@ -57,36 +73,58 @@ export function getRuleFields(entityType: string, ruleKey: string): RuleFieldDef
       let type: FieldType = 'text'
       let options: string[] | undefined = undefined
 
-      // Determine field type based on Zod schema and field name
-      if (typeName === 'ZodNumber') {
-        type = 'number'
-      } else if (typeName === 'ZodBoolean') {
-        type = 'boolean'
-      } else if (typeName === 'ZodEnum') {
-        const enumValues = cur._def.values as string[]
-        if (isSeverityEnum(enumValues)) {
-          type = 'severity'
-        } else {
+      // Get field-specific config (may override type/options)
+      const fieldConfig = RULE_FIELD_CONFIG[fieldName] || {}
+
+      // If config specifies a type, use it
+      if (fieldConfig.type) {
+        type = fieldConfig.type
+        options = fieldConfig.options
+      } else {
+        // Determine field type based on Zod schema and field name
+        if (typeName === 'ZodNumber') {
+          type = 'number'
+        } else if (typeName === 'ZodBoolean') {
+          type = 'boolean'
+        } else if (typeName === 'ZodEnum') {
+          const enumValues = cur._def.values as string[]
+          if (isSeverityEnum(enumValues)) {
+            type = 'severity'
+          } else {
+            type = 'select'
+            options = enumValues
+          }
+        } else if (TIME_FIELD_NAMES.includes(fieldName)) {
+          // Time fields detected by name
+          type = 'time'
+        } else if (fieldConfig.options) {
+          // Field config provides options = select
           type = 'select'
-          options = enumValues
+          options = fieldConfig.options
         }
-      } else if (TIME_FIELD_NAMES.includes(fieldName)) {
-        // Time fields detected by name
-        type = 'time'
-      } else if (SELECT_FIELD_NAMES[fieldName]) {
-        // Select fields with predefined options detected by name
-        type = 'select'
-        options = SELECT_FIELD_NAMES[fieldName]
       }
 
-      fields.push({
+      // Build field definition, merging with config
+      const fieldDef: RuleFieldDef = {
         name: fieldName,
         type,
-        label: fieldName,
-        options,
-      })
+        label: fieldConfig.label || fieldName,
+        options: options || fieldConfig.options,
+        // Merge config properties
+        required: fieldConfig.required,
+        placeholder: fieldConfig.placeholder,
+        min: fieldConfig.min,
+        max: fieldConfig.max,
+        defaultValue: fieldConfig.defaultValue,
+        suffix: fieldConfig.suffix,
+        tooltip: fieldConfig.tooltip,
+        validation: fieldConfig.validation,
+      }
+
+      fields.push(fieldDef)
     })
   })
 
   return fields
 }
+

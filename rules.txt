@@ -1,0 +1,121 @@
+rules validationGeneral System Fields
+* status_code
+    * Display Name: 4XX (שגיאת לקוח), 5XX (שגיאת שרת), כולל
+    value: 4XX, 5XX, other
+    * Type: str
+    * Required: Yes
+    * Values: Restricted to 4XX, 5XX, or other.
+* details
+    * Display Name: פרטי חוק
+    * Type: str
+    * Required: No
+* description
+    * Display Name: תיאור התראה
+    * Type: str / text
+    * Required: Yes
+* metric_name
+    * Display Name: שם מטריקה
+    * Type: text
+    * Required: Yes
+    * Validation: Cannot include Hebrew characters (HE).
+* service_name
+    * Display Name: שם שירות
+    * Type: text
+    * Required: Yes
+    * Validation: Cannot include Hebrew characters (HE).
+* severity
+    * Required: Yes
+* is_same_date
+    * Display Name: האם באותו יום
+    * Type: boolean
+    * Required: No
+
+Metrics & Thresholds
+* expected_mean
+    * Display Name: הפער הממוצע בין החיזוי למטריקה...
+    * Type: float
+    * Required: Yes
+* forecast_metric
+    * Display Name:  מטריקת החיזוי שנוצרת בניטור חריגות
+    * Type: text
+    * Required: Yes
+* buckets
+    * Display Name: buckets
+    * Tooltip: "הזן ערך רצוי בשדה buckets, במידה ולא יוזן ערך החוק יוכל על כל הערכים"
+    * Validation: cannot include ' " ` 
+* pools_threshold
+    * Display Name: אחוז פודים
+    * Required: Yes
+    * Validations:
+        * Range: 0 < x < 100
+        * Cannot start with 0
+        * Default Value: ["", ">"]
+        * Placeholder: 1-99
+* threshold
+    * Type: type-threshold
+    * Required: Yes
+    * Validations:
+        * Range: 0 < x < 100
+        * Cannot be 0
+        * Default Value: ["", ">"]
+        * Placeholder: 1-99
+* amount_user
+    * Display Name: כמות משתמשים שחווים כשלון
+    * Type: threshold
+    * Required: Yes
+    * Validations:
+        * Max: 10,000
+        * Min: 0
+        * Cannot start with 0
+        * Default Value: ["3", ">"]
+* amount_running
+    * Display Name: כמות הרצות
+    * Type: threshold
+    * Required: Yes
+    * Validations:
+        * Max: 1,000,000
+        * Min: > 0
+        * Cannot start with 0
+
+Time & Duration Fields
+* duration
+    * Display Name: שיהוי להתרעה
+    * Required: No
+    * Validations:
+        * Value must be bigger than 1
+        * Placeholder: 2-15
+        * Default: ["", "m"]
+* time_interval
+    * Display Name: טווח בדיקה
+    * Required: Yes
+    * Validations:
+        * Unit: Only m (minutes)
+        * Value must be bigger than 0
+        * Placeholder: הזן מספר שלם
+        * Default: ["5", "m"]
+* start_time 
+    * Display Name: זמן התחלה
+    * Required: No
+    type: '13:00' time picker
+* end_time
+    * Display Name: זמן סיום
+    * Required: No
+    type: '13:00' time picker
+
+* response_time_unit
+    * Display Name: יחידת זמן
+    * Required: Yes
+    * Options: 'seconds' (שניות), 'minutes' (דקות), 'hours' (שעות)
+* time_unit
+    * Display Name: יחידת זמן
+    * Required: Yes
+    * Options: 'minutes' (דקות), 'hours' (שעות)
+
+Volume & Units
+* volume_unit
+    * Display Name: יחידות מידה
+    * Type: options
+    * Options: bytes, KB, MB, GB
+* field_disk_type
+    * Display Name: סוג דיסק
+    * Options: bytes, KB

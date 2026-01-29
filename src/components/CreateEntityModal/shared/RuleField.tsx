@@ -1,22 +1,15 @@
 import { Controller } from 'react-hook-form'
-import { Input, InputNumber, Checkbox, Select, Typography, TimePicker } from 'antd'
+import { Input, InputNumber, Checkbox, Select, Typography, TimePicker, Tooltip } from 'antd'
 import dayjs from 'dayjs'
 import { SEVERITY_CONFIG, formatLabel } from './constants'
-import type { FieldType } from './ruleFieldUtils'
+import type { RuleFieldDef } from './ruleFieldUtils'
 import './RuleField.css'
 
 const { Text } = Typography
 
-interface FieldDef {
-  name: string
-  type: FieldType
-  label: string
-  options?: string[]
-}
-
 interface RuleFieldProps {
   basePath: string
-  field: FieldDef
+  field: RuleFieldDef
   control: any
   disabledSeverities?: string[]
 }
@@ -31,9 +24,12 @@ export const RuleField = ({ basePath, field, control, disabledSeverities = [] }:
 
   return (
     <div style={{ display: 'flex', alignItems: 'center', marginBottom: 12 }}>
-      <Text strong style={{ fontSize: 14, width: 100, marginLeft: 12, flexShrink: 0 }}>
-        {formatLabel(field.label)}
-      </Text>
+      <Tooltip title={field.tooltip} placement='top'>
+        <Text strong style={{ fontSize: 14, width: 100, marginLeft: 12, flexShrink: 0 }}>
+          {formatLabel(field.label)}
+          {field.required && <span style={{ color: '#ff4d4f' }}> *</span>}
+        </Text>
+      </Tooltip>
 
       {/* Use quarter width for compact fields */}
       <div
@@ -51,7 +47,16 @@ export const RuleField = ({ basePath, field, control, disabledSeverities = [] }:
           render={({ field: rhfField }) => {
             switch (field.type) {
               case 'number':
-                return <InputNumber {...rhfField} min={0} style={{ width: '100%' }} />
+                return (
+                  <InputNumber
+                    {...rhfField}
+                    min={field.min ?? 0}
+                    max={field.max}
+                    placeholder={field.placeholder}
+                    style={{ width: '100%' }}
+                    addonAfter={field.suffix}
+                  />
+                )
 
               case 'boolean':
                 return <Checkbox checked={rhfField.value} onChange={(e) => rhfField.onChange(e.target.checked)} />
@@ -140,7 +145,7 @@ export const StandaloneRuleField = ({
   onChange,
   disabledSeverities = [],
 }: {
-  field: FieldDef
+  field: RuleFieldDef
   value?: any
   onChange?: (value: any) => void
   disabledSeverities?: string[]
@@ -148,7 +153,17 @@ export const StandaloneRuleField = ({
   const renderInput = () => {
     switch (field.type) {
       case 'number':
-        return <InputNumber min={0} style={{ width: '100%' }} value={value} onChange={onChange} />
+        return (
+          <InputNumber
+            min={field.min ?? 0}
+            max={field.max}
+            placeholder={field.placeholder}
+            style={{ width: '100%' }}
+            value={value}
+            onChange={onChange}
+            addonAfter={field.suffix}
+          />
+        )
 
       case 'boolean':
         return <Checkbox checked={value} onChange={(e) => onChange?.(e.target.checked)} />
@@ -213,7 +228,7 @@ export const StandaloneRuleField = ({
             style={{ width: '100%' }}
             value={value}
             onChange={onChange}
-            options={field.options?.map((opt) => ({ value: opt, label: opt }))}
+            options={field.options?.map((opt: string) => ({ value: opt, label: opt }))}
           />
         )
 
@@ -224,9 +239,12 @@ export const StandaloneRuleField = ({
 
   return (
     <div style={{ display: 'flex', alignItems: 'center', marginBottom: 12 }}>
-      <Text strong style={{ fontSize: 14, width: 100, marginLeft: 12, flexShrink: 0 }}>
-        {formatLabel(field.label)}
-      </Text>
+      <Tooltip title={field.tooltip} placement='top'>
+        <Text strong style={{ fontSize: 14, width: 100, marginLeft: 12, flexShrink: 0 }}>
+          {formatLabel(field.label)}
+          {field.required && <span style={{ color: '#ff4d4f' }}> *</span>}
+        </Text>
+      </Tooltip>
       {/* Use quarter width for compact fields */}
       <div
         style={{
