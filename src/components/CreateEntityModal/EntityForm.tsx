@@ -9,42 +9,58 @@
  * For display flow: Shows general fields + icon selection
  */
 
-import { memo, useState } from 'react'
-import { FormProvider, Controller } from 'react-hook-form'
-import { Input, Typography, Space, Tabs } from 'antd'
+import { memo, useState, type ReactNode } from 'react'
+import { FormProvider } from 'react-hook-form'
+import { Space } from 'antd'
 import { GenericButton } from '../GenericButton'
-import { FlowSelector } from './steps/Step1_Details/FlowSelector'
-import { MonitorSection } from './steps/Step1_Details/MonitorSection'
-import { CategorySystemSelector } from './steps/Step1_Details/CategorySystemSelector'
-import { LinksSection } from './steps/Step1_Details/LinksSection'
-import { RulesTab } from './steps/Step2_Rules/RulesTab'
-import { BindingsTab } from './steps/Step2_Rules/BindingsTab'
+import { Step1Content, type Step1ContentProps } from './steps/Step1_Details/Step1Content'
+import { Step2Content } from './steps/Step2_Rules/Step2Content'
 import { FormStepper } from './components/FormStepper'
 import { useEntityForm, type EntityFormData } from './hooks/useEntityForm'
 import { ResultSummary } from './components/ResultSummary'
-
-const { Text } = Typography
-const { TextArea } = Input
 
 interface EntityFormProps {
   onSave?: (data: EntityFormData) => void
   onClose?: () => void
 }
 
-// Mapping from systemId (staticConfig) to rule entity type (ruleSchemas)
-const RULE_ENTITY_MAPPING: Record<string, string> = {
-  vm_linux: 'linux',
-  vm_windows: 'windows',
-  mongo_k: 'mongok',
-  s3_db: 's3',
-  hadoop_hdfs: 'hdfs',
-  // Add other mappings as needed, defaulting to exact match if not found
+// Props needed to render step content - same as Step1ContentProps
+type StepRenderProps = Step1ContentProps
+
+// Step definition with render function
+interface StepDefinition {
+  value: number
+  label: string
+  render: (props: StepRenderProps) => ReactNode
 }
 
-// Step definitions
-const STEPS = [
-  { value: 1, label: 'פרטי ישות' },
-  { value: 2, label: 'הצמדות וחוקים' },
+// Step definitions with component render functions
+const STEPS: StepDefinition[] = [
+  {
+    value: 1,
+    label: 'פרטי ישות',
+    render: (props) => (
+      <Step1Content
+        flow={props.flow}
+        flowOptions={props.flowOptions}
+        systemId={props.systemId}
+        categoryId={props.categoryId}
+        categories={props.categories}
+        systems={props.systems}
+        showSystemSelector={props.showSystemSelector}
+        showGeneralSection={props.showGeneralSection}
+        showMonitorSection={props.showMonitorSection}
+        onFlowChange={props.onFlowChange}
+        onCategoryChange={props.onCategoryChange}
+        onSystemChange={props.onSystemChange}
+      />
+    ),
+  },
+  {
+    value: 2,
+    label: 'הצמדות וחוקים',
+    render: (props) => <Step2Content systemId={props.systemId} />,
+  },
 ]
 
 export const EntityForm = memo(function EntityForm({ onSave }: EntityFormProps) {
@@ -97,6 +113,25 @@ export const EntityForm = memo(function EntityForm({ onSave }: EntityFormProps) 
 
   const isNextDisabled = flow === 'monitor' && !systemId
 
+  // Props passed to step render functions
+  const stepProps: StepRenderProps = {
+    flow,
+    flowOptions,
+    systemId,
+    categoryId,
+    categories,
+    systems,
+    showSystemSelector,
+    showGeneralSection,
+    showMonitorSection,
+    onFlowChange: handleFlowChange,
+    onCategoryChange: handleCategoryChange,
+    onSystemChange: handleSystemSelect,
+  }
+
+  // Find current step and render its content
+  const currentStepDef = STEPS.find((step) => step.value === currentStep)
+
   return (
     <FormProvider {...form}>
       <div
@@ -114,129 +149,7 @@ export const EntityForm = memo(function EntityForm({ onSave }: EntityFormProps) 
         {/* Scrollable Content */}
         <div style={{ flex: 1, overflowY: 'auto', padding: 16 }}>
           <Space direction='vertical' size='middle' style={{ width: '100%' }}>
-            {/* Step 1: Entity Details */}
-            {currentStep === 1 && (
-              <>
-                {/* Flow Selector - Only visible on Step 1, below stepper */}
-                <FlowSelector
-                  flow={flow}
-                  flowOptions={flowOptions}
-                  onFlowChange={(value) => handleFlowChange(value as 'monitor' | 'display')}
-                />
-
-                {/* פרטים כלליים Section Header */}
-                <Text strong style={{ fontSize: 16, display: 'block', textAlign: 'right', marginBottom: 16 }}>
-                  פרטים כלליים
-                </Text>
-
-                {/* Category and Entity Selectors - Only for monitor flow */}
-                {showSystemSelector && (
-                  <CategorySystemSelector
-                    categories={categories}
-                    systems={systems}
-                    selectedCategory={categoryId}
-                    selectedSystem={systemId}
-                    onCategoryChange={handleCategoryChange}
-                    onSystemChange={handleSystemSelect}
-                  />
-                )}
-
-                {/* Name and Description - Visible after system selection */}
-                {showGeneralSection && (
-                  <div style={{ direction: 'rtl' }}>
-                    <div style={{ marginBottom: 16, display: 'flex', alignItems: 'flex-start' }}>
-                      <Text strong style={{ fontSize: 14, width: 100, marginLeft: 16, marginTop: 5 }}>
-                        שם יישות
-                      </Text>
-                      <div style={{ flex: 1 }}>
-                        <Controller
-                          name='displayName'
-                          control={form.control}
-                          render={({ field }) => (
-                            <Input
-                              {...field}
-                              placeholder='הזן שם יישות'
-                              status={form.formState.errors.displayName ? 'error' : undefined}
-                              style={{ width: '100%', direction: 'rtl' }}
-                            />
-                          )}
-                        />
-                        {form.formState.errors.displayName && (
-                          <Text type='danger' style={{ fontSize: 12, display: 'block' }}>
-                            {form.formState.errors.displayName.message}
-                          </Text>
-                        )}
-                      </div>
-                    </div>
-                    <div style={{ display: 'flex', alignItems: 'start' }}>
-                      <Text strong style={{ fontSize: 14, width: 100, marginLeft: 16, marginTop: 5 }}>
-                        תיאור
-                      </Text>
-                      <div style={{ flex: 1 }}>
-                        <Controller
-                          name='description'
-                          control={form.control}
-                          render={({ field }) => (
-                            <TextArea
-                              {...field}
-                              placeholder='הזן תיאור ותפקיד היישות'
-                              rows={3}
-                              status={form.formState.errors.description ? 'error' : undefined}
-                              style={{ direction: 'rtl', width: '100%' }}
-                            />
-                          )}
-                        />
-                        {form.formState.errors.description && (
-                          <Text type='danger' style={{ fontSize: 12, display: 'block' }}>
-                            {form.formState.errors.description.message}
-                          </Text>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                {/* Links Section */}
-                {showGeneralSection && <LinksSection />}
-
-                {/* Monitor Section - Dynamic fields per system */}
-                {showMonitorSection && systemId && <MonitorSection systemId={systemId} />}
-              </>
-            )}
-
-            {/* Step 2: Rules & Bindings */}
-            {currentStep === 2 && (
-              <Tabs
-                defaultActiveKey='rules'
-                type='card'
-                items={[
-                  {
-                    key: 'rules',
-                    label: 'חוקים על יישות',
-                    children: (
-                      <div style={{ padding: '16px 0' }}>
-                        <RulesTab
-                          entityType={
-                            RULE_ENTITY_MAPPING[form.getValues('systemId')] || form.getValues('systemId') || 'linux'
-                          }
-                        />
-                      </div>
-                    ),
-                  },
-                  {
-                    key: 'bindings',
-                    label: 'הצמדות וחוקים',
-                    children: (
-                      <div style={{ padding: '16px 0' }}>
-                        <BindingsTab />
-                      </div>
-                    ),
-                  },
-                ]}
-                style={{ direction: 'rtl', width: '100%' }}
-                tabBarStyle={{ marginBottom: 24 }}
-              />
-            )}
+            {currentStepDef?.render(stepProps)}
           </Space>
         </div>
 
