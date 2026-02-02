@@ -130,5 +130,3 @@ export const GenericRuleForm = memo(function GenericRuleForm({
     </div>
   )
 })
-
-GenericRuleForm.displayName = 'GenericRuleForm'

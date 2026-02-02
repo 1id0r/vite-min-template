@@ -7,6 +7,7 @@ export { getRuleFields, type RuleFieldDef, type FieldType, type FieldValidation 
 export { RULE_FIELD_CONFIG, getFieldConfig } from './ruleFieldConfig'
 export { 
   SEVERITY_CONFIG, 
+  SEVERITY_LEVELS,
   SEVERITY_OPTIONS,
   getSeverityOptions,
   MAX_RULES_PER_TYPE, 

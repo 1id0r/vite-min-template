@@ -56,5 +56,3 @@ export const Step2Content = memo(function Step2Content({ systemId }: Step2Conten
     />
   )
 })
-
-Step2Content.displayName = 'Step2Content'

@@ -90,5 +90,3 @@ export const CategorySystemSelector = memo(function CategorySystemSelector({
     </Space>
   )
 })
-
-CategorySystemSelector.displayName = 'CategorySystemSelector'

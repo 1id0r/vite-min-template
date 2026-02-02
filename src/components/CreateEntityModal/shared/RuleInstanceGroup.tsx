@@ -75,5 +75,3 @@ export const RuleInstanceGroup = memo(function RuleInstanceGroup({
     </div>
   )
 })
-
-RuleInstanceGroup.displayName = 'RuleInstanceGroup'

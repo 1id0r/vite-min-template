@@ -59,5 +59,3 @@ export const FlowSelector = memo(function FlowSelector({ flow, flowOptions, onFl
     </div>
   )
 })
-
-FlowSelector.displayName = 'FlowSelector'

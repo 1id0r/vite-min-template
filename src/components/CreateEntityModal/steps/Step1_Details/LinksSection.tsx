@@ -105,5 +105,3 @@ export const LinksSection = memo(function LinksSection() {
     </div>
   )
 })
-
-LinksSection.displayName = 'LinksSection'

@@ -24,8 +24,8 @@ export const RULE_FIELD_CONFIG: Record<string, Partial<RuleFieldDef>> = {
   pods_threshold: {
     label: 'אחוז פודים',
     placeholder: '1-99',
-    min: 0,
-    max: 100,
+    min: 1,
+    max: 99,
     required: true,
   },
   amount_user: {

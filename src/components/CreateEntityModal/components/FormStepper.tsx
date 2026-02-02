@@ -38,5 +38,3 @@ export const FormStepper = memo(function FormStepper({ currentStep, steps }: For
     </div>
   )
 })
-
-FormStepper.displayName = 'FormStepper'

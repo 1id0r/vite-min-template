@@ -8,15 +8,9 @@
 import { memo } from 'react'
 import { Input, InputNumber, Checkbox, Select, TimePicker, Typography } from 'antd'
 import type { RuleFormFieldProps } from './types'
+import { SEVERITY_CONFIG, SEVERITY_LEVELS } from '../../schemas/ruleSchemas'
 
 const { Text } = Typography
-
-// Severity configuration
-const SEVERITY_CONFIG = {
-  critical: { color: 'red', label: 'Critical' },
-  major: { color: 'orange', label: 'Major' },
-  info: { color: 'blue', label: 'Info' },
-} as const
 
 /** Format field names: 'some_field_name' → 'Some Field Name' */
 const formatLabel = (label: string): string =>
@@ -57,7 +51,7 @@ export const RuleFormField = memo(function RuleFormField({
       case 'severity':
         return (
           <div style={{ display: 'flex', gap: 8 }}>
-            {(['critical', 'major', 'info'] as const).map((sev) => {
+            {SEVERITY_LEVELS.map((sev) => {
               const config = SEVERITY_CONFIG[sev]
               const isDisabled = disabled || disabledSeverities.includes(sev)
               const isSelected = value === sev

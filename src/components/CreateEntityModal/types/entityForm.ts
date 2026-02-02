@@ -41,6 +41,23 @@ export interface EntityFormData {
   elastic?: Record<string, any>
 }
 
+/** Default values for entity form initialization */
+export const DEFAULT_ENTITY_FORM_VALUES: EntityFormData = {
+  flow: 'monitor',
+  systemId: '',
+  displayName: '',
+  entityType: '',
+  description: '',
+  contactInfo: '',
+  responsibleParty: '',
+  links: [{ url: '', label: '' }],
+  measurements: [],
+  attachments: [],
+  entityRules: [],
+  urls: [],
+  elastic: {},
+}
+
 export interface UseEntityFormResult {
   // Form instance - typed as any to handle dynamic schema
   form: any

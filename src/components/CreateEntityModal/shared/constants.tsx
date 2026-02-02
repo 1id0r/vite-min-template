@@ -1,17 +1,14 @@
 import type { ReactNode } from 'react'
 import { Tag } from 'antd'
+import { SEVERITY_LEVELS, SEVERITY_CONFIG, type Severity } from '../../../schemas/ruleSchemas'
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Severity Configuration
+// Severity Configuration - Re-exported from ruleSchemas.ts (Single Source of Truth)
 // ─────────────────────────────────────────────────────────────────────────────
 
-export type SeverityLevel = 'critical' | 'major' | 'info'
-
-export const SEVERITY_CONFIG: Record<SeverityLevel, { color: string; label: string }> = {
-  critical: { color: 'red', label: 'Critical' },
-  major: { color: 'orange', label: 'Major' },
-  info: { color: 'blue', label: 'Info' },
-}
+// Re-export for backwards compatibility
+export { SEVERITY_LEVELS, SEVERITY_CONFIG }
+export type SeverityLevel = Severity
 
 export const SEVERITY_OPTIONS = Object.entries(SEVERITY_CONFIG).map(([value, config]) => ({
   value,

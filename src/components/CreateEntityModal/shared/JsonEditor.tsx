@@ -88,5 +88,3 @@ export const JsonEditor = memo(function JsonEditor({
     </div>
   )
 })
-
-JsonEditor.displayName = 'JsonEditor'

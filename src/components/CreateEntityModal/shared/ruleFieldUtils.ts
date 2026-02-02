@@ -4,7 +4,7 @@
  * Extracts field definitions from rule schemas for dynamic form rendering
  */
 
-import { getRuleFieldGroups, FieldGroupSchemas } from '../../../schemas/ruleSchemas'
+import { getRuleFieldGroups, FieldGroupSchemas, SEVERITY_LEVELS } from '../../../schemas/ruleSchemas'
 import { RULE_FIELD_CONFIG } from './ruleFieldConfig'
 
 export type FieldType = 'text' | 'number' | 'boolean' | 'select' | 'severity' | 'time'
@@ -49,14 +49,12 @@ const NUMBER_FIELD_NAMES = ['threshold', 'duration', 'time_interval', 'expected_
 /** Field names that should be rendered as boolean checkboxes */
 const BOOLEAN_FIELD_NAMES = ['is_same_date', 'functionality']
 
-/** Severity enum values to detect severity fields */
-const SEVERITY_VALUES = ['critical', 'major', 'info']
-
 /**
  * Detect if an enum field is a severity field
+ * Uses SEVERITY_LEVELS from ruleSchemas.ts (Single Source of Truth)
  */
 function isSeverityEnum(values: string[]): boolean {
-  return SEVERITY_VALUES.every(v => values.includes(v)) && values.length === SEVERITY_VALUES.length
+  return SEVERITY_LEVELS.every(v => values.includes(v)) && values.length === SEVERITY_LEVELS.length
 }
 
 /**

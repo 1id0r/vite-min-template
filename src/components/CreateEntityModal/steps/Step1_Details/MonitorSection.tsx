@@ -70,5 +70,3 @@ export const MonitorSection = memo(function MonitorSection({ systemId }: Monitor
     </div>
   )
 })
-
-MonitorSection.displayName = 'MonitorSection'

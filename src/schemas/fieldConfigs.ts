@@ -321,6 +321,46 @@ export function getBindingFieldConfig(bindingType: string): FormFieldsConfig | u
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
+// Binding Metadata Configuration (for BindingSection component)
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * Metadata for binding types - defines component behavior
+ * Separate from BindingFieldConfigs (which defines what fields to render)
+ */
+export interface BindingMetadata {
+  type: string
+  title: string
+  fieldArrayName: string
+  defaultValues: Record<string, any>
+  defaultOpen?: boolean
+}
+
+export const BINDING_DEFINITIONS: BindingMetadata[] = [
+  {
+    type: 'url',
+    title: 'URL',
+    fieldArrayName: 'urls',
+    defaultValues: { url: '', timeout: 30 },
+    defaultOpen: true,
+  },
+  {
+    type: 'elastic',
+    title: 'Elastic',
+    fieldArrayName: 'elastic',
+    defaultValues: {
+      cluster: '',
+      queryName: '',
+      scheduleInterval: 5,
+      scheduleUnit: 'minutes',
+      timeout: 5,
+      jsonQuery: '',
+    },
+  },
+]
+
+
+// ─────────────────────────────────────────────────────────────────────────────
 // Rule Field Configurations
 // ─────────────────────────────────────────────────────────────────────────────
 

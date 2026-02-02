@@ -182,5 +182,3 @@ export const EntityForm = memo(function EntityForm({ onSave }: EntityFormProps) 
     </FormProvider>
   )
 })
-
-EntityForm.displayName = 'EntityForm'

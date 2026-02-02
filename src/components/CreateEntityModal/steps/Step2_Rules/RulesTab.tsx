@@ -1,6 +1,6 @@
 import { memo, useMemo, useState } from 'react'
 import { useFormContext, useFieldArray } from 'react-hook-form'
-import { Select, Button, Space, Typography, Checkbox } from 'antd'
+import { Select, Button, Space, Typography, Checkbox, Modal } from 'antd'
 import { IconX, IconChevronDown, IconChevronRight } from '@tabler/icons-react'
 import { getEntityRules } from '../../../../schemas/ruleSchemas'
 import { RuleField, RuleInstanceGroup, getRuleFields } from '../../shared'
@@ -17,7 +17,7 @@ interface RulesTabProps {
 }
 
 export const RulesTab = memo(function RulesTab({ entityType = 'linux' }: RulesTabProps) {
-  const { control } = useFormContext<EntityFormData>()
+  const { control, getValues } = useFormContext<EntityFormData>()
   const { fields, append, remove } = useFieldArray({ control, name: 'entityRules' as any })
 
   const availableRules = useMemo(() => getEntityRules(entityType), [entityType])
@@ -49,6 +49,34 @@ export const RulesTab = memo(function RulesTab({ entityType = 'linux' }: RulesTa
     fields.forEach((f: any, idx) => {
       if (!newKeysSet.has(f.ruleKey)) remove(idx)
     })
+  }
+
+  const handleRemoveRule = (index: number, ruleLabel: string) => {
+    // Get current values for this rule
+    const values = getValues(`entityRules.${index}.data`)
+
+    // Check if rule has any filled content
+    const hasContent =
+      values &&
+      Object.entries(values).some(([, value]) => {
+        // Ignore empty or default values
+        if (value === '' || value === null || value === undefined) return false
+        return true
+      })
+
+    if (hasContent) {
+      Modal.confirm({
+        title: 'מחיקת חוק',
+        content: `האם אתה בטוח שברצונך למחוק את החוק "${ruleLabel}"? פעולה זו תמחק את כל הנתונים שהזנת.`,
+        okText: 'מחק',
+        cancelText: 'ביטול',
+        okButtonProps: { danger: true },
+        onOk: () => remove(index),
+      })
+    } else {
+      // Empty rule - remove without confirmation
+      remove(index)
+    }
   }
 
   const handleAddMoreOfType = (ruleKey: string) => {
@@ -97,7 +125,8 @@ export const RulesTab = memo(function RulesTab({ entityType = 'linux' }: RulesTa
                     key={idx}
                     index={idx}
                     entityType={entityType}
-                    onRemove={() => remove(idx)}
+                    ruleLabel={group.label}
+                    onRemove={() => handleRemoveRule(idx, group.label)}
                     showDivider={showDivider}
                     siblingIndices={group.indices}
                   />
@@ -111,8 +140,6 @@ export const RulesTab = memo(function RulesTab({ entityType = 'linux' }: RulesTa
   )
 })
 
-RulesTab.displayName = 'RulesTab'
-
 // ─────────────────────────────────────────────────────────────────────────────
 // RuleInstance - Individual rule with fields
 // ─────────────────────────────────────────────────────────────────────────────
@@ -120,12 +147,14 @@ RulesTab.displayName = 'RulesTab'
 const RuleInstance = ({
   index,
   entityType,
+  ruleLabel,
   onRemove,
   showDivider,
   siblingIndices,
 }: {
   index: number
   entityType: string
+  ruleLabel: string
   onRemove: () => void
   showDivider: boolean
   siblingIndices: number[]

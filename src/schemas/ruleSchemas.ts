@@ -21,9 +21,17 @@ import { z } from 'zod'
 // Global Field Schemas - Reusable across all rules
 // ─────────────────────────────────────────────────────────────────────────────
 
-/** Severity levels for rules */
-export const SeverityEnum = z.enum(['critical', 'major', 'info'])
+/** Severity levels for rules - Single Source of Truth */
+export const SEVERITY_LEVELS = ['critical', 'major', 'info'] as const
+export const SeverityEnum = z.enum(SEVERITY_LEVELS)
 export type Severity = z.infer<typeof SeverityEnum>
+
+/** Severity display configuration - colors and labels for UI rendering */
+export const SEVERITY_CONFIG: Record<Severity, { color: string; label: string }> = {
+  critical: { color: 'red', label: 'Critical' },
+  major: { color: 'orange', label: 'Major' },
+  info: { color: 'blue', label: 'Info' },
+}
 
 /**
  * Generic Fields - Common metadata fields for most rules

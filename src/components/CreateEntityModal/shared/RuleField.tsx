@@ -1,7 +1,7 @@
 import { Controller } from 'react-hook-form'
 import { Input, InputNumber, Checkbox, Select, Typography, TimePicker, Tooltip } from 'antd'
 import dayjs from 'dayjs'
-import { SEVERITY_CONFIG, formatLabel } from './constants'
+import { SEVERITY_CONFIG, SEVERITY_LEVELS, formatLabel } from './constants'
 import type { RuleFieldDef } from './ruleFieldUtils'
 import './RuleField.css'
 
@@ -76,7 +76,7 @@ export const RuleField = ({ basePath, field, control, disabledSeverities = [] }:
               case 'severity':
                 return (
                   <div style={{ display: 'flex', gap: 8 }}>
-                    {(['critical', 'major', 'info'] as const).map((sev) => {
+                    {SEVERITY_LEVELS.map((sev) => {
                       const config = SEVERITY_CONFIG[sev]
                       const isDisabled = disabledSeverities.includes(sev)
                       const isSelected = rhfField.value === sev
@@ -183,7 +183,7 @@ export const StandaloneRuleField = ({
       case 'severity':
         return (
           <div style={{ display: 'flex', gap: 8 }}>
-            {(['critical', 'major', 'info'] as const).map((sev) => {
+            {SEVERITY_LEVELS.map((sev) => {
               const config = SEVERITY_CONFIG[sev]
               const isDisabled = disabledSeverities.includes(sev)
               const isSelected = value === sev

@@ -147,5 +147,3 @@ export const Step1Content = memo(function Step1Content({
     </>
   )
 })
-
-Step1Content.displayName = 'Step1Content'
