@@ -13,4 +13,4 @@ export {
   MAX_RULES_PER_TYPE, 
   formatLabel 
 } from './constants'
-export type { SeverityLevel } from './constants'
+

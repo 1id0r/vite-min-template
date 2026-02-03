@@ -6,7 +6,7 @@
 
 import { memo } from 'react'
 import { Radio } from 'antd'
-import type { FlowId, FlowOption } from '../../types'
+import type { FlowId, FlowOption } from '../../types/entityForm'
 
 export interface FlowSelectorProps {
   flow: FlowId
@@ -14,10 +14,9 @@ export interface FlowSelectorProps {
   onFlowChange: (value: string) => void
 }
 
-const FLOW_LABELS: Partial<Record<FlowId, string>> = {
+const FLOW_LABELS: Record<FlowId, string> = {
   monitor: 'יישות ניטור',
   display: 'יישות תצוגה',
-  general: 'ישות כללית',
 }
 
 export const FlowSelector = memo(function FlowSelector({ flow, flowOptions, onFlowChange }: FlowSelectorProps) {

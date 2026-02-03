@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react'
 import { Tag } from 'antd'
-import { SEVERITY_LEVELS, SEVERITY_CONFIG, type Severity } from '../../../schemas/ruleSchemas'
+import { SEVERITY_LEVELS, SEVERITY_CONFIG } from '../../../schemas/ruleSchemas'
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Severity Configuration - Re-exported from ruleSchemas.ts (Single Source of Truth)
@@ -8,7 +8,6 @@ import { SEVERITY_LEVELS, SEVERITY_CONFIG, type Severity } from '../../../schema
 
 // Re-export for backwards compatibility
 export { SEVERITY_LEVELS, SEVERITY_CONFIG }
-export type SeverityLevel = Severity
 
 export const SEVERITY_OPTIONS = Object.entries(SEVERITY_CONFIG).map(([value, config]) => ({
   value,

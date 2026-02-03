@@ -10,6 +10,11 @@ import type { TreeSelection } from '../../../types/tree'
 
 export type FlowId = 'monitor' | 'display'
 
+export interface FlowOption {
+  label: string
+  value: string
+}
+
 /** Form data structure for entity creation */
 export interface EntityFormData {
   flow: FlowId
