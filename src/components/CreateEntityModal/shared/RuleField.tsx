@@ -54,7 +54,7 @@ export const RuleField = ({ basePath, field, control, disabledSeverities = [] }:
                     max={field.max}
                     placeholder={field.placeholder}
                     style={{ width: '100%' }}
-                    addonAfter={field.suffix}
+                    suffix={field.suffix}
                   />
                 )
 
@@ -161,7 +161,7 @@ export const StandaloneRuleField = ({
             style={{ width: '100%' }}
             value={value}
             onChange={onChange}
-            addonAfter={field.suffix}
+            suffix={field.suffix}
           />
         )
 

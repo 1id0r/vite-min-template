@@ -72,9 +72,9 @@ export const EditEntityModal = ({ visible, onClose, onSave, entityType, initialD
       label: 'Bindings',
       children: (
         <div style={{ direction: 'rtl', padding: 16 }}>
-          <Space direction='vertical' style={{ width: '100%' }} size='large'>
+          <Space orientation='vertical' style={{ width: '100%' }} size='large'>
             {(formData.urls || []).length > 0 && (
-              <Collapse defaultActiveKey={['urls']} ghost expandIconPosition='end'>
+              <Collapse defaultActiveKey={['urls']} ghost expandIconPlacement='end'>
                 <Panel header={<Text strong>URL Bindings</Text>} key='urls'>
                   {formData.urls.map((url: any, idx: number) => (
                     <div key={idx} style={{ padding: 16, border: '1px solid #eee', borderRadius: 8, marginBottom: 16 }}>
@@ -90,7 +90,7 @@ export const EditEntityModal = ({ visible, onClose, onSave, entityType, initialD
             )}
 
             {(formData.elastic || []).length > 0 && (
-              <Collapse defaultActiveKey={['elastic']} ghost expandIconPosition='end'>
+              <Collapse defaultActiveKey={['elastic']} ghost expandIconPlacement='end'>
                 <Panel header={<Text strong>Elastic Bindings</Text>} key='elastic'>
                   {formData.elastic.map((es: any, idx: number) => (
                     <div key={idx} style={{ padding: 16, border: '1px solid #eee', borderRadius: 8, marginBottom: 16 }}>
@@ -117,9 +117,9 @@ export const EditEntityModal = ({ visible, onClose, onSave, entityType, initialD
       label: 'Entity Rules',
       children: (
         <div style={{ direction: 'rtl', padding: 16 }}>
-          <Space direction='vertical' style={{ width: '100%' }} size='large'>
+          <Space orientation='vertical' style={{ width: '100%' }} size='large'>
             {Object.entries(availableRules).map(([ruleKey, def]) => (
-              <Collapse key={ruleKey} ghost expandIconPosition='end'>
+              <Collapse key={ruleKey} ghost expandIconPlacement='end'>
                 <Panel
                   header={<Text strong>{def.labelHe || def.label}</Text>}
                   key={ruleKey}

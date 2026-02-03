@@ -28,7 +28,7 @@ export const FormStepper = memo(function FormStepper({ currentStep, steps }: For
     >
       <Steps
         current={currentStep - 1}
-        direction='horizontal'
+        orientation='horizontal'
         size='default'
         style={{ direction: 'rtl' }}
         items={steps.map((step) => ({

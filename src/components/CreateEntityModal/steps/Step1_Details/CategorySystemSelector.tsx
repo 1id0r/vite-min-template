@@ -59,7 +59,7 @@ export const CategorySystemSelector = memo(function CategorySystemSelector({
   }
 
   return (
-    <Space direction='vertical' style={{ width: '100%', direction: 'rtl' }} size='middle'>
+    <Space orientation='vertical' style={{ width: '100%', direction: 'rtl' }} size='middle'>
       <div style={{ display: 'flex', alignItems: 'center' }}>
         <Text strong style={{ fontSize: 14, width: 100, marginLeft: 16 }}>
           קטגוריה

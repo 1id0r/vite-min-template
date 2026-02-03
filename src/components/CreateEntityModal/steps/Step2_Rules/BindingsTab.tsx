@@ -32,7 +32,7 @@ const panelStyle: React.CSSProperties = {
 export const BindingsTab = memo(function BindingsTab() {
   return (
     <div style={{ direction: 'rtl' }}>
-      <Space direction='vertical' size='small' style={{ width: '100%' }}>
+      <Space orientation='vertical' size='small' style={{ width: '100%' }}>
         {/* Map over binding definitions instead of hardcoding */}
         {BINDING_DEFINITIONS.map((config) => (
           <BindingSection key={config.type} config={config} />
@@ -40,7 +40,7 @@ export const BindingsTab = memo(function BindingsTab() {
 
         {/* Measurements section */}
         <div style={panelStyle}>
-          <Collapse ghost expandIconPosition='end'>
+          <Collapse ghost expandIconPlacement='end'>
             <Panel header={<Text strong>מדידות</Text>} key='measurements'>
               <MeasurementsSection />
             </Panel>

@@ -52,7 +52,7 @@ export const LinksSection = memo(function LinksSection() {
         padding: '24px',
       }}
     >
-      <Space direction='vertical' style={{ width: '100%' }} size='middle'>
+      <Space orientation='vertical' style={{ width: '100%' }} size='middle'>
         {links.map((link, index) => (
           <div key={index} style={{ position: 'relative' }}>
             <div style={{ display: 'flex', alignItems: 'center', marginBottom: 12 }}>

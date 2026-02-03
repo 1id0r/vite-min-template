@@ -277,7 +277,7 @@ export const BindingFieldConfigs: Record<string, FormFieldsConfig> = {
     title: 'URL',
     fields: [
       { name: 'url', type: 'text', label: 'URL', placeholder: 'הזן URL', required: true },
-      { name: 'timeout', type: 'number', label: 'timeout', min: 0, max: 60, suffix: 'שניות' },
+      { name: 'timeout', type: 'number', label: 'timeout', min: 0, max: 60, suffix: 'דקות' },
     ],
   },
   elastic: {
@@ -342,7 +342,7 @@ export const BINDING_DEFINITIONS: BindingMetadata[] = [
     type: 'url',
     title: 'URL',
     fieldArrayName: 'urls',
-    defaultValues: { url: '', timeout: 30 },
+    defaultValues: { url: '', timeout: 1 },
     defaultOpen: true,
   },
   {

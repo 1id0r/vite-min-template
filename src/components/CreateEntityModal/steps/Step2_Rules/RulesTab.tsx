@@ -86,7 +86,7 @@ export const RulesTab = memo(function RulesTab({ entityType = 'linux' }: RulesTa
 
   return (
     <div style={{ direction: 'rtl' }}>
-      <Space direction='vertical' style={{ width: '100%' }} size='large'>
+      <Space orientation='vertical' style={{ width: '100%' }} size='large'>
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
           <Text strong style={{ whiteSpace: 'nowrap' }}>
             חוק

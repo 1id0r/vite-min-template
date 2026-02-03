@@ -61,9 +61,9 @@ export const BindingSection = memo(function BindingSection({ config }: BindingSe
 
   return (
     <div style={panelStyle}>
-      <Collapse defaultActiveKey={config.defaultOpen ? [config.type] : []} ghost expandIconPosition='end'>
+      <Collapse defaultActiveKey={config.defaultOpen ? [config.type] : []} ghost expandIconPlacement='end'>
         <Panel header={<Text strong>{config.title}</Text>} key={config.type}>
-          <Space direction='vertical' style={{ width: '100%' }}>
+          <Space orientation='vertical' style={{ width: '100%' }}>
             {fields.map((field, index) => (
               <BindingInstance
                 key={field.id}

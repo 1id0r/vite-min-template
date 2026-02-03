@@ -196,7 +196,7 @@ const LinksArrayField = ({ value, onChange }: { value: any; onChange?: (val: any
 
   return (
     <div style={{ width: '100%' }}>
-      <Space direction='vertical' size='small' style={{ width: '100%' }}>
+      <Space orientation='vertical' size='small' style={{ width: '100%' }}>
         {links.map((link: any, index: number) => (
           <Space key={index} align='start' style={{ width: '100%' }}>
             <Input

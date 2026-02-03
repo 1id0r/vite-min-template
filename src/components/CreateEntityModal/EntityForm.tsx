@@ -156,7 +156,7 @@ export const EntityForm = memo(function EntityForm({ onSave }: EntityFormProps) 
 
         {/* Scrollable Content */}
         <div style={{ flex: 1, overflowY: 'auto', padding: 16 }}>
-          <Space direction='vertical' size='middle' style={{ width: '100%' }}>
+          <Space orientation='vertical' size='middle' style={{ width: '100%' }}>
             {currentStepDef?.render(stepProps)}
           </Space>
         </div>

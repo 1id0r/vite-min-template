@@ -93,7 +93,7 @@ export function TreeStep({ selection, onSelectionChange }: TreeStepProps) {
   }
 
   return (
-    <Space direction='vertical' size='middle' style={{ width: '100%', direction: 'rtl' }}>
+    <Space orientation='vertical' size='middle' style={{ width: '100%', direction: 'rtl' }}>
       <Input
         value={searchTerm}
         onChange={(e) => setSearchTerm(e.target.value)}
