@@ -50,6 +50,7 @@ const STEPS: StepDefinition[] = [
         showSystemSelector={props.showSystemSelector}
         showGeneralSection={props.showGeneralSection}
         showMonitorSection={props.showMonitorSection}
+        showIconSelector={props.showIconSelector}
         onFlowChange={props.onFlowChange}
         onCategoryChange={props.onCategoryChange}
         onSystemChange={props.onSystemChange}
@@ -81,6 +82,7 @@ export const EntityForm = memo(function EntityForm({ onSave }: EntityFormProps) 
     systems,
     showSystemSelector,
     showGeneralSection,
+    showIconMenu,
     showMonitorSection,
     handleFlowChange,
     handleCategoryChange,
@@ -113,6 +115,9 @@ export const EntityForm = memo(function EntityForm({ onSave }: EntityFormProps) 
 
   const isNextDisabled = flow === 'monitor' && !systemId
 
+  // Display flow is single-step (no step 2)
+  const isDisplayFlow = flow === 'display'
+
   // Props passed to step render functions
   const stepProps: StepRenderProps = {
     flow,
@@ -124,6 +129,7 @@ export const EntityForm = memo(function EntityForm({ onSave }: EntityFormProps) 
     showSystemSelector,
     showGeneralSection,
     showMonitorSection,
+    showIconSelector: showIconMenu,
     onFlowChange: handleFlowChange,
     onCategoryChange: handleCategoryChange,
     onSystemChange: handleSystemSelect,
@@ -141,10 +147,12 @@ export const EntityForm = memo(function EntityForm({ onSave }: EntityFormProps) 
           flexDirection: 'column',
         }}
       >
-        {/* Fixed Header - Stepper */}
-        <div style={{ padding: '8px 12px 0' }}>
-          <FormStepper currentStep={currentStep} steps={STEPS} />
-        </div>
+        {/* Fixed Header - Stepper (hidden for display flow) */}
+        {!isDisplayFlow && (
+          <div style={{ padding: '8px 12px 0' }}>
+            <FormStepper currentStep={currentStep} steps={STEPS} />
+          </div>
+        )}
 
         {/* Scrollable Content */}
         <div style={{ flex: 1, overflowY: 'auto', padding: 16 }}>
@@ -164,7 +172,11 @@ export const EntityForm = memo(function EntityForm({ onSave }: EntityFormProps) 
             gap: 12,
           }}
         >
-          {currentStep === 1 ?
+          {/* Display flow: single step with save button */}
+          {isDisplayFlow ?
+            <GenericButton variant='filled' buttonType='textOnly' text='יצירת יישות' onClick={handleSave} />
+          : /* Monitor flow: multi-step with next/back */
+          currentStep === 1 ?
             <GenericButton
               variant='filled'
               buttonType='textOnly'

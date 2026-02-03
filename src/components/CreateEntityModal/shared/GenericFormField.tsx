@@ -43,7 +43,9 @@ export const GenericFormField = memo(function GenericFormField({
   labelWidth = 100,
 }: GenericFormFieldProps) {
   const isStacked = layout === 'stacked'
-  const showLabel = field.label && field.label.length > 0
+  // Prefer Hebrew label (labelHe) over English label
+  const displayLabel = field.labelHe || field.label
+  const showLabel = displayLabel && displayLabel.length > 0
 
   const fieldStatus: AntdStatus = status || (error ? 'error' : undefined)
 
@@ -60,7 +62,7 @@ export const GenericFormField = memo(function GenericFormField({
         flexShrink: 0,
       }}
     >
-      {field.label}
+      {displayLabel}
     </Text>
   )
 

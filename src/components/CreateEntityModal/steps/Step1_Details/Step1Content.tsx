@@ -16,6 +16,7 @@ import { FlowSelector } from './FlowSelector'
 import { CategorySystemSelector } from './CategorySystemSelector'
 import { LinksSection } from './LinksSection'
 import { MonitorSection } from './MonitorSection'
+import { IconSelector } from './IconSelector'
 import type { EntityFormData } from '../../hooks/useEntityForm'
 import type { CategoryDefinition, SystemDefinition } from '../../../../types/entity'
 
@@ -37,6 +38,7 @@ export interface Step1ContentProps {
   showSystemSelector: boolean
   showGeneralSection: boolean
   showMonitorSection: boolean
+  showIconSelector: boolean
   onFlowChange: (value: 'monitor' | 'display') => void
   onCategoryChange: (categoryId: string | null) => void
   onSystemChange: (systemId: string | null) => void
@@ -52,6 +54,7 @@ export const Step1Content = memo(function Step1Content({
   showSystemSelector,
   showGeneralSection,
   showMonitorSection,
+  showIconSelector,
   onFlowChange,
   onCategoryChange,
   onSystemChange,
@@ -68,7 +71,7 @@ export const Step1Content = memo(function Step1Content({
       />
 
       {/* פרטים כלליים Section Header */}
-      <Text strong style={{ fontSize: 16, display: 'block', textAlign: 'right', marginBottom: 20 }}>
+      <Text strong style={{ fontSize: 16, display: 'block', textAlign: 'right', marginBottom: 20, marginTop: '10px' }}>
         פרטים כלליים
       </Text>
 
@@ -122,7 +125,7 @@ export const Step1Content = memo(function Step1Content({
                 render={({ field }) => (
                   <TextArea
                     {...field}
-                    placeholder='הזן תיאור ותפקיד היישות'
+                    placeholder='הזן תיאור היישות'
                     rows={3}
                     status={form.formState.errors.description ? 'error' : undefined}
                     style={{ direction: 'rtl', width: '100%' }}
@@ -141,6 +144,9 @@ export const Step1Content = memo(function Step1Content({
 
       {/* Links Section */}
       {showGeneralSection && <LinksSection />}
+
+      {/* Icon Selector - Only for display flow */}
+      {showIconSelector && <IconSelector />}
 
       {/* Monitor Section - Dynamic fields per system */}
       {showMonitorSection && systemId && <MonitorSection systemId={systemId} />}

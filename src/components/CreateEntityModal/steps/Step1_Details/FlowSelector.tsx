@@ -15,8 +15,8 @@ export interface FlowSelectorProps {
 }
 
 const FLOW_LABELS: Partial<Record<FlowId, string>> = {
-  monitor: 'מוצר פעיל',
-  display: 'מוצר תצוגה',
+  monitor: 'יישות ניטור',
+  display: 'יישות תצוגה',
   general: 'ישות כללית',
 }
 
