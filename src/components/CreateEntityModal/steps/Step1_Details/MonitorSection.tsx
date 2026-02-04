@@ -5,7 +5,7 @@
  * Includes validation button that calls the backend API to validate entity details.
  */
 
-import { memo, useMemo, useState, useCallback } from 'react'
+import { memo, useMemo, useState, useCallback, useEffect, useRef } from 'react'
 import { useFormContext } from 'react-hook-form'
 import { Typography, Button, Alert } from 'antd'
 import { CheckCircleOutlined, LoadingOutlined } from '@ant-design/icons'
@@ -35,6 +35,9 @@ export const MonitorSection = memo(function MonitorSection({ systemId, onValidat
     error: string
   } | null>(null)
 
+  // Track the data that was validated to detect changes
+  const validatedDataRef = useRef<string | null>(null)
+
   // Get field config for this system
   const fieldConfig = useMemo(() => getMonitorFieldConfig(systemId), [systemId])
 
@@ -57,6 +60,19 @@ export const MonitorSection = memo(function MonitorSection({ systemId, onValidat
     return data
   }, [fieldConfig, watchedValues])
 
+  // Create a stable string representation for comparison
+  const monitorDataString = useMemo(() => JSON.stringify(monitorData), [monitorData])
+
+  // Reset validation when monitor data changes after validation
+  useEffect(() => {
+    // If we have validated data and current data differs, reset validation
+    if (validatedDataRef.current !== null && validatedDataRef.current !== monitorDataString) {
+      setValidationResult(null)
+      onValidationChange?.(false)
+      validatedDataRef.current = null
+    }
+  }, [monitorDataString, onValidationChange])
+
   // Check if this entity supports validation
   const supportsValidation = useMemo(() => hasValidationSupport(systemId), [systemId])
 
@@ -78,6 +94,10 @@ export const MonitorSection = memo(function MonitorSection({ systemId, onValidat
       const result = await validateEntity(systemId, monitorData as Record<string, unknown>)
       setValidationResult(result)
       onValidationChange?.(result.isValid)
+      // Store the data that was validated
+      if (result.isValid) {
+        validatedDataRef.current = monitorDataString
+      }
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Validation failed'
       setValidationResult({ isValid: false, error: errorMessage })
@@ -85,7 +105,7 @@ export const MonitorSection = memo(function MonitorSection({ systemId, onValidat
     } finally {
       setIsValidating(false)
     }
-  }, [systemId, monitorData, onValidationChange])
+  }, [systemId, monitorData, monitorDataString, onValidationChange])
 
   if (!fieldConfig || fieldConfig.fields.length === 0) {
     return null
