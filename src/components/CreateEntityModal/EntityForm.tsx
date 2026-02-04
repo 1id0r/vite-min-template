@@ -92,6 +92,15 @@ export const EntityForm = memo(function EntityForm({ onSave }: EntityFormProps) 
     handleSave,
   } = useEntityForm(handleSaveWithResult)
 
+  // Reset validation when system changes - MUST be before early return to maintain hook order
+  const handleSystemSelectWithReset = useCallback(
+    (newSystemId: string | null) => {
+      setIsEntityValidated(false)
+      handleSystemSelect(newSystemId)
+    },
+    [handleSystemSelect],
+  )
+
   // If we have submitted data, show the result summary
   if (submittedData) {
     return <ResultSummary result={submittedData} onClose={() => setSubmittedData(null)} />
@@ -114,15 +123,6 @@ export const EntityForm = memo(function EntityForm({ onSave }: EntityFormProps) 
       setCurrentStep(currentStep - 1)
     }
   }
-
-  // Reset validation when system changes
-  const handleSystemSelectWithReset = useCallback(
-    (newSystemId: string | null) => {
-      setIsEntityValidated(false)
-      handleSystemSelect(newSystemId)
-    },
-    [handleSystemSelect],
-  )
 
   // For monitor flow, require validation before proceeding
   const isNextDisabled = flow === 'monitor' && (!systemId || !isEntityValidated)
