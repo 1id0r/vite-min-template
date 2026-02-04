@@ -50,9 +50,19 @@ export interface FieldConfig {
   max?: number
 }
 
+/** Validation configuration for API calls */
+export interface ValidationConfig {
+  /** API entity name (e.g., 'Mongok' for /eav/isexist/Mongok) */
+  entityName: string
+  /** Maps form field names (snake_case) to API header names */
+  fieldMappings: Record<string, string>
+}
+
 export interface FormFieldsConfig {
   title?: string
   fields: FieldConfig[]
+  /** Optional validation config for entity existence check */
+  validation?: ValidationConfig
 }
 
 // Monitor field configurations by system ID
@@ -62,6 +72,10 @@ export const MonitorFieldConfigs: Record<string, FormFieldsConfig> = {
     fields: [
       { name: 'cluster', type: 'text', label: 'Cluster', labelHe: 'אשכול', required: true, colSpan: 12 },
     ],
+    validation: {
+      entityName: 'Mongok',
+      fieldMappings: { cluster: 'cluster' },
+    },
   },
   redis: {
     title: 'Redis',
@@ -69,12 +83,20 @@ export const MonitorFieldConfigs: Record<string, FormFieldsConfig> = {
       { name: 'cluster', type: 'text', label: 'Cluster', labelHe: 'אשכול', required: true, colSpan: 6 },
       { name: 'db_name', type: 'text', label: 'DB Name', labelHe: 'שם מסד נתונים', required: true, colSpan: 6 },
     ],
+    validation: {
+      entityName: 'Redis',
+      fieldMappings: { cluster: 'cluster', db_name: 'dbName' },
+    },
   },
   postgresql: {
     title: 'PostgreSQL monitoring',
     fields: [
       { name: 'host', type: 'text', label: 'Host', labelHe: 'שרת', required: true, colSpan: 12 },
     ],
+    validation: {
+      entityName: 'Postgresql',
+      fieldMappings: { host: 'host' },
+    },
   },
   elastic: {
     title: 'Elastic',
@@ -84,6 +106,10 @@ export const MonitorFieldConfigs: Record<string, FormFieldsConfig> = {
       { name: 'buckets_names', type: 'textarea', label: 'Buckets Names', labelHe: 'שמות דליים', required: false, colSpan: 4, placeholder: 'bucket1, bucket2' },
       { name: 'query_id', type: 'text', label: 'Query ID', labelHe: 'מזהה שליפה', required: true, colSpan: 4 },
     ],
+    validation: {
+      entityName: 'Elastic',
+      fieldMappings: { cluster: 'cluster' },
+    },
   },
   sql_server: {
     title: 'SQL Server monitoring',
@@ -97,6 +123,10 @@ export const MonitorFieldConfigs: Record<string, FormFieldsConfig> = {
     fields: [
       { name: 'account', type: 'text', label: 'Account', labelHe: 'חשבון', required: true, colSpan: 12 },
     ],
+    validation: {
+      entityName: 'S3',
+      fieldMappings: { account: 'account' },
+    },
   },
   hdfs: {
     title: 'HDFS monitoring',
@@ -112,6 +142,10 @@ export const MonitorFieldConfigs: Record<string, FormFieldsConfig> = {
       { name: 'consumer_group', type: 'text', label: 'Consumer Group', labelHe: 'קבוצת צרכנים', required: true, colSpan: 4 },
       { name: 'topic', type: 'text', label: 'Topic', labelHe: 'נושא', required: true, colSpan: 4 },
     ],
+    validation: {
+      entityName: 'Kafka',
+      fieldMappings: { cluster: 'cluster', consumer_group: 'consumerGroup', topic: 'topic' },
+    },
   },
   nifi: {
     title: 'NiFi monitoring',
@@ -120,6 +154,10 @@ export const MonitorFieldConfigs: Record<string, FormFieldsConfig> = {
       { name: 'componentType', type: 'text', label: 'Component Type', labelHe: 'סוג רכיב', required: true, colSpan: 4 },
       { name: 'componentId', type: 'text', label: 'Component ID', labelHe: 'מזהה רכיב', required: true, colSpan: 4 },
     ],
+    validation: {
+      entityName: 'Nifi',
+      fieldMappings: { environment: 'environment', componentType: 'componentType', componentId: 'componentId' },
+    },
   },
   pvc: {
     title: 'PVC monitoring',
@@ -128,18 +166,30 @@ export const MonitorFieldConfigs: Record<string, FormFieldsConfig> = {
       { name: 'namespace', type: 'text', label: 'Namespace', labelHe: 'מרחב שמות', required: true, colSpan: 4 },
       { name: 'pvc', type: 'text', label: 'PVC', labelHe: 'PVC', required: true, colSpan: 4 },
     ],
+    validation: {
+      entityName: 'Pvc',
+      fieldMappings: { environment: 'environment', namespace: 'namespace', pvc: 'pvc' },
+    },
   },
   linux: {
     title: 'Linux VM monitoring',
     fields: [
       { name: 'server_name', type: 'text', label: 'Server Name', labelHe: 'שם שרת', required: true, colSpan: 12 },
     ],
+    validation: {
+      entityName: 'Linux',
+      fieldMappings: { server_name: 'serverName' },
+    },
   },
   windows: {
     title: 'Windows VM monitoring',
     fields: [
       { name: 'server_name', type: 'text', label: 'Server Name', labelHe: 'שם שרת', required: true, colSpan: 12 },
     ],
+    validation: {
+      entityName: 'Windows',
+      fieldMappings: { server_name: 'serverName' },
+    },
   },
 
   // New entity types added per user request
@@ -150,6 +200,10 @@ export const MonitorFieldConfigs: Record<string, FormFieldsConfig> = {
       { name: 'namespace', type: 'text', label: 'Namespace', labelHe: 'מרחב שמות', required: true, colSpan: 4 },
       { name: 'service', type: 'text', label: 'Service', labelHe: 'שירות', required: true, colSpan: 4 },
     ],
+    validation: {
+      entityName: 'Openshift',
+      fieldMappings: { environment: 'environment', namespace: 'namespace', service: 'service' },
+    },
   },
   data: {
     title: 'Data',
@@ -178,6 +232,10 @@ export const MonitorFieldConfigs: Record<string, FormFieldsConfig> = {
       { name: 'cube_name', type: 'text', label: 'Cube Name', labelHe: 'שם קוביה', required: true, colSpan: 6 },
       { name: 'timed_package_id', type: 'text', label: 'Timed Package ID', labelHe: 'מזהה חבילה מתוזמנת', required: true, colSpan: 6 },
     ],
+    validation: {
+      entityName: 'timedPackage',
+      fieldMappings: { cube_name: 'PackageId', timed_package_id: 'timedPackageId' },
+    },
   },
   url_entity: {
     title: 'URL',

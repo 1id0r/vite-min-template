@@ -9,7 +9,7 @@
  * For display flow: Shows general fields + icon selection
  */
 
-import { memo, useState, type ReactNode } from 'react'
+import { memo, useState, useCallback, type ReactNode } from 'react'
 import { FormProvider } from 'react-hook-form'
 import { Space } from 'antd'
 import { GenericButton } from '../GenericButton'
@@ -54,6 +54,7 @@ const STEPS: StepDefinition[] = [
         onFlowChange={props.onFlowChange}
         onCategoryChange={props.onCategoryChange}
         onSystemChange={props.onSystemChange}
+        onValidationChange={props.onValidationChange}
       />
     ),
   },
@@ -67,6 +68,7 @@ const STEPS: StepDefinition[] = [
 export const EntityForm = memo(function EntityForm({ onSave }: EntityFormProps) {
   const [submittedData, setSubmittedData] = useState<EntityFormData | null>(null)
   const [currentStep, setCurrentStep] = useState(1)
+  const [isEntityValidated, setIsEntityValidated] = useState(false)
 
   const handleSaveWithResult = (data: EntityFormData) => {
     setSubmittedData(data)
@@ -113,7 +115,17 @@ export const EntityForm = memo(function EntityForm({ onSave }: EntityFormProps) 
     }
   }
 
-  const isNextDisabled = flow === 'monitor' && !systemId
+  // Reset validation when system changes
+  const handleSystemSelectWithReset = useCallback(
+    (newSystemId: string | null) => {
+      setIsEntityValidated(false)
+      handleSystemSelect(newSystemId)
+    },
+    [handleSystemSelect],
+  )
+
+  // For monitor flow, require validation before proceeding
+  const isNextDisabled = flow === 'monitor' && (!systemId || !isEntityValidated)
 
   // Display flow is single-step (no step 2)
   const isDisplayFlow = flow === 'display'
@@ -132,7 +144,8 @@ export const EntityForm = memo(function EntityForm({ onSave }: EntityFormProps) 
     showIconSelector: showIconMenu,
     onFlowChange: handleFlowChange,
     onCategoryChange: handleCategoryChange,
-    onSystemChange: handleSystemSelect,
+    onSystemChange: handleSystemSelectWithReset,
+    onValidationChange: setIsEntityValidated,
   }
 
   // Find current step and render its content

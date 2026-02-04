@@ -42,6 +42,7 @@ export interface Step1ContentProps {
   onFlowChange: (value: 'monitor' | 'display') => void
   onCategoryChange: (categoryId: string | null) => void
   onSystemChange: (systemId: string | null) => void
+  onValidationChange?: (isValid: boolean) => void
 }
 
 export const Step1Content = memo(function Step1Content({
@@ -58,6 +59,7 @@ export const Step1Content = memo(function Step1Content({
   onFlowChange,
   onCategoryChange,
   onSystemChange,
+  onValidationChange,
 }: Step1ContentProps) {
   const form = useFormContext<EntityFormData>()
 
@@ -149,7 +151,7 @@ export const Step1Content = memo(function Step1Content({
       {showIconSelector && <IconSelector />}
 
       {/* Monitor Section - Dynamic fields per system */}
-      {showMonitorSection && systemId && <MonitorSection systemId={systemId} />}
+      {showMonitorSection && systemId && <MonitorSection systemId={systemId} onValidationChange={onValidationChange} />}
     </>
   )
 })
