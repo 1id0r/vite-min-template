@@ -48,10 +48,12 @@ export const BindingSection = memo(function BindingSection({ config }: BindingSe
       Modal.confirm({
         title: 'מחיקת הצמדה',
         content: `האם אתה בטוח שברצונך למחוק את ה-${config.title} הזה? פעולה זו תמחק גם את כל החוקים המשויכים.`,
-        okText: 'מחק',
-        cancelText: 'ביטול',
-        okButtonProps: { danger: true },
-        onOk: () => remove(index),
+        okText: 'המשך עריכה',
+        cancelText: 'מחק הצמדה',
+        okButtonProps: { type: 'primary' },
+        cancelButtonProps: { danger: true },
+        direction: 'rtl',
+        onCancel: () => remove(index),
       })
     } else {
       // Empty binding - remove without confirmation

@@ -68,10 +68,12 @@ export const RulesTab = memo(function RulesTab({ entityType = 'linux' }: RulesTa
       Modal.confirm({
         title: 'מחיקת חוק',
         content: `האם אתה בטוח שברצונך למחוק את החוק "${ruleLabel}"? פעולה זו תמחק את כל הנתונים שהזנת.`,
-        okText: 'מחק',
-        cancelText: 'ביטול',
-        okButtonProps: { danger: true },
-        onOk: () => remove(index),
+        okText: 'המשך עריכה',
+        cancelText: 'מחק חוק',
+        okButtonProps: { type: 'primary' },
+        cancelButtonProps: { danger: true },
+        direction: 'rtl',
+        onCancel: () => remove(index),
       })
     } else {
       // Empty rule - remove without confirmation
