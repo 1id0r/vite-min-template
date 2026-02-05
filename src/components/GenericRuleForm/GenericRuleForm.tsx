@@ -20,7 +20,7 @@
 
 import { memo, useState, useEffect, useMemo, useCallback } from 'react'
 import { getRuleFieldGroups, FieldGroupSchemas } from '../../schemas/ruleSchemas'
-import { getRuleFieldConfig } from '../../schemas/fieldConfigs'
+import { getRuleFieldConfig } from '../../schemas/ruleSchemas'
 import { RuleFormField } from './RuleFormField'
 import type { GenericRuleFormProps, RuleFieldDef, FieldType } from './types'
 

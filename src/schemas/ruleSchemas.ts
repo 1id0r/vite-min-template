@@ -626,7 +626,49 @@ export function getRuleFieldGroups(entityType: string, ruleName: string): FieldG
   return rules[ruleName].fieldGroups
 }
 
+// ─────────────────────────────────────────────────────────────────────────────
+// Rule Field Configs - UI field definitions for form rendering
+// ─────────────────────────────────────────────────────────────────────────────
 
+import { type FormFieldsConfig } from './fieldConfigs'
+
+export const RuleFieldConfigs: Record<string, FormFieldsConfig> = {
+  generic: {
+    title: 'שדות כלליים',
+    fields: [
+      { name: 'functionality', type: 'text', label: 'פונקציונליות', colSpan: 12 },
+      { name: 'details', type: 'text', label: 'פרטים', colSpan: 12 },
+      { name: 'severity', type: 'severity', label: 'חומרה', colSpan: 12 },
+      { name: 'duration', type: 'number', label: 'משך זמן', colSpan: 6, suffix: 'דקות' },
+    ],
+  },
+  dynamic: {
+    title: 'שדות דינמיים',
+    fields: [
+      { name: 'threshold', type: 'number', label: 'סף', colSpan: 6 },
+      { name: 'is_same_date', type: 'boolean', label: 'אותו תאריך', colSpan: 6 },
+      { name: 'start_time', type: 'time', label: 'שעת התחלה', colSpan: 6 },
+      { name: 'end_time', type: 'time', label: 'שעת סיום', colSpan: 6 },
+    ],
+  },
+  threshold: {
+    title: 'סף',
+    fields: [
+      { name: 'threshold', type: 'number', label: 'סף', colSpan: 12 },
+    ],
+  },
+  volume: {
+    title: 'יחידת נפח',
+    fields: [
+      { name: 'volume_unit', type: 'text', label: 'יחידת נפח', colSpan: 12, placeholder: 'MB, GB, etc.' },
+    ],
+  },
+}
+
+/** Helper to get rule field config by field group name */
+export function getRuleFieldConfig(fieldGroupName: string): FormFieldsConfig | undefined {
+  return RuleFieldConfigs[fieldGroupName]
+}
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Type Inference Helpers

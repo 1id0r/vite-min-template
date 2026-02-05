@@ -9,60 +9,19 @@
  * For display flow: Shows general fields + icon selection
  */
 
-import { memo, useState, type ReactNode } from 'react'
+import { memo, useState } from 'react'
 import { FormProvider } from 'react-hook-form'
 import { Space } from 'antd'
 import { GenericButton } from '../GenericButton'
-import { Step1Content, type Step1ContentProps } from './steps/Step1_Details/Step1Content'
-import { Step2Content } from './steps/Step2_Rules/Step2Content'
 import { FormStepper } from './components/FormStepper'
 import { useEntityForm, type EntityFormData } from './hooks/useEntityForm'
 import { ResultSummary } from './components/ResultSummary'
+import { STEPS, type StepRenderProps } from './stepDefinitions'
 
 interface EntityFormProps {
   onSave?: (data: EntityFormData) => void
   onClose?: () => void
 }
-
-// Props needed to render step content - same as Step1ContentProps
-type StepRenderProps = Step1ContentProps
-
-// Step definition with render function
-interface StepDefinition {
-  value: number
-  label: string
-  render: (props: StepRenderProps) => ReactNode
-}
-
-// Step definitions with component render functions
-const STEPS: StepDefinition[] = [
-  {
-    value: 1,
-    label: 'פרטי ישות',
-    render: (props) => (
-      <Step1Content
-        flow={props.flow}
-        flowOptions={props.flowOptions}
-        systemId={props.systemId}
-        categoryId={props.categoryId}
-        categories={props.categories}
-        systems={props.systems}
-        showSystemSelector={props.showSystemSelector}
-        showGeneralSection={props.showGeneralSection}
-        showMonitorSection={props.showMonitorSection}
-        showIconSelector={props.showIconSelector}
-        onFlowChange={props.onFlowChange}
-        onCategoryChange={props.onCategoryChange}
-        onSystemChange={props.onSystemChange}
-      />
-    ),
-  },
-  {
-    value: 2,
-    label: 'הצמדות וחוקים',
-    render: (props) => <Step2Content systemId={props.systemId} />,
-  },
-]
 
 export const EntityForm = memo(function EntityForm({ onSave }: EntityFormProps) {
   const [submittedData, setSubmittedData] = useState<EntityFormData | null>(null)
