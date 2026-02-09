@@ -40,6 +40,9 @@ export interface RuleFieldDef {
 /** Field names that should be rendered as time pickers */
 const TIME_FIELD_NAMES = ['start_time', 'end_time']
 
+/** Field names that should be excluded from auto-generation (rendered by dedicated components) */
+const EXCLUDED_FIELD_NAMES = ['functionality']
+
 /** Field names that should be rendered as severity pills */
 const SEVERITY_FIELD_NAMES = ['severity']
 
@@ -47,7 +50,7 @@ const SEVERITY_FIELD_NAMES = ['severity']
 const NUMBER_FIELD_NAMES = ['threshold', 'duration', 'time_interval', 'expected_mean', 'amount_user', 'amount_running', 'pods_threshold']
 
 /** Field names that should be rendered as boolean checkboxes */
-const BOOLEAN_FIELD_NAMES = ['is_same_date', 'functionality']
+const BOOLEAN_FIELD_NAMES = ['is_same_date']
 
 /**
  * Detect if an enum field is a severity field
@@ -70,6 +73,9 @@ export function getRuleFields(entityType: string, ruleKey: string): RuleFieldDef
     if (!schema) return
 
     Object.entries(schema.shape).forEach(([fieldName, fieldSchema]: [string, any]) => {
+      // Skip fields rendered by dedicated components
+      if (EXCLUDED_FIELD_NAMES.includes(fieldName)) return
+      
       // Unwrap optional/nullable
       let cur = fieldSchema
       while (cur._def.typeName === 'ZodOptional' || cur._def.typeName === 'ZodNullable') {

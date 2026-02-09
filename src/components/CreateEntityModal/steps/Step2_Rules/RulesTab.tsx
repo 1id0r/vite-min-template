@@ -3,7 +3,7 @@ import { useFormContext, useFieldArray } from 'react-hook-form'
 import { Select, Button, Space, Typography, Checkbox, Modal } from 'antd'
 import { IconX, IconChevronDown, IconChevronRight } from '@tabler/icons-react'
 import { getEntityRules } from '../../../../schemas/ruleSchemas'
-import { RuleField, RuleInstanceGroup, getRuleFields } from '../../shared'
+import { RuleField, RuleInstanceGroup, getRuleFields, FunctionalitySection } from '../../shared'
 import type { EntityFormData } from '../../hooks/useEntityForm'
 
 const { Text } = Typography
@@ -127,7 +127,6 @@ export const RulesTab = memo(function RulesTab({ entityType = 'linux' }: RulesTa
                     key={idx}
                     index={idx}
                     entityType={entityType}
-                    ruleLabel={group.label}
                     onRemove={() => handleRemoveRule(idx, group.label)}
                     showDivider={showDivider}
                     siblingIndices={group.indices}
@@ -149,14 +148,12 @@ export const RulesTab = memo(function RulesTab({ entityType = 'linux' }: RulesTa
 const RuleInstance = ({
   index,
   entityType,
-  ruleLabel,
   onRemove,
   showDivider,
   siblingIndices,
 }: {
   index: number
   entityType: string
-  ruleLabel: string
   onRemove: () => void
   showDivider: boolean
   siblingIndices: number[]
@@ -210,6 +207,10 @@ const RuleInstance = ({
 
         {isExpanded && (
           <div style={{ padding: 16 }}>
+            {/* Functionality collapsible section */}
+            <FunctionalitySection basePath={`entityRules.${index}.data.functionality`} />
+
+            {/* Other rule fields */}
             {allFields.map((field) => (
               <RuleField
                 key={field.name}

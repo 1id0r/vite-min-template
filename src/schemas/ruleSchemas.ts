@@ -34,17 +34,44 @@ export const SEVERITY_CONFIG: Record<Severity, { color: string; label: string }>
 }
 
 /**
+ * Functionality Fields Schema - Complex collapsible section
+ * Display Name: פונקציונליות לחוק
+ * 
+ * Contains:
+ * - interval: Time between resends (minutes), required, must be > 0
+ * - email_addresses: List of email strings, required
+ * - url: HTTP URL link, required
+ * - text: String text, required
+ * - email_description: Email description text, required
+ * - servicenow: Optional ServiceNow integration with JSON config
+ * 
+ * UI: Rendered as collapsible Collapse panel
+ */
+export const FunctionalityFieldsSchema = z.object({
+  interval: z.number().min(1, 'חייב להיות גדול מ-0'), // Time between resends in minutes
+  email_addresses: z.array(z.string().email('כתובת מייל לא תקינה')).min(1, 'חובה לפחות כתובת מייל אחת'), // List of emails
+  url: z.string().url('קישור URL לא תקין'), // HTTP URL
+  text: z.string().min(1, 'שדה חובה'), // Text string
+  email_description: z.string().min(1, 'שדה חובה'), // Email description
+  servicenow: z.object({
+    json: z.record(z.unknown()),
+  }).optional(), // Optional ServiceNow with JSON
+}).optional()
+
+export type FunctionalityFields = z.infer<typeof FunctionalityFieldsSchema>
+
+/**
  * Generic Fields - Common metadata fields for most rules
  * Used in almost every rule configuration
  * 
  * UI NOTES:
- * - functionality: text input
+ * - functionality: collapsible section with nested fields
  * - details: text input
  * - severity: rendered as badges component (critical/major/info)
  * - duration: number input (half row layout)
  */
 export const GenericRuleFieldsSchema = z.object({
-  functionality: z.string().optional(),
+  functionality: FunctionalityFieldsSchema,
   details: z.string().optional(),
   severity: SeverityEnum.optional(),
   duration: z.number().optional(), // in minutes
@@ -636,7 +663,6 @@ export const RuleFieldConfigs: Record<string, FormFieldsConfig> = {
   generic: {
     title: 'שדות כלליים',
     fields: [
-      { name: 'functionality', type: 'text', label: 'פונקציונליות', colSpan: 12 },
       { name: 'details', type: 'text', label: 'פרטים', colSpan: 12 },
       { name: 'severity', type: 'severity', label: 'חומרה', colSpan: 12 },
       { name: 'duration', type: 'number', label: 'משך זמן', colSpan: 6, suffix: 'דקות' },

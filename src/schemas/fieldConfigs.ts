@@ -33,7 +33,7 @@
 // ─────────────────────────────────────────────────────────────────────────────
 export interface FieldConfig {
   name: string
-  type: 'text' | 'textarea' | 'number' | 'boolean' | 'select' | 'async-select' | 'links-array' | 'segmented' | 'json' | 'severity' | 'time'
+  type: 'text' | 'textarea' | 'number' | 'boolean' | 'select' | 'async-select' | 'links-array' | 'segmented' | 'json' | 'severity' | 'time' | 'tags'
   label: string
   labelHe?: string // Hebrew label for RTL display
   placeholder?: string
