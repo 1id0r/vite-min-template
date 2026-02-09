@@ -29,7 +29,7 @@ export const MonitorFieldConfigs: Record<string, MonitorFieldConfigWithValidatio
     fields: [
       { name: 'cluster', type: 'text', label: 'Cluster', labelHe: 'אשכול', required: true, colSpan: 12 },
     ],
-    validationEndpoint: 'mongok',
+    validationEndpoint: 'mongoK',
     validationFieldMapping: { cluster: 'cluster' },
   },
   redis: {
