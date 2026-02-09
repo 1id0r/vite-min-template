@@ -18,6 +18,7 @@ import { LinksSection } from './LinksSection'
 import { MonitorSection } from './MonitorSection'
 import { IconSelector } from './IconSelector'
 import type { EntityFormData } from '../../hooks/useEntityForm'
+import type { ValidationStatus } from '../../hooks/useEntityValidation'
 import type { CategoryDefinition, SystemDefinition } from '../../../../types/entity'
 
 const { Text } = Typography
@@ -42,6 +43,11 @@ export interface Step1ContentProps {
   onFlowChange: (value: 'monitor' | 'display') => void
   onCategoryChange: (categoryId: string | null) => void
   onSystemChange: (systemId: string | null) => void
+  // Validation props
+  validationStatus: ValidationStatus
+  validationError: string | null
+  onValidate: () => void
+  onResetValidation: () => void
 }
 
 export const Step1Content = memo(function Step1Content({
@@ -58,6 +64,10 @@ export const Step1Content = memo(function Step1Content({
   onFlowChange,
   onCategoryChange,
   onSystemChange,
+  validationStatus,
+  validationError,
+  onValidate,
+  onResetValidation,
 }: Step1ContentProps) {
   const form = useFormContext<EntityFormData>()
 
@@ -149,7 +159,15 @@ export const Step1Content = memo(function Step1Content({
       {showIconSelector && <IconSelector />}
 
       {/* Monitor Section - Dynamic fields per system */}
-      {showMonitorSection && systemId && <MonitorSection systemId={systemId} />}
+      {showMonitorSection && systemId && (
+        <MonitorSection
+          systemId={systemId}
+          validationStatus={validationStatus}
+          validationError={validationError}
+          onValidate={onValidate}
+          onResetValidation={onResetValidation}
+        />
+      )}
     </>
   )
 })

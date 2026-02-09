@@ -39,6 +39,10 @@ export const STEPS: StepDefinition[] = [
         onFlowChange={props.onFlowChange}
         onCategoryChange={props.onCategoryChange}
         onSystemChange={props.onSystemChange}
+        validationStatus={props.validationStatus}
+        validationError={props.validationError}
+        onValidate={props.onValidate}
+        onResetValidation={props.onResetValidation}
       />
     ),
   },

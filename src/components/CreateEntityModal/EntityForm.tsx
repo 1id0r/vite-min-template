@@ -9,12 +9,13 @@
  * For display flow: Shows general fields + icon selection
  */
 
-import { memo, useState } from 'react'
+import { memo, useState, useCallback } from 'react'
 import { FormProvider } from 'react-hook-form'
 import { Space } from 'antd'
 import { GenericButton } from '../GenericButton'
 import { FormStepper } from './components/FormStepper'
 import { useEntityForm, type EntityFormData } from './hooks/useEntityForm'
+import { useEntityValidation } from './hooks/useEntityValidation'
 import { ResultSummary } from './components/ResultSummary'
 import { STEPS, type StepRenderProps } from './stepDefinitions'
 
@@ -49,6 +50,17 @@ export const EntityForm = memo(function EntityForm({ onSave }: EntityFormProps) 
     handleSave,
   } = useEntityForm(handleSaveWithResult)
 
+  // Entity validation hook
+  const { validationStatus, validationError, validate, resetValidation, supportsValidation } = useEntityValidation()
+
+  // Handle validate button click
+  const handleValidate = useCallback(() => {
+    if (systemId) {
+      const monitorData = form.getValues('monitor') || {}
+      validate(systemId, monitorData)
+    }
+  }, [systemId, form, validate])
+
   // If we have submitted data, show the result summary
   if (submittedData) {
     return <ResultSummary result={submittedData} onClose={() => setSubmittedData(null)} />
@@ -72,7 +84,10 @@ export const EntityForm = memo(function EntityForm({ onSave }: EntityFormProps) 
     }
   }
 
-  const isNextDisabled = flow === 'monitor' && !systemId
+  // Next button disabled if no system selected OR validation not passed
+  // For entities that support validation, require valid status
+  const needsValidation = systemId ? supportsValidation(systemId) : false
+  const isNextDisabled = flow === 'monitor' && (!systemId || (needsValidation && validationStatus !== 'valid'))
 
   // Display flow is single-step (no step 2)
   const isDisplayFlow = flow === 'display'
@@ -92,6 +107,10 @@ export const EntityForm = memo(function EntityForm({ onSave }: EntityFormProps) 
     onFlowChange: handleFlowChange,
     onCategoryChange: handleCategoryChange,
     onSystemChange: handleSystemSelect,
+    validationStatus,
+    validationError,
+    onValidate: handleValidate,
+    onResetValidation: resetValidation,
   }
 
   // Find current step and render its content

@@ -34,7 +34,7 @@ export function CreateEntityModal() {
         placement='right'
         size={560}
         styles={{
-          header: { direction: 'rtl' },
+          header: { direction: 'ltr', textAlign: 'right' },
           body: { height: 'calc(100% - 60px)', padding: 0 },
         }}
       >
