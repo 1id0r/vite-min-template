@@ -29,6 +29,8 @@ interface GenericFormFieldProps {
   status?: AntdStatus
   layout?: 'inline' | 'stacked'
   labelWidth?: number
+  /** Optional annotation text shown next to label (e.g., 'אופציונלי', 'חובה') */
+  annotation?: string
 }
 
 export const GenericFormField = memo(function GenericFormField({
@@ -41,6 +43,7 @@ export const GenericFormField = memo(function GenericFormField({
   status,
   layout = 'inline',
   labelWidth = 100,
+  annotation,
 }: GenericFormFieldProps) {
   const isStacked = layout === 'stacked'
   // Prefer Hebrew label (labelHe) over English label
@@ -50,20 +53,24 @@ export const GenericFormField = memo(function GenericFormField({
   const fieldStatus: AntdStatus = status || (error ? 'error' : undefined)
 
   const labelElement = showLabel && (
-    <Text
-      strong
+    <div
       style={{
-        fontSize: 14,
         width: isStacked ? '100%' : labelWidth,
-        display: 'block',
         marginBottom: isStacked ? 8 : 0,
         marginLeft: isStacked ? 0 : 16,
         textAlign: 'right',
         flexShrink: 0,
       }}
     >
-      {displayLabel}
-    </Text>
+      <Text strong style={{ fontSize: 14, display: 'block' }}>
+        {displayLabel}
+      </Text>
+      {annotation && (
+        <Text type='secondary' style={{ fontSize: 11, display: 'block' }}>
+          {annotation}
+        </Text>
+      )}
+    </div>
   )
 
   const contentElement = (

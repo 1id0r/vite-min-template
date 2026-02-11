@@ -27,6 +27,23 @@ export const MonitorSection = memo(function MonitorSection({ systemId }: Monitor
   // Get field config for this system
   const fieldConfig = useMemo(() => getMonitorFieldConfig(systemId), [systemId])
 
+  // Compute which group is the minority to label only that group
+  const minorityLabel = useMemo(() => {
+    if (!fieldConfig) return null
+    const requiredCount = fieldConfig.fields.filter((f) => f.required).length
+    const optionalCount = fieldConfig.fields.length - requiredCount
+    if (optionalCount === 0 || requiredCount === 0) return null // all same type, no annotation needed
+    return requiredCount >= optionalCount ? 'optional' : 'required'
+  }, [fieldConfig])
+
+  // Get annotation for a field based on the minority label
+  const getAnnotation = (field: { required?: boolean }): string | undefined => {
+    if (!minorityLabel) return undefined
+    if (minorityLabel === 'optional' && !field.required) return 'אופציונלי'
+    if (minorityLabel === 'required' && field.required) return 'חובה'
+    return undefined
+  }
+
   if (!fieldConfig || fieldConfig.fields.length === 0) {
     return null
   }
@@ -59,6 +76,7 @@ export const MonitorSection = memo(function MonitorSection({ systemId }: Monitor
             control={control}
             error={(errors.monitor as any)?.[field.name]?.message}
             layout='inline'
+            annotation={getAnnotation(field)}
           />
         ))}
 

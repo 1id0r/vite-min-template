@@ -12,6 +12,8 @@ interface RuleFieldProps {
   field: RuleFieldDef
   control: any
   disabledSeverities?: string[]
+  /** Optional annotation text shown next to label (e.g., 'אופציונלי', 'חובה') */
+  annotation?: string
 }
 
 /**
@@ -19,16 +21,22 @@ interface RuleFieldProps {
  * Handles: text, number (min=0), boolean, select (with severity badges)
  * Uses inline layout: label on right, input on left (RTL)
  */
-export const RuleField = ({ basePath, field, control, disabledSeverities = [] }: RuleFieldProps) => {
+export const RuleField = ({ basePath, field, control, disabledSeverities = [], annotation }: RuleFieldProps) => {
   const name = `${basePath}.${field.name}`
 
   return (
     <div style={{ display: 'flex', alignItems: 'center', marginBottom: 12 }}>
       <Tooltip title={field.tooltip} placement='top'>
-        <Text strong style={{ fontSize: 14, width: 100, marginLeft: 12, flexShrink: 0 }}>
-          {formatLabel(field.label)}
-          {field.required && <span style={{ color: '#ff4d4f' }}> *</span>}
-        </Text>
+        <div style={{ width: 100, marginLeft: 12, flexShrink: 0 }}>
+          <Text strong style={{ fontSize: 14, display: 'block' }}>
+            {formatLabel(field.label)}
+          </Text>
+          {annotation && (
+            <Text type='secondary' style={{ fontSize: 11, display: 'block' }}>
+              {annotation}
+            </Text>
+          )}
+        </div>
       </Tooltip>
 
       {/* Use quarter width for compact fields */}
@@ -144,11 +152,13 @@ export const StandaloneRuleField = ({
   value,
   onChange,
   disabledSeverities = [],
+  annotation,
 }: {
   field: RuleFieldDef
   value?: any
   onChange?: (value: any) => void
   disabledSeverities?: string[]
+  annotation?: string
 }) => {
   const renderInput = () => {
     switch (field.type) {
@@ -240,10 +250,16 @@ export const StandaloneRuleField = ({
   return (
     <div style={{ display: 'flex', alignItems: 'center', marginBottom: 12 }}>
       <Tooltip title={field.tooltip} placement='top'>
-        <Text strong style={{ fontSize: 14, width: 100, marginLeft: 12, flexShrink: 0 }}>
-          {formatLabel(field.label)}
-          {field.required && <span style={{ color: '#ff4d4f' }}> *</span>}
-        </Text>
+        <div style={{ width: 100, marginLeft: 12, flexShrink: 0 }}>
+          <Text strong style={{ fontSize: 14, display: 'block' }}>
+            {formatLabel(field.label)}
+          </Text>
+          {annotation && (
+            <Text type='secondary' style={{ fontSize: 11, display: 'block' }}>
+              {annotation}
+            </Text>
+          )}
+        </div>
       </Tooltip>
       {/* Use quarter width for compact fields */}
       <div

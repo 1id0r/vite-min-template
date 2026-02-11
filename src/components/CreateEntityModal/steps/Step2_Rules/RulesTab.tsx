@@ -165,6 +165,21 @@ const RuleInstance = ({
   // Use utility to get fields instead of inline derivation
   const allFields = useMemo(() => getRuleFields(entityType, ruleKey), [entityType, ruleKey])
 
+  // Compute which group is the minority to label only that group
+  const minorityLabel = useMemo(() => {
+    const requiredCount = allFields.filter((f) => f.required).length
+    const optionalCount = allFields.length - requiredCount
+    if (optionalCount === 0 || requiredCount === 0) return null
+    return requiredCount >= optionalCount ? 'optional' : 'required'
+  }, [allFields])
+
+  const getAnnotation = (field: { required?: boolean }): string | undefined => {
+    if (!minorityLabel) return undefined
+    if (minorityLabel === 'optional' && !field.required) return 'אופציונלי'
+    if (minorityLabel === 'required' && field.required) return 'חובה'
+    return undefined
+  }
+
   // Watch sibling severities directly for real-time sync
   const siblingSeverities = siblingIndices
     .filter((idx) => idx !== index)
@@ -218,6 +233,7 @@ const RuleInstance = ({
                 field={field}
                 control={control}
                 disabledSeverities={disabledSeverities}
+                annotation={getAnnotation(field)}
               />
             ))}
           </div>
