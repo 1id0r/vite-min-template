@@ -203,6 +203,34 @@ export const MongoKVolumeFieldsSchema = z.object({
 
 export type MongoKVolumeFields = z.infer<typeof MongoKVolumeFieldsSchema>
 
+/**
+ * Custom Rule - Severity Entry Schema
+ * Each severity entry has its own query, description, and delay
+ */
+export const CustomSeverityEntrySchema = z.object({
+  severity: SeverityEnum,
+  query: z.string().optional(), // JSON query string
+  run_description: z.string().optional(),
+  alert_delay: z.number().min(2).max(15).optional(), // 2-15 minutes
+})
+
+export type CustomSeverityEntry = z.infer<typeof CustomSeverityEntrySchema>
+
+/**
+ * Custom Rule Fields - Universal rule available on every entity
+ * Contains rule name, component selection (static/dynamic), metrics pool,
+ * and up to 3 severity entries
+ */
+export const CustomRuleFieldsSchema = z.object({
+  rule_name: z.string().min(1, 'שם חוק הוא שדה חובה'),
+  component_type: z.enum(['static', 'dynamic']).optional(),
+  component_name: z.string().optional(),
+  metrics_pool: z.enum(['120', '140']).optional(),
+  severity_entries: z.array(CustomSeverityEntrySchema).max(3).optional(),
+})
+
+export type CustomRuleFields = z.infer<typeof CustomRuleFieldsSchema>
+
 // ─────────────────────────────────────────────────────────────────────────────
 // Field Group Registry - Named groups for composition
 // ─────────────────────────────────────────────────────────────────────────────
@@ -220,6 +248,7 @@ export const FieldGroupSchemas = {
   timeUnitThreshold: TimeUnitThresholdFieldsSchema,
   unitingAlerts: UnitingAlertsFieldsSchema,
   mongokVolume: MongoKVolumeFieldsSchema,
+  customRule: CustomRuleFieldsSchema,
 } as const
 
 export type FieldGroupName = keyof typeof FieldGroupSchemas
@@ -240,6 +269,13 @@ export interface RuleDefinition {
 // ─────────────────────────────────────────────────────────────────────────────
 // Entity Rule Registry - Maps entity type to available rules
 // ─────────────────────────────────────────────────────────────────────────────
+
+/** Universal custom rule — injected into every entity */
+const CUSTOM_RULE_DEFINITION: RuleDefinition = {
+  label: 'Custom',
+  labelHe: 'חוק מותאם אישית',
+  fieldGroups: ['customRule'],
+}
 
 export const EntityRuleRegistry: Record<string, Record<string, RuleDefinition>> = {
   // HDFS Rules
@@ -608,7 +644,9 @@ export const EntityRuleRegistry: Record<string, Record<string, RuleDefinition>> 
  * Get all rules available for a given entity type
  */
 export function getEntityRules(entityType: string): Record<string, RuleDefinition> {
-  return EntityRuleRegistry[entityType] ?? {}
+  const entityRules = EntityRuleRegistry[entityType] ?? {}
+  // Always inject the universal custom rule
+  return { ...entityRules, custom: CUSTOM_RULE_DEFINITION }
 }
 
 /**

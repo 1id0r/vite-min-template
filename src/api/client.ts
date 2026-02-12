@@ -71,6 +71,32 @@ export async function fetchClusters(): Promise<string[]> {
   }
 }
 
+// Mock components for dev mode
+export const MOCK_COMPONENTS = ['component-alpha', 'component-beta', 'component-gamma', 'component-delta'];
+const componentsApiUrl = (import.meta.env.VITE_COMPONENTS_API_URL as string | undefined) || "";
+
+/**
+ * Fetch component list from API or return mock data if no URL configured
+ * Used by the custom rule's "שם רכיב" static select
+ */
+export async function fetchComponents(): Promise<string[]> {
+  if (!componentsApiUrl) {
+    return MOCK_COMPONENTS;
+  }
+
+  try {
+    const response = await fetch(componentsApiUrl);
+    if (!response.ok) {
+      throw new Error(`Components request failed with status ${response.status}`);
+    }
+    const data = await response.json();
+    return data.components || [];
+  } catch (error) {
+    console.warn("Failed to fetch components, falling back to mock data:", error);
+    return MOCK_COMPONENTS;
+  }
+}
+
 export async function fetchTreeNodes(
   rootId: string,
   depth = 3,

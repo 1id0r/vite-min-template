@@ -32,7 +32,7 @@ export const EntityFormSchema = z.object({
   })).optional(),
   
   urls: z.array(z.object({
-     url: z.string(),
+     url: z.string().regex(/^(https?:\/\/)/, 'חייב להתחיל ב-http:// או https://').url('פורמט URL לא תקין'),
      timeout: z.number().optional()
   })).optional(),
   

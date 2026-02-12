@@ -3,7 +3,7 @@ import { useFormContext, useFieldArray } from 'react-hook-form'
 import { Select, Button, Space, Typography, Checkbox, Modal } from 'antd'
 import { IconX, IconChevronDown, IconChevronRight } from '@tabler/icons-react'
 import { getEntityRules } from '../../../../schemas/ruleSchemas'
-import { RuleField, RuleInstanceGroup, getRuleFields, FunctionalitySection } from '../../shared'
+import { RuleField, RuleInstanceGroup, getRuleFields, FunctionalitySection, CustomRuleInstance } from '../../shared'
 import type { EntityFormData } from '../../hooks/useEntityForm'
 
 const { Text } = Typography
@@ -222,20 +222,26 @@ const RuleInstance = ({
 
         {isExpanded && (
           <div style={{ padding: 16 }}>
-            {/* Functionality collapsible section */}
-            <FunctionalitySection basePath={`entityRules.${index}.data.functionality`} />
+            {ruleKey === 'custom' ?
+              /* Custom rule has its own dedicated form */
+              <CustomRuleInstance basePath={`entityRules.${index}.data`} control={control} />
+            : <>
+                {/* Functionality collapsible section */}
+                <FunctionalitySection basePath={`entityRules.${index}.data.functionality`} />
 
-            {/* Other rule fields */}
-            {allFields.map((field) => (
-              <RuleField
-                key={field.name}
-                basePath={`entityRules.${index}.data`}
-                field={field}
-                control={control}
-                disabledSeverities={disabledSeverities}
-                annotation={getAnnotation(field)}
-              />
-            ))}
+                {/* Other rule fields */}
+                {allFields.map((field) => (
+                  <RuleField
+                    key={field.name}
+                    basePath={`entityRules.${index}.data`}
+                    field={field}
+                    control={control}
+                    disabledSeverities={disabledSeverities}
+                    annotation={getAnnotation(field)}
+                  />
+                ))}
+              </>
+            }
           </div>
         )}
       </div>

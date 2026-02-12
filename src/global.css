@@ -5,6 +5,12 @@
   direction: ltr !important;
 }
 
+
 .ltr-time-picker .ant-picker-panel {
   direction: ltr !important;
+}
+
+/* Force Ant Design labels to be regular weight */
+.ant-form-item-label > label {
+  font-weight: 400 !important;
 }

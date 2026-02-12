@@ -83,7 +83,9 @@ export const RuleField = ({ basePath, field, control, disabledSeverities = [], a
 
               case 'severity':
                 return (
-                  <div style={{ display: 'flex', gap: 8 }}>
+                  <div
+                    style={{ display: 'inline-flex', border: '1px solid #d9d9d9', borderRadius: 6, overflow: 'hidden' }}
+                  >
                     {SEVERITY_LEVELS.map((sev) => {
                       const config = SEVERITY_CONFIG[sev]
                       const isDisabled = disabledSeverities.includes(sev)
@@ -93,27 +95,19 @@ export const RuleField = ({ basePath, field, control, disabledSeverities = [], a
                           key={sev}
                           onClick={() => !isDisabled && rhfField.onChange(sev)}
                           style={{
-                            padding: '6px 16px',
-                            borderRadius: 16,
+                            padding: '4px 14px',
                             cursor: isDisabled ? 'not-allowed' : 'pointer',
-                            backgroundColor:
-                              isSelected ? config.color
-                              : isDisabled ? '#f5f5f5'
-                              : '#fafafa',
+                            backgroundColor: isSelected ? '#1677ff' : 'transparent',
                             color:
                               isSelected ? '#fff'
                               : isDisabled ? '#bfbfbf'
                               : '#595959',
-                            border: `1px solid ${
-                              isSelected ? config.color
-                              : isDisabled ? '#d9d9d9'
-                              : '#e8e8e8'
-                            }`,
-                            opacity: isDisabled ? 0.5 : 1,
+                            borderRight: 'none',
                             fontWeight: isSelected ? 600 : 400,
                             fontSize: 13,
-                            transition: 'all 0.2s ease',
-                            textDecoration: isDisabled ? 'line-through' : 'none',
+                            transition: 'all 0.15s ease',
+                            opacity: isDisabled ? 0.45 : 1,
+                            lineHeight: '22px',
                           }}
                         >
                           {config.label}
@@ -192,7 +186,7 @@ export const StandaloneRuleField = ({
 
       case 'severity':
         return (
-          <div style={{ display: 'flex', gap: 8 }}>
+          <div style={{ display: 'inline-flex', border: '1px solid #d9d9d9', borderRadius: 6, overflow: 'hidden' }}>
             {SEVERITY_LEVELS.map((sev) => {
               const config = SEVERITY_CONFIG[sev]
               const isDisabled = disabledSeverities.includes(sev)
@@ -202,27 +196,19 @@ export const StandaloneRuleField = ({
                   key={sev}
                   onClick={() => !isDisabled && onChange?.(sev)}
                   style={{
-                    padding: '6px 16px',
-                    borderRadius: 16,
+                    padding: '4px 14px',
                     cursor: isDisabled ? 'not-allowed' : 'pointer',
-                    backgroundColor:
-                      isSelected ? config.color
-                      : isDisabled ? '#f5f5f5'
-                      : '#fafafa',
+                    backgroundColor: isSelected ? '#1677ff' : 'transparent',
                     color:
                       isSelected ? '#fff'
                       : isDisabled ? '#bfbfbf'
                       : '#595959',
-                    border: `1px solid ${
-                      isSelected ? config.color
-                      : isDisabled ? '#d9d9d9'
-                      : '#e8e8e8'
-                    }`,
-                    opacity: isDisabled ? 0.5 : 1,
+                    borderRight: 'none',
                     fontWeight: isSelected ? 600 : 400,
                     fontSize: 13,
-                    transition: 'all 0.2s ease',
-                    textDecoration: isDisabled ? 'line-through' : 'none',
+                    transition: 'all 0.15s ease',
+                    opacity: isDisabled ? 0.45 : 1,
+                    lineHeight: '22px',
                   }}
                 >
                   {config.label}

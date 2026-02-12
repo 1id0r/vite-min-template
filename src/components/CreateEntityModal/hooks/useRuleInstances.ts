@@ -36,10 +36,12 @@ export function useRuleInstances(entityType: string): UseRuleInstancesResult {
 
   const ruleOptions = useMemo(
     () =>
-      Object.entries(availableRules).map(([key, def]) => ({
-        value: key,
-        label: def.labelHe || def.label,
-      })),
+      Object.entries(availableRules)
+        .filter(([key]) => key !== 'custom') // Custom rule has its own dedicated form — exclude from bindings
+        .map(([key, def]) => ({
+          value: key,
+          label: def.labelHe || def.label,
+        })),
     [availableRules]
   )
 
