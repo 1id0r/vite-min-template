@@ -21,4 +21,5 @@ export const antdTheme: ThemeConfig = {
   token: {
     fontFamily: "Heebo, sans-serif",
   },
+
 };

@@ -1,19 +1,17 @@
-import { type ButtonHTMLAttributes, type ComponentType } from 'react'
+import { type ComponentType } from 'react'
 import type { IconProps } from '@tabler/icons-react'
-import styles from './GenericButton.module.css'
+import { Button, type ButtonProps } from 'antd'
 
 export type ButtonVariant = 'filled' | 'outlined' | 'link'
 export type ButtonType = 'textWithIcon' | 'iconOnly' | 'textOnly'
 
-export interface GenericButtonProps extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'type'> {
+export interface GenericButtonProps extends Omit<ButtonProps, 'type' | 'icon' | 'iconPosition'> {
   variant?: ButtonVariant
   buttonType?: ButtonType
   text?: string
   icon?: ComponentType<IconProps>
   iconSize?: number
   iconPosition?: 'left' | 'right'
-  className?: string
-  htmlType?: 'button' | 'submit' | 'reset'
 }
 
 export function GenericButton({
@@ -23,42 +21,38 @@ export function GenericButton({
   icon: Icon,
   iconSize = 18,
   iconPosition = 'left',
-  className = '',
-  htmlType = 'button',
   disabled,
   ...props
 }: GenericButtonProps) {
-  const buttonClasses = [styles.button, styles[variant], styles[buttonType], disabled ? styles.disabled : '', className]
-    .filter(Boolean)
-    .join(' ')
-
-  const renderIcon = () => {
-    if (!Icon || buttonType === 'textOnly') return null
-    return <Icon size={iconSize} stroke={2} />
+  // Map variant to Ant Design Button type
+  const getAntdType = (): ButtonProps['type'] => {
+    switch (variant) {
+      case 'filled':
+        return 'primary'
+      case 'outlined':
+        return 'default'
+      case 'link':
+        return 'link'
+      default:
+        return 'primary'
+    }
   }
 
-  const renderContent = () => {
-    if (buttonType === 'iconOnly') {
-      return renderIcon()
-    }
+  // Determine if we should show text
+  const showText = buttonType !== 'iconOnly'
 
-    if (buttonType === 'textOnly') {
-      return <span className={styles.text}>{text}</span>
-    }
-
-    // textWithIcon
-    return (
-      <>
-        {iconPosition === 'left' && renderIcon()}
-        <span className={styles.text}>{text}</span>
-        {iconPosition === 'right' && renderIcon()}
-      </>
-    )
-  }
+  // Prepare icon element
+  const iconElement = Icon ? <Icon size={iconSize} stroke={2} style={{ marginTop: 4 }} /> : undefined
 
   return (
-    <button type={htmlType} className={buttonClasses} disabled={disabled} {...props}>
-      {renderContent()}
-    </button>
+    <Button
+      type={getAntdType()}
+      icon={buttonType !== 'textOnly' ? iconElement : undefined}
+      iconPosition={iconPosition === 'right' ? 'end' : 'start'}
+      disabled={disabled}
+      {...props}
+    >
+      {showText && text}
+    </Button>
   )
 }
