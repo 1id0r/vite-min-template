@@ -8,12 +8,11 @@
  * - חומרות (severity_entries): up to 3 collapsible entries, each with severity/query/description/delay
  */
 
-import { memo, useState } from 'react'
+import { memo, useState, useEffect } from 'react'
 import { Controller, useFormContext, useFieldArray } from 'react-hook-form'
 import { Input, InputNumber, Button, Typography, Space } from 'antd'
 import { IconPlus, IconX, IconChevronDown, IconChevronRight } from '@tabler/icons-react'
 import { SEVERITY_LEVELS, SEVERITY_CONFIG } from '../../../schemas/ruleSchemas'
-import { AsyncComponentSelect } from './AsyncComponentSelect'
 import { JsonEditor } from './JsonEditor'
 
 const { Text } = Typography
@@ -25,13 +24,20 @@ interface CustomRuleInstanceProps {
 }
 
 export const CustomRuleInstance = memo(function CustomRuleInstance({ basePath, control }: CustomRuleInstanceProps) {
-  const { watch } = useFormContext()
-  const componentType = watch(`${basePath}.component_type`)
+  const { watch, getValues } = useFormContext()
 
   const { fields, append, remove } = useFieldArray({
     control,
     name: `${basePath}.severity_entries` as any,
   })
+
+  // Ensure at least one severity entry exists on mount
+  useEffect(() => {
+    const currentEntries = getValues(`${basePath}.severity_entries`)
+    if (!currentEntries || currentEntries.length === 0) {
+      append({ severity: undefined, query: '', run_description: '', alert_delay: 5 })
+    }
+  }, [basePath, getValues, append])
 
   // Watch severity values in real-time — no useMemo (watch returns same ref, memo won't retrigger)
   const watchedEntries = watch(`${basePath}.severity_entries`) || []
@@ -48,39 +54,6 @@ export const CustomRuleInstance = memo(function CustomRuleInstance({ basePath, c
           control={control}
           render={({ field }) => <Input {...field} placeholder='הזן שם חוק' style={{ width: '100%' }} />}
         />
-      </FieldRow>
-
-      {/* שם רכיב - label | radio | input/select in one row */}
-      <FieldRow label='שם רכיב'>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, width: '100%' }}>
-          <div style={{ flexShrink: 0 }}>
-            <Controller
-              name={`${basePath}.component_type`}
-              control={control}
-              render={({ field }) => (
-                <RadioPillGroup
-                  value={field.value || 'static'}
-                  onChange={field.onChange}
-                  options={[
-                    { label: 'סטטי', value: 'static' },
-                    { label: 'דינמי', value: 'dynamic' },
-                  ]}
-                />
-              )}
-            />
-          </div>
-          <div style={{ flex: 1, minWidth: 0 }}>
-            <Controller
-              name={`${basePath}.component_name`}
-              control={control}
-              render={({ field }) =>
-                componentType === 'dynamic' ?
-                  <Input {...field} placeholder='הזן שם רכיב' style={{ width: '100%' }} />
-                : <AsyncComponentSelect value={field.value} onChange={field.onChange} />
-              }
-            />
-          </div>
-        </div>
       </FieldRow>
 
       {/* מאגר מטריקות - Radio pills */}
@@ -129,6 +102,7 @@ export const CustomRuleInstance = memo(function CustomRuleInstance({ basePath, c
               usedSeverities={usedSeverities}
               currentSeverity={watchedEntries[idx]?.severity}
               onRemove={() => remove(idx)}
+              defaultExpanded
             />
           ))}
         </Space>
@@ -154,6 +128,7 @@ const SeverityEntry = ({
   usedSeverities,
   currentSeverity,
   onRemove,
+  defaultExpanded = true,
 }: {
   index: number
   basePath: string
@@ -161,8 +136,9 @@ const SeverityEntry = ({
   usedSeverities: string[]
   currentSeverity?: string
   onRemove: () => void
+  defaultExpanded?: boolean
 }) => {
-  const [isExpanded, setIsExpanded] = useState(false)
+  const [isExpanded, setIsExpanded] = useState(defaultExpanded)
   const severityLabel =
     currentSeverity ? SEVERITY_CONFIG[currentSeverity as keyof typeof SEVERITY_CONFIG]?.label : undefined
 
