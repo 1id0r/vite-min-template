@@ -7,7 +7,7 @@
 
 import { memo } from 'react'
 import { useFormContext } from 'react-hook-form'
-import { Input, Button, Space, Typography } from 'antd'
+import { Input, Button, Typography } from 'antd'
 import { IconPlus, IconX } from '@tabler/icons-react'
 import { GenericButton } from '../../../GenericButton'
 import type { EntityFormData } from '../../hooks/useEntityForm'
@@ -52,7 +52,7 @@ export const LinksSection = memo(function LinksSection() {
         padding: '24px',
       }}
     >
-      <Space orientation='vertical' style={{ width: '100%' }} size='middle'>
+      <div style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: 24 }}>
         {links.map((link, index) => (
           <div key={index} style={{ position: 'relative' }}>
             <div style={{ display: 'flex', alignItems: 'center', marginBottom: 12 }}>
@@ -65,13 +65,7 @@ export const LinksSection = memo(function LinksSection() {
                   value={link.url}
                   onChange={(e) => handleLinkChange(index, 'url', e.target.value)}
                   status={link.url && !URL_REGEX.test(link.url) ? 'error' : undefined}
-                  style={{ direction: 'rtl' }}
-                />
-                <Button
-                  type='text'
-                  icon={<IconX size={14} />}
-                  onClick={() => handleRemoveLink(index)}
-                  style={{ marginRight: 8, color: '#6B7280' }}
+                  style={{ direction: 'rtl', marginLeft: 40 }}
                 />
               </div>
             </div>
@@ -87,6 +81,19 @@ export const LinksSection = memo(function LinksSection() {
                 style={{ flex: 1, direction: 'rtl', marginLeft: 40 }}
               />
             </div>
+            {/* Delete Button - Centered vertically relative to the entire item */}
+            <Button
+              type='text'
+              icon={<IconX size={14} />}
+              onClick={() => handleRemoveLink(index)}
+              style={{
+                position: 'absolute',
+                top: '50%',
+                left: 0,
+                transform: 'translateY(-50%)',
+                color: '#6B7280',
+              }}
+            />
           </div>
         ))}
 
@@ -101,7 +108,7 @@ export const LinksSection = memo(function LinksSection() {
             onClick={handleAddLink}
           />
         </div>
-      </Space>
+      </div>
     </div>
   )
 })

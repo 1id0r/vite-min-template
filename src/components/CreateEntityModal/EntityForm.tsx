@@ -131,7 +131,6 @@ export const EntityForm = memo(function EntityForm({ onSave }: EntityFormProps) 
         <div
           style={{
             padding: 16,
-            borderTop: '1px solid #E5E7EB',
             backgroundColor: '#FFFFFF',
             display: 'flex',
             justifyContent: 'flex-end',

@@ -37,7 +37,12 @@ export const RulesTab = memo(function RulesTab({ entityType = 'linux' }: RulesTa
     return groups
   }, [fields])
 
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false)
+
   const handleRuleSelectionChange = (selectedKeys: string[]) => {
+    // Keep dropdown open when selecting
+    setIsDropdownOpen(true)
+
     const currentKeys = new Set(selectedRuleKeys)
     selectedKeys.forEach((key) => {
       if (!currentKeys.has(key)) {
@@ -85,7 +90,7 @@ export const RulesTab = memo(function RulesTab({ entityType = 'linux' }: RulesTa
     const ruleDef = availableRules[ruleKey]
     if (ruleDef) append({ ruleKey, ruleLabel: ruleDef.labelHe || ruleDef.label, enabled: true, data: {} })
   }
-
+  // ... (rest is same until return)
   return (
     <div style={{ direction: 'rtl' }}>
       <Space orientation='vertical' style={{ width: '100%' }} size='large'>
@@ -100,6 +105,8 @@ export const RulesTab = memo(function RulesTab({ entityType = 'linux' }: RulesTa
             options={ruleOptions}
             value={selectedRuleKeys}
             onChange={handleRuleSelectionChange}
+            open={isDropdownOpen}
+            onDropdownVisibleChange={(visible) => setIsDropdownOpen(visible)}
             showSearch
             filterOption={(input, opt) => (opt?.label ?? '').toLowerCase().includes(input.toLowerCase())}
             maxTagCount='responsive'

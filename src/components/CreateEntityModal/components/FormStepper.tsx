@@ -25,7 +25,7 @@ export const FormStepper = memo(function FormStepper({ currentStep, steps }: For
       current={currentStep - 1}
       orientation='horizontal'
       size='default'
-      style={{ direction: 'rtl', marginBottom: 6 }}
+      style={{ direction: 'rtl', margin: '20px 0' }}
       items={steps.map((step) => ({
         title: <span style={{ fontSize: '15px', fontWeight: 500 }}>{step.label}</span>,
       }))}
