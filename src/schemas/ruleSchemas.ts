@@ -54,7 +54,7 @@ export const FunctionalityFieldsSchema = z.object({
   text: z.string().min(1, 'שדה חובה'), // Text string
   email_description: z.string().min(1, 'שדה חובה'), // Email description
   servicenow: z.object({
-    json: z.record(z.unknown()),
+    json: z.record(z.string(), z.unknown()),
   }).optional(), // Optional ServiceNow with JSON
 }).optional()
 
