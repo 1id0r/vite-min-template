@@ -17,3 +17,5 @@ export {
   formatLabel 
 } from './constants'
 
+export * from './MultiSelectDropdown'
+

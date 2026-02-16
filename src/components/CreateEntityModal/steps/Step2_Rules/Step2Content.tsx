@@ -30,7 +30,6 @@ export const Step2Content = memo(function Step2Content({ systemId }: Step2Conten
   return (
     <Tabs
       defaultActiveKey='rules'
-      type='card'
       items={[
         {
           key: 'rules',
@@ -53,6 +52,7 @@ export const Step2Content = memo(function Step2Content({ systemId }: Step2Conten
       ]}
       style={{ direction: 'rtl', width: '100%' }}
       tabBarStyle={{ marginBottom: 24 }}
+      tabBarGutter={32}
     />
   )
 })

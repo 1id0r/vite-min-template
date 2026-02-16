@@ -6,10 +6,10 @@
  */
 
 import { memo, useState, useMemo } from 'react'
-import { Typography, Select, Button, Checkbox } from 'antd'
+import { Typography, Button } from 'antd'
 import { IconX, IconChevronDown, IconChevronRight } from '@tabler/icons-react'
 import type { BindingMetadata } from '../../../../schemas/fieldConfigs'
-import { BindingForm, StandaloneRuleField, RuleInstanceGroup, getRuleFields } from '../../shared'
+import { BindingForm, StandaloneRuleField, RuleInstanceGroup, getRuleFields, MultiSelectDropdown } from '../../shared'
 import { useRuleInstances } from '../../hooks/useRuleInstances'
 
 const { Text } = Typography
@@ -78,21 +78,12 @@ export const BindingInstance = memo(function BindingInstance({
               <Text strong style={{ whiteSpace: 'nowrap' }}>
                 חוק
               </Text>
-              <Select
-                mode='multiple'
+              <MultiSelectDropdown
                 placeholder='הוסף חוק'
-                style={{ flex: 1 }}
                 options={rules.ruleOptions}
                 value={rules.selectedRules}
                 onChange={rules.handleSelectionChange}
-                maxTagCount='responsive'
-                menuItemSelectedIcon={null}
-                optionRender={(option) => (
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                    <Checkbox checked={rules.selectedRules.includes(option.value as string)} />
-                    <span>{option.label}</span>
-                  </div>
-                )}
+                width='100%'
               />
             </div>
 

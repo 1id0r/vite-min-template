@@ -1,9 +1,16 @@
 import { memo, useMemo, useState } from 'react'
 import { useFormContext, useFieldArray } from 'react-hook-form'
-import { Select, Button, Space, Typography, Checkbox, Modal } from 'antd'
+import { Button, Space, Typography, Modal } from 'antd'
 import { IconX, IconChevronDown, IconChevronRight } from '@tabler/icons-react'
 import { getEntityRules } from '../../../../schemas/ruleSchemas'
-import { RuleField, RuleInstanceGroup, getRuleFields, FunctionalitySection, CustomRuleInstance } from '../../shared'
+import {
+  RuleField,
+  RuleInstanceGroup,
+  getRuleFields,
+  FunctionalitySection,
+  CustomRuleInstance,
+  MultiSelectDropdown,
+} from '../../shared'
 import type { EntityFormData } from '../../hooks/useEntityForm'
 
 const { Text } = Typography
@@ -37,12 +44,7 @@ export const RulesTab = memo(function RulesTab({ entityType = 'linux' }: RulesTa
     return groups
   }, [fields])
 
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false)
-
   const handleRuleSelectionChange = (selectedKeys: string[]) => {
-    // Keep dropdown open when selecting
-    setIsDropdownOpen(true)
-
     const currentKeys = new Set(selectedRuleKeys)
     selectedKeys.forEach((key) => {
       if (!currentKeys.has(key)) {
@@ -98,25 +100,12 @@ export const RulesTab = memo(function RulesTab({ entityType = 'linux' }: RulesTa
           <Text strong style={{ whiteSpace: 'nowrap' }}>
             חוק
           </Text>
-          <Select
-            mode='multiple'
+          <MultiSelectDropdown
             placeholder='הוסף חוק'
-            style={{ flex: 1 }}
             options={ruleOptions}
             value={selectedRuleKeys}
             onChange={handleRuleSelectionChange}
-            open={isDropdownOpen}
-            onDropdownVisibleChange={(visible) => setIsDropdownOpen(visible)}
-            showSearch
-            filterOption={(input, opt) => (opt?.label ?? '').toLowerCase().includes(input.toLowerCase())}
-            maxTagCount='responsive'
-            menuItemSelectedIcon={null}
-            optionRender={(option) => (
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                <Checkbox checked={selectedRuleKeys.includes(option.value as string)} />
-                <span>{option.label}</span>
-              </div>
-            )}
+            width='100%'
           />
         </div>
 

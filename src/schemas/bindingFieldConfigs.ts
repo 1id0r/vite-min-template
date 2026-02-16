@@ -87,7 +87,6 @@ export const BINDING_DEFINITIONS: BindingMetadata[] = [
     title: 'URL',
     fieldArrayName: 'urls',
     defaultValues: { url: '', timeout: 1 },
-    defaultOpen: true,
   },
   {
     type: 'elastic',

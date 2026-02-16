@@ -43,7 +43,7 @@ export interface EntityFormData {
      timeout?: number;
   }[]
   
-  elastic?: Record<string, any>
+  elastic?: Record<string, any>[]
 }
 
 /** Default values for entity form initialization */
@@ -59,8 +59,15 @@ export const DEFAULT_ENTITY_FORM_VALUES: EntityFormData = {
   measurements: [],
   attachments: [],
   entityRules: [],
-  urls: [],
-  elastic: {},
+  urls: [{ url: '', timeout: 1 }],
+  elastic: [{
+    cluster: '',
+    queryName: '',
+    scheduleInterval: 5,
+    scheduleUnit: 'minutes',
+    timeout: 5,
+    jsonQuery: '',
+  }],
 }
 
 export interface UseEntityFormResult {
