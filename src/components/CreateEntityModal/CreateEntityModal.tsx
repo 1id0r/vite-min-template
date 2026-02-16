@@ -1,6 +1,6 @@
 import { useCallback, useState } from 'react'
-import { Drawer } from 'antd'
-import { IconPlus } from '@tabler/icons-react'
+import { Drawer, Button } from 'antd'
+import { IconPlus, IconX } from '@tabler/icons-react'
 import { GenericButton } from '../GenericButton'
 import { EntityForm } from './EntityForm'
 
@@ -33,8 +33,10 @@ export function CreateEntityModal() {
         title='הוספת יישות'
         placement='right'
         size={560}
+        closeIcon={null}
+        extra={<Button type='text' onClick={handleClose} icon={<IconX size={24} color='gray' />} />}
         styles={{
-          header: { direction: 'rtl' },
+          header: { direction: 'rtl', borderBottom: 'none' },
           body: { height: 'calc(100% - 60px)', padding: 0 },
         }}
       >

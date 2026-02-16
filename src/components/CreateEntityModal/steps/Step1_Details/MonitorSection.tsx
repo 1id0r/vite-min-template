@@ -54,37 +54,38 @@ export const MonitorSection = memo(function MonitorSection({ systemId }: Monitor
   }
 
   return (
-    <div
-      style={{
-        direction: 'rtl',
-        border: '1px solid #d9d9d9',
-        borderRadius: '8px',
-        padding: '24px',
-        marginTop: '24px',
-      }}
-    >
-      <Text strong style={{ fontSize: 14, display: 'block', marginBottom: 16, textAlign: 'right' }}>
+    <>
+      <Text strong style={{ fontSize: 16, display: 'block', marginBottom: 16, textAlign: 'right' }}>
         פרטי היישות
       </Text>
-      <div>
-        {/* Dynamic Fields using GenericFormField */}
-        {fieldConfig.fields.map((field) => (
-          <GenericFormField
-            key={field.name}
-            field={field}
-            name={`monitor.${field.name}`}
-            control={control}
-            error={(errors.monitor as any)?.[field.name]?.message}
-            layout='inline'
-            annotation={getAnnotation(field)}
-          />
-        ))}
+      <div
+        style={{
+          direction: 'rtl',
+          border: '1px solid #d9d9d9',
+          borderRadius: '8px',
+          padding: '24px',
+        }}
+      >
+        <div>
+          {/* Dynamic Fields using GenericFormField */}
+          {fieldConfig.fields.map((field) => (
+            <GenericFormField
+              key={field.name}
+              field={field}
+              name={`monitor.${field.name}`}
+              control={control}
+              error={(errors.monitor as any)?.[field.name]?.message}
+              layout='inline'
+              annotation={getAnnotation(field)}
+            />
+          ))}
 
-        {/* Validate Button */}
-        <Button onClick={handleValidate} style={{ marginTop: 8 }}>
-          בדוק ולידציה
-        </Button>
+          {/* Validate Button - Aligned to left (flex-end in RTL) */}
+          <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 16 }}>
+            <Button onClick={handleValidate}>בדוק ולידציה</Button>
+          </div>
+        </div>
       </div>
-    </div>
+    </>
   )
 })

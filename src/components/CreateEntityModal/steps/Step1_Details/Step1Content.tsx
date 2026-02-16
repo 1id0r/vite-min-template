@@ -11,8 +11,7 @@
 
 import { memo } from 'react'
 import { Controller, useFormContext } from 'react-hook-form'
-import { Input, Typography } from 'antd'
-import { FlowSelector } from './FlowSelector'
+import { Input, Typography, Divider } from 'antd'
 import { CategorySystemSelector } from './CategorySystemSelector'
 import { LinksSection } from './LinksSection'
 import { MonitorSection } from './MonitorSection'
@@ -45,8 +44,6 @@ export interface Step1ContentProps {
 }
 
 export const Step1Content = memo(function Step1Content({
-  flow,
-  flowOptions,
   systemId,
   categories,
   categoryId,
@@ -55,7 +52,6 @@ export const Step1Content = memo(function Step1Content({
   showGeneralSection,
   showMonitorSection,
   showIconSelector,
-  onFlowChange,
   onCategoryChange,
   onSystemChange,
 }: Step1ContentProps) {
@@ -64,14 +60,8 @@ export const Step1Content = memo(function Step1Content({
   return (
     <>
       {/* Flow Selector - Only visible on Step 1, below stepper */}
-      <FlowSelector
-        flow={flow}
-        flowOptions={flowOptions}
-        onFlowChange={(value) => onFlowChange(value as 'monitor' | 'display')}
-      />
-
       {/* פרטים כלליים Section Header */}
-      <Text strong style={{ fontSize: 16, display: 'block', textAlign: 'right', marginBottom: 20, marginTop: '10px' }}>
+      <Text strong style={{ fontSize: 16, display: 'block', textAlign: 'right', marginBottom: 16, marginTop: 0 }}>
         פרטים כלליים
       </Text>
 
@@ -147,6 +137,9 @@ export const Step1Content = memo(function Step1Content({
 
       {/* Icon Selector - Only for display flow */}
       {showIconSelector && <IconSelector />}
+
+      {/* Divider between Links and Monitor Section */}
+      {showMonitorSection && systemId && <Divider style={{ margin: '24px 0' }} />}
 
       {/* Monitor Section - Dynamic fields per system */}
       {showMonitorSection && systemId && <MonitorSection systemId={systemId} />}

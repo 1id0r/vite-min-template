@@ -21,20 +21,14 @@ interface FormStepperProps {
 
 export const FormStepper = memo(function FormStepper({ currentStep, steps }: FormStepperProps) {
   return (
-    <div
-      style={{
-        padding: '12px 18px',
-      }}
-    >
-      <Steps
-        current={currentStep - 1}
-        orientation='horizontal'
-        size='default'
-        style={{ direction: 'rtl' }}
-        items={steps.map((step) => ({
-          title: <span style={{ fontSize: '15px', fontWeight: 500 }}>{step.label}</span>,
-        }))}
-      />
-    </div>
+    <Steps
+      current={currentStep - 1}
+      orientation='horizontal'
+      size='default'
+      style={{ direction: 'rtl', marginBottom: 6 }}
+      items={steps.map((step) => ({
+        title: <span style={{ fontSize: '15px', fontWeight: 500 }}>{step.label}</span>,
+      }))}
+    />
   )
 })

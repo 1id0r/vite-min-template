@@ -17,6 +17,7 @@ import { FormStepper } from './components/FormStepper'
 import { useEntityForm, type EntityFormData } from './hooks/useEntityForm'
 import { ResultSummary } from './components/ResultSummary'
 import { STEPS, type StepRenderProps } from './stepDefinitions'
+import { FlowSelector } from './steps/Step1_Details/FlowSelector'
 
 interface EntityFormProps {
   onSave?: (data: EntityFormData) => void
@@ -106,20 +107,26 @@ export const EntityForm = memo(function EntityForm({ onSave }: EntityFormProps) 
           flexDirection: 'column',
         }}
       >
-        {/* Fixed Header - Stepper (hidden for display flow) */}
-        {!isDisplayFlow && (
-          <div style={{ padding: '8px 12px 0' }}>
-            <FormStepper currentStep={currentStep} steps={STEPS} />
+        {/* Fixed Header - Flow Selector and Stepper */}
+        <div style={{ padding: '8px 16px 0' }}>
+          {/* Flow Selector - Always visible */}
+          <div style={{ marginBottom: 16 }}>
+            <FlowSelector
+              flow={flow}
+              flowOptions={flowOptions}
+              onFlowChange={(value) => handleFlowChange(value as 'monitor' | 'display')}
+            />
           </div>
-        )}
 
+          {/* Stepper (hidden for display flow) */}
+          {!isDisplayFlow && <FormStepper currentStep={currentStep} steps={STEPS} />}
+        </div>
         {/* Scrollable Content */}
         <div style={{ flex: 1, overflowY: 'auto', padding: 16 }}>
           <Space orientation='vertical' size='middle' style={{ width: '100%' }}>
             {currentStepDef?.render(stepProps)}
           </Space>
         </div>
-
         {/* Footer with Next/Save Button */}
         <div
           style={{
