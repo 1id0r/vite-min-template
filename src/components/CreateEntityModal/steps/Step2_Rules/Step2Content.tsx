@@ -44,14 +44,14 @@ export const Step2Content = memo(function Step2Content({ systemId }: Step2Conten
           key: 'bindings',
           label: 'הצמדות וחוקים',
           children: (
-            <div style={{ padding: '16px 0' }}>
+            <div style={{ padding: '10px 0' }}>
               <BindingsTab />
             </div>
           ),
         },
       ]}
       style={{ direction: 'rtl', width: '100%' }}
-      tabBarStyle={{ marginBottom: 24 }}
+      tabBarStyle={{ marginBottom: 12 }}
       tabBarGutter={32}
     />
   )

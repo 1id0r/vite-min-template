@@ -123,7 +123,7 @@ export const EntityForm = memo(function EntityForm({ onSave }: EntityFormProps) 
         </div>
         {/* Scrollable Content */}
         <div style={{ flex: 1, overflowY: 'auto', padding: 16 }}>
-          <Space orientation='vertical' size='middle' style={{ width: '100%' }}>
+          <Space orientation='vertical' size='middle' style={{ width: '90%', margin: '0 auto' }}>
             {currentStepDef?.render(stepProps)}
           </Space>
         </div>
@@ -150,7 +150,7 @@ export const EntityForm = memo(function EntityForm({ onSave }: EntityFormProps) 
               disabled={isNextDisabled}
             />
           : <>
-              <GenericButton variant='outlined' buttonType='textOnly' text='חזור' onClick={handleBack} />
+              <GenericButton variant='outlined' buttonType='textOnly' text='הקודם' onClick={handleBack} />
               <GenericButton variant='filled' buttonType='textOnly' text='יצירת יישות' onClick={handleSave} />
             </>
           }

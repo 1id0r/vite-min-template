@@ -1,7 +1,7 @@
-import { memo, useMemo, useState } from 'react'
+import { memo, useMemo } from 'react'
 import { useFormContext, useFieldArray } from 'react-hook-form'
 import { Button, Space, Typography, Modal } from 'antd'
-import { IconX, IconChevronDown, IconChevronRight } from '@tabler/icons-react'
+import { IconX } from '@tabler/icons-react'
 import { getEntityRules } from '../../../../schemas/ruleSchemas'
 import {
   RuleField,
@@ -155,7 +155,6 @@ const RuleInstance = ({
   siblingIndices: number[]
 }) => {
   const { control, watch } = useFormContext()
-  const [isExpanded, setIsExpanded] = useState(true)
   const ruleKey = watch(`entityRules.${index}.ruleKey`)
 
   // Use utility to get fields instead of inline derivation
@@ -192,54 +191,45 @@ const RuleInstance = ({
         borderBottom: showDivider ? '1px solid #e9ecef' : 'none',
       }}
     >
-      <div style={{ border: '1px solid #e9ecef', borderRadius: 8, overflow: 'hidden' }}>
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: 8,
-            padding: '10px 12px',
-            backgroundColor: '#fff',
-            boxShadow: '0 1px 2px rgba(0,0,0,0.06)',
-          }}
-        >
-          <Button
-            type='text'
-            shape='circle'
-            size='small'
-            onClick={() => setIsExpanded(!isExpanded)}
-            icon={isExpanded ? <IconChevronDown size={14} /> : <IconChevronRight size={14} />}
-          />
-          <div style={{ flex: 1, cursor: 'pointer' }} onClick={() => setIsExpanded(!isExpanded)}>
-            <Text style={{ color: '#6B7280' }}>חוק {index + 1}</Text>
-          </div>
-          <Button type='text' icon={<IconX size={14} />} onClick={onRemove} size='small' style={{ color: '#6B7280' }} />
+      <div
+        style={{
+          border: '1px solid #e9ecef',
+          borderRadius: 8,
+          padding: 16,
+          display: 'flex',
+          alignItems: 'flex-start',
+          gap: 8,
+        }}
+      >
+        <div style={{ width: '90%' }}>
+          {ruleKey === 'custom' ?
+            /* Custom rule has its own dedicated form */
+            <CustomRuleInstance basePath={`entityRules.${index}.data`} control={control} />
+          : <>
+              {/* Functionality collapsible section */}
+              <FunctionalitySection basePath={`entityRules.${index}.data.functionality`} />
+
+              {/* Other rule fields */}
+              {allFields.map((field) => (
+                <RuleField
+                  key={field.name}
+                  basePath={`entityRules.${index}.data`}
+                  field={field}
+                  control={control}
+                  disabledSeverities={disabledSeverities}
+                  annotation={getAnnotation(field)}
+                />
+              ))}
+            </>
+          }
         </div>
-
-        {isExpanded && (
-          <div style={{ padding: 16 }}>
-            {ruleKey === 'custom' ?
-              /* Custom rule has its own dedicated form */
-              <CustomRuleInstance basePath={`entityRules.${index}.data`} control={control} />
-            : <>
-                {/* Functionality collapsible section */}
-                <FunctionalitySection basePath={`entityRules.${index}.data.functionality`} />
-
-                {/* Other rule fields */}
-                {allFields.map((field) => (
-                  <RuleField
-                    key={field.name}
-                    basePath={`entityRules.${index}.data`}
-                    field={field}
-                    control={control}
-                    disabledSeverities={disabledSeverities}
-                    annotation={getAnnotation(field)}
-                  />
-                ))}
-              </>
-            }
-          </div>
-        )}
+        <Button
+          type='text'
+          icon={<IconX size={14} />}
+          onClick={onRemove}
+          size='small'
+          style={{ color: '#6B7280', flexShrink: 0, marginTop: 4 }}
+        />
       </div>
     </div>
   )

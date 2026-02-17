@@ -7,7 +7,7 @@
 
 import { memo, useState, useMemo } from 'react'
 import { Typography, Button } from 'antd'
-import { IconX, IconChevronDown, IconChevronRight } from '@tabler/icons-react'
+import { IconX, IconChevronDown, IconChevronRight, IconPlus } from '@tabler/icons-react'
 import type { BindingMetadata } from '../../../../schemas/fieldConfigs'
 import { BindingForm, StandaloneRuleField, RuleInstanceGroup, getRuleFields, MultiSelectDropdown } from '../../shared'
 import { useRuleInstances } from '../../hooks/useRuleInstances'
@@ -73,19 +73,26 @@ export const BindingInstance = memo(function BindingInstance({
           <div style={{ direction: 'rtl', padding: 16 }}>
             <BindingForm bindingType={config.type as 'url' | 'elastic'} basePath={basePath} control={control} />
 
-            {/* Rules Multi-Select */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16, marginTop: 8 }}>
-              <Text strong style={{ whiteSpace: 'nowrap' }}>
-                חוק
-              </Text>
-              <MultiSelectDropdown
-                placeholder='הוסף חוק'
-                options={rules.ruleOptions}
-                value={rules.selectedRules}
-                onChange={rules.handleSelectionChange}
-                width='100%'
-              />
-            </div>
+            {/* Rules - show button or dropdown */}
+            {rules.selectedRules.length === 0 && !rules.showDropdown ?
+              <div style={{ display: 'flex', justifyContent: 'flex-start', marginTop: 8, marginBottom: 16 }}>
+                <Button type='dashed' icon={<IconPlus size={14} />} onClick={rules.openDropdown}>
+                  הוסף חוק
+                </Button>
+              </div>
+            : <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16, marginTop: 8 }}>
+                <Text strong style={{ whiteSpace: 'nowrap' }}>
+                  חוק
+                </Text>
+                <MultiSelectDropdown
+                  placeholder='הוסף חוק'
+                  options={rules.ruleOptions}
+                  value={rules.selectedRules}
+                  onChange={rules.handleSelectionChange}
+                  width='100%'
+                />
+              </div>
+            }
 
             {/* Rule Instances using shared RuleInstanceGroup */}
             {rules.ruleInstances.length > 0 && (
@@ -138,7 +145,6 @@ interface RuleInstanceItemProps {
 }
 
 const RuleInstanceItem = memo(function RuleInstanceItem({
-  idx,
   ruleKey,
   entityType,
   onRemove,
@@ -147,56 +153,38 @@ const RuleInstanceItem = memo(function RuleInstanceItem({
   currentSeverity,
   onSeverityChange,
 }: RuleInstanceItemProps) {
-  const [isExpanded, setIsExpanded] = useState(true)
-
   // Use shared utility instead of inline field derivation
   const allFields = useMemo(() => getRuleFields(entityType, ruleKey), [entityType, ruleKey])
 
   return (
     <div
       style={{
-        marginBottom: showDivider ? 16 : 0,
-        paddingBottom: showDivider ? 16 : 0,
-        borderBottom: showDivider ? '1px solid #e9ecef' : 'none',
+        marginBottom: showDivider ? 12 : 0,
       }}
     >
-      <div style={{ border: '1px solid #e9ecef', borderRadius: 8, overflow: 'hidden' }}>
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: 8,
-            padding: '10px 12px',
-            backgroundColor: '#fff',
-            boxShadow: '0 1px 2px rgba(0,0,0,0.06)',
-          }}
-        >
-          <Button
-            type='text'
-            shape='circle'
-            size='small'
-            onClick={() => setIsExpanded(!isExpanded)}
-            icon={isExpanded ? <IconChevronDown size={14} /> : <IconChevronRight size={14} />}
-          />
-          <div style={{ flex: 1, cursor: 'pointer' }} onClick={() => setIsExpanded(!isExpanded)}>
-            <Text style={{ color: '#6B7280' }}>חוק {idx + 1}</Text>
-          </div>
+      <div
+        style={{
+          border: '1px solid #e9ecef',
+          borderRadius: 8,
+          padding: 8,
+          display: 'flex',
+          flexDirection: 'column',
+        }}
+      >
+        <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 4 }}>
           <Button type='text' icon={<IconX size={14} />} onClick={onRemove} size='small' style={{ color: '#6B7280' }} />
         </div>
-
-        {isExpanded && (
-          <div style={{ padding: 16 }}>
-            {allFields.map((field) => (
-              <StandaloneRuleField
-                key={field.name}
-                field={field}
-                value={field.name === 'severity' ? currentSeverity : undefined}
-                disabledSeverities={field.name === 'severity' ? disabledSeverities : []}
-                onChange={field.name === 'severity' ? onSeverityChange : undefined}
-              />
-            ))}
-          </div>
-        )}
+        <div style={{ padding: '0 8px 8px 8px' }}>
+          {allFields.map((field) => (
+            <StandaloneRuleField
+              key={field.name}
+              field={field}
+              value={field.name === 'severity' ? currentSeverity : undefined}
+              disabledSeverities={field.name === 'severity' ? disabledSeverities : []}
+              onChange={field.name === 'severity' ? onSeverityChange : undefined}
+            />
+          ))}
+        </div>
       </div>
     </div>
   )

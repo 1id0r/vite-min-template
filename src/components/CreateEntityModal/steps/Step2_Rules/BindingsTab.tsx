@@ -40,7 +40,7 @@ export const BindingsTab = memo(function BindingsTab() {
 
         {/* Measurements section */}
         <div style={panelStyle}>
-          <Collapse ghost expandIconPlacement='end'>
+          <Collapse ghost expandIconPlacement='start'>
             <Panel header={<Text strong>מדידות</Text>} key='measurements'>
               <MeasurementsSection />
             </Panel>

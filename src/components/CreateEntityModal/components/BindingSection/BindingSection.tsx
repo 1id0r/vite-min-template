@@ -63,7 +63,7 @@ export const BindingSection = memo(function BindingSection({ config }: BindingSe
 
   return (
     <div style={panelStyle}>
-      <Collapse defaultActiveKey={config.defaultOpen ? [config.type] : []} ghost expandIconPlacement='end'>
+      <Collapse defaultActiveKey={config.defaultOpen ? [config.type] : []} ghost expandIconPlacement='start'>
         <Panel header={<Text strong>{config.title}</Text>} key={config.type}>
           <Space orientation='vertical' style={{ width: '100%' }}>
             {fields.map((field, index) => (
@@ -76,7 +76,7 @@ export const BindingSection = memo(function BindingSection({ config }: BindingSe
                 showDivider={index < fields.length - 1}
               />
             ))}
-            <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 8 }}>
+            <div style={{ display: 'flex', justifyContent: 'flex-start', marginTop: 8 }}>
               <Button type='dashed' icon={<IconPlus size={14} />} onClick={() => append(config.defaultValues)}>
                 הוסף {config.title}
               </Button>

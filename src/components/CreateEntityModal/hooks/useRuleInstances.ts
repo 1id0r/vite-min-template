@@ -12,11 +12,13 @@ interface UseRuleInstancesResult {
   ruleInstances: RuleInstance[]
   ruleOptions: Array<{ value: string; label: string }>
   groupedInstances: Record<string, { label: string; indices: number[] }>
+  showDropdown: boolean
   
   // Actions
   handleSelectionChange: (selected: string[]) => void
   handleRemove: (idx: number) => void
   handleAddMore: (ruleKey: string) => void
+  openDropdown: () => void
   
   // Severity tracking
   instanceSeverities: Record<number, string>
@@ -31,6 +33,9 @@ export function useRuleInstances(entityType: string): UseRuleInstancesResult {
   const [selectedRules, setSelectedRules] = useState<string[]>([])
   const [ruleInstances, setRuleInstances] = useState<RuleInstance[]>([])
   const [instanceSeverities, setInstanceSeverities] = useState<Record<number, string>>({})
+  const [showDropdown, setShowDropdown] = useState(false)
+
+  const openDropdown = () => setShowDropdown(true)
 
   const availableRules = useMemo(() => getEntityRules(entityType), [entityType])
 
@@ -112,9 +117,11 @@ export function useRuleInstances(entityType: string): UseRuleInstancesResult {
     ruleInstances,
     ruleOptions,
     groupedInstances,
+    showDropdown,
     handleSelectionChange,
     handleRemove,
     handleAddMore,
+    openDropdown,
     instanceSeverities,
     handleSeverityChange,
   }

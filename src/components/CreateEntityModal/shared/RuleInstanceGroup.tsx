@@ -8,6 +8,7 @@
 import { memo, useState } from 'react'
 import { Button, Typography } from 'antd'
 import { IconPlus, IconChevronDown, IconChevronRight } from '@tabler/icons-react'
+import { GenericButton } from '../../GenericButton'
 import { MAX_RULES_PER_TYPE } from './constants'
 
 const { Text } = Typography
@@ -33,8 +34,7 @@ export const RuleInstanceGroup = memo(function RuleInstanceGroup({
     <div
       style={{
         direction: 'rtl',
-        border: '1px solid #fff',
-        boxShadow: '0 2px 4px rgba(0,0,0,0.12)',
+        border: '1px solid #e9ecef',
         borderRadius: 10,
         overflow: 'hidden',
       }}
@@ -46,7 +46,6 @@ export const RuleInstanceGroup = memo(function RuleInstanceGroup({
           gap: 8,
           width: '100%',
           padding: '10px 12px',
-          boxShadow: '0 2px 4px rgba(0,0,0,0.06)',
           cursor: 'pointer',
         }}
         onClick={() => setIsExpanded(!isExpanded)}
@@ -65,10 +64,14 @@ export const RuleInstanceGroup = memo(function RuleInstanceGroup({
       {isExpanded && (
         <div style={{ padding: 16 }}>
           {indices.map((idx, i) => renderInstance(idx, i < indices.length - 1))}
-          <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 16 }}>
-            <Button type='dashed' icon={<IconPlus size={14} />} onClick={onAddMore} disabled={isMaxReached}>
-              {isMaxReached ? 'מקסימום 3 חוקים' : 'הוסף חוק'}
-            </Button>
+          <div style={{ display: 'flex', justifyContent: 'flex-start', marginTop: 16 }}>
+            <GenericButton
+              variant='link'
+              text={isMaxReached ? 'מקסימום 3 חוקים' : 'הוסף חומרה'}
+              icon={IconPlus}
+              onClick={onAddMore}
+              disabled={isMaxReached}
+            />
           </div>
         </div>
       )}

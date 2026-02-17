@@ -24,9 +24,10 @@ export const FunctionalitySection = memo(function FunctionalitySection({ basePat
 
   return (
     <Collapse
+      ghost
       activeKey={activeKey}
       onChange={(keys) => setActiveKey(keys as string[])}
-      style={{ marginBottom: 16, direction: 'rtl' }}
+      style={{ marginBottom: 16, direction: 'rtl', border: '1px solid #e9ecef', borderRadius: 8 }}
       items={[
         {
           key: 'functionality',
@@ -119,7 +120,8 @@ export const FunctionalitySection = memo(function FunctionalitySection({ basePat
 
               {/* ServiceNow section (nested collapse) */}
               <Collapse
-                style={{ marginTop: 16 }}
+                ghost
+                style={{ marginTop: 16, border: '1px solid #e9ecef', borderRadius: 8 }}
                 items={[
                   {
                     key: 'servicenow',
