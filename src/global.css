@@ -11,6 +11,13 @@
 }
 
 /* Force Ant Design labels to be regular weight */
-.ant-form-item-label > label {
+.ant-form-item-label>label {
   font-weight: 400 !important;
+}
+
+/* Make the tabs divider shorter */
+.short-divider-tabs .ant-tabs-nav::before {
+  width: 205px !important;
+  right: 0 !important;
+  left: auto !important;
 }

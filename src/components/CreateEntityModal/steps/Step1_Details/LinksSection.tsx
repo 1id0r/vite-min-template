@@ -55,18 +55,23 @@ export const LinksSection = memo(function LinksSection() {
       <div style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: 24 }}>
         {links.map((link, index) => (
           <div key={index} style={{ position: 'relative' }}>
-            <div style={{ display: 'flex', alignItems: 'center', marginBottom: 12 }}>
-              <Text strong style={{ fontSize: 14, width: 90, marginLeft: 12 }}>
+            <div style={{ display: 'flex', alignItems: 'flex-start', marginBottom: 12 }}>
+              <Text strong style={{ fontSize: 14, width: 90, marginLeft: 12, marginTop: 6 }}>
                 לינק
               </Text>
-              <div style={{ flex: 1, display: 'flex', alignItems: 'center' }}>
+              <div style={{ flex: 1, display: 'flex', flexDirection: 'column', marginLeft: 40 }}>
                 <Input
                   placeholder='הזן לינק'
                   value={link.url}
                   onChange={(e) => handleLinkChange(index, 'url', e.target.value)}
                   status={link.url && !URL_REGEX.test(link.url) ? 'error' : undefined}
-                  style={{ direction: 'rtl', marginLeft: 40 }}
+                  style={{ direction: 'rtl' }}
                 />
+                {link.url && !URL_REGEX.test(link.url) && (
+                  <Text type='danger' style={{ fontSize: 12, marginTop: 4 }}>
+                    כתובת לא תקינה (למשל חסר .com)
+                  </Text>
+                )}
               </div>
             </div>
             <div style={{ display: 'flex', alignItems: 'center' }}>

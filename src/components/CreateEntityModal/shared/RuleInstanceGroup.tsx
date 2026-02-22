@@ -67,7 +67,7 @@ export const RuleInstanceGroup = memo(function RuleInstanceGroup({
           <div style={{ display: 'flex', justifyContent: 'flex-start', marginTop: 16 }}>
             <GenericButton
               variant='link'
-              text={isMaxReached ? 'מקסימום 3 חוקים' : 'הוסף חומרה'}
+              text={isMaxReached ? 'מקסימום 3 חוקים' : 'הוסף חוק'}
               icon={IconPlus}
               onClick={onAddMore}
               disabled={isMaxReached}

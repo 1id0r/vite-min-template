@@ -87,7 +87,7 @@ export const CustomRuleInstance = memo(function CustomRuleInstance({ basePath, c
               icon={<IconPlus size={14} />}
               onClick={() => append({ severity: undefined, query: '', run_description: '', alert_delay: 5 })}
             >
-              הוסף חומרה
+              הוסף חומרה נוספת
             </Button>
           )}
         </div>
@@ -148,6 +148,7 @@ const SeverityEntry = ({
         border: '1px solid #e9ecef',
         borderRadius: 8,
         overflow: 'hidden',
+        position: 'relative', // Added to contain the absolute button
       }}
     >
       {/* Collapsible header */}
@@ -162,7 +163,18 @@ const SeverityEntry = ({
         }}
         onClick={() => setIsExpanded(!isExpanded)}
       >
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+        <Button
+          type='text'
+          icon={<IconX size={14} />}
+          onClick={(e) => {
+            e.stopPropagation()
+            onRemove()
+          }}
+          size='small'
+          style={{ color: '#6B7280', position: 'absolute', top: 12, left: 16, zIndex: 10 }} // Increased zIndex
+        />
+
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, paddingLeft: 30 }}>
           {isExpanded ?
             <IconChevronDown size={16} color='#6B7280' />
           : <IconChevronRight size={16} color='#6B7280' />}
@@ -175,16 +187,6 @@ const SeverityEntry = ({
             </Text>
           )}
         </div>
-        <Button
-          type='text'
-          icon={<IconX size={14} />}
-          onClick={(e) => {
-            e.stopPropagation()
-            onRemove()
-          }}
-          size='small'
-          style={{ color: '#6B7280' }}
-        />
       </div>
 
       {/* Collapsible content */}
@@ -207,28 +209,61 @@ const SeverityEntry = ({
               />
             </FieldRow>
 
-            {/* שליפה - JSON */}
+            {/* שליפה - PromQL (JSON) */}
             <FieldRow label='שליפה' stacked>
               <Controller
                 name={`${basePath}.query`}
                 control={control}
-                render={({ field }) => (
-                  <JsonEditor
-                    value={field.value || ''}
-                    onChange={field.onChange}
-                    height='120px'
-                    placeholder='{"query": {...}}'
-                  />
+                rules={{
+                  validate: (value) => {
+                    if (!value) return true
+
+                    try {
+                      // We expect value to be a valid JSON string from JsonEditor
+                      // The user wants the JSON to contain a valid PromQL query
+                      const parsed = JSON.parse(value)
+                      const queryStr = parsed?.query
+
+                      if (queryStr) {
+                        const promqlRegex =
+                          /^[a-zA-Z_:][a-zA-Z0-9_:]*(?:\{.*?\})?(?:\[.*?\])?(?:\s+(?:by|without)\s*\(.*?\))?(?:\s*[+\-*/%^=!<>&|]\s*.*)*$/i
+                        if (!promqlRegex.test(queryStr)) {
+                          return 'ערך ה-query אינו שאילתת PromQL תקינה'
+                        }
+                      }
+                    } catch (e) {
+                      return 'הזן JSON תקין (לדוגמה: {"query": "up"})'
+                    }
+
+                    return true
+                  },
+                }}
+                render={({ field, fieldState }) => (
+                  <div style={{ width: '100%', display: 'flex', flexDirection: 'column' }}>
+                    <JsonEditor
+                      value={field.value || ''}
+                      onChange={field.onChange}
+                      height='120px'
+                      placeholder='{"query": "up{job=\\"node\\"}"}'
+                    />
+                    {fieldState.error && (
+                      <Text type='danger' style={{ fontSize: 12, marginTop: 4 }}>
+                        {fieldState.error.message}
+                      </Text>
+                    )}
+                  </div>
                 )}
               />
             </FieldRow>
 
             {/* תיאור הרצה */}
-            <FieldRow label='תיאור הרצה'>
+            <FieldRow label='תיאור הרצה' stacked>
               <Controller
                 name={`${basePath}.run_description`}
                 control={control}
-                render={({ field }) => <Input {...field} placeholder='הזן תיאור' style={{ width: '100%' }} />}
+                render={({ field }) => (
+                  <Input.TextArea {...field} placeholder='הזן תיאור' rows={3} style={{ width: '100%' }} />
+                )}
               />
             </FieldRow>
 

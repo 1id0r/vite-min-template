@@ -29,6 +29,7 @@ export const Step2Content = memo(function Step2Content({ systemId }: Step2Conten
 
   return (
     <Tabs
+      className='short-divider-tabs'
       defaultActiveKey='rules'
       items={[
         {

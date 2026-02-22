@@ -109,21 +109,27 @@ export const EntityForm = memo(function EntityForm({ onSave }: EntityFormProps) 
       >
         {/* Fixed Header - Flow Selector and Stepper */}
         <div style={{ padding: '8px 16px 0' }}>
-          {/* Flow Selector - Always visible */}
-          <div style={{ marginBottom: 16 }}>
-            <FlowSelector
-              flow={flow}
-              flowOptions={flowOptions}
-              onFlowChange={(value) => handleFlowChange(value as 'monitor' | 'display')}
-            />
-          </div>
+          {/* Flow Selector - Visible only in step 1 */}
+          {currentStep === 1 && (
+            <div style={{ marginBottom: 16 }}>
+              <FlowSelector
+                flow={flow}
+                flowOptions={flowOptions}
+                onFlowChange={(value) => handleFlowChange(value as 'monitor' | 'display')}
+              />
+            </div>
+          )}
 
           {/* Stepper (hidden for display flow) */}
           {!isDisplayFlow && <FormStepper currentStep={currentStep} steps={STEPS} />}
         </div>
         {/* Scrollable Content */}
         <div style={{ flex: 1, overflowY: 'auto', padding: 16 }}>
-          <Space orientation='vertical' size='middle' style={{ width: '90%', margin: '0 auto' }}>
+          <Space
+            orientation='vertical'
+            size='middle'
+            style={{ width: currentStep === 1 ? '90%' : '100%', margin: '0 auto' }}
+          >
             {currentStepDef?.render(stepProps)}
           </Space>
         </div>

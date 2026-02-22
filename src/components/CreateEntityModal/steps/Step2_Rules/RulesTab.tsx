@@ -46,6 +46,59 @@ export const RulesTab = memo(function RulesTab({ entityType = 'linux' }: RulesTa
 
   const handleRuleSelectionChange = (selectedKeys: string[]) => {
     const currentKeys = new Set(selectedRuleKeys)
+    const newKeysSet = new Set(selectedKeys)
+
+    // Check which keys were removed
+    const removedKeys = [...currentKeys].filter((key) => !newKeysSet.has(key))
+
+    if (removedKeys.length > 0) {
+      let hasData = false
+      let removedRuleLabel = ''
+
+      removedKeys.forEach((key) => {
+        fields.forEach((f: any, idx) => {
+          if (f.ruleKey === key) {
+            const values = getValues(`entityRules.${idx}.data`)
+            const instanceHasData =
+              values &&
+              Object.entries(values).some(([, value]) => {
+                if (value === '' || value === null || value === undefined) return false
+                return true
+              })
+            if (instanceHasData) {
+              hasData = true
+              removedRuleLabel = f.ruleLabel || availableRules[key]?.labelHe || availableRules[key]?.label || key
+            }
+          }
+        })
+      })
+
+      if (hasData) {
+        Modal.confirm({
+          title: 'מחיקת חוק',
+          content: `האם אתה בטוח שברצונך למחוק את החוק "${removedRuleLabel}"? פעולה זו תמחק את כל הנתונים שהזנת.`,
+          okText: 'המשך עריכה',
+          cancelText: 'מחק חוק',
+          okButtonProps: { type: 'primary' },
+          cancelButtonProps: { danger: true },
+          direction: 'rtl',
+          onOk: () => {
+            // Do nothing, let user continue editing (they clicked "continue editing" which is okText)
+          },
+          onCancel: () => {
+            // They clicked "delete rule" (cancelText)
+            applySelectionChange(selectedKeys)
+          },
+        })
+        return
+      }
+    }
+
+    applySelectionChange(selectedKeys)
+  }
+
+  const applySelectionChange = (selectedKeys: string[]) => {
+    const currentKeys = new Set(selectedRuleKeys)
     selectedKeys.forEach((key) => {
       if (!currentKeys.has(key)) {
         const ruleDef = availableRules[key]
@@ -53,9 +106,14 @@ export const RulesTab = memo(function RulesTab({ entityType = 'linux' }: RulesTa
       }
     })
     const newKeysSet = new Set(selectedKeys)
+    // Remove indices in reverse order so array shifting doesn't mess up subsequent removals
+    const indicesToRemove: number[] = []
     fields.forEach((f: any, idx) => {
-      if (!newKeysSet.has(f.ruleKey)) remove(idx)
+      if (!newKeysSet.has(f.ruleKey)) indicesToRemove.push(idx)
     })
+    if (indicesToRemove.length > 0) {
+      remove(indicesToRemove.reverse())
+    }
   }
 
   const handleRemoveRule = (index: number, ruleLabel: string) => {
@@ -196,12 +254,25 @@ const RuleInstance = ({
           border: '1px solid #e9ecef',
           borderRadius: 8,
           padding: 16,
-          display: 'flex',
-          alignItems: 'flex-start',
-          gap: 8,
+          position: 'relative', // To contain the absolute button
+          minHeight: 100, // Ensure there's enough space for the floating button
         }}
       >
-        <div style={{ width: '90%' }}>
+        <Button
+          type='text'
+          icon={<IconX size={14} />}
+          onClick={onRemove}
+          size='small'
+          style={{
+            color: '#6B7280',
+            position: 'absolute',
+            top: 12,
+            left: 12,
+            zIndex: 10,
+          }}
+        />
+
+        <div style={{ width: '100%', marginTop: 24 }}>
           {ruleKey === 'custom' ?
             /* Custom rule has its own dedicated form */
             <CustomRuleInstance basePath={`entityRules.${index}.data`} control={control} />
@@ -223,13 +294,6 @@ const RuleInstance = ({
             </>
           }
         </div>
-        <Button
-          type='text'
-          icon={<IconX size={14} />}
-          onClick={onRemove}
-          size='small'
-          style={{ color: '#6B7280', flexShrink: 0, marginTop: 4 }}
-        />
       </div>
     </div>
   )
