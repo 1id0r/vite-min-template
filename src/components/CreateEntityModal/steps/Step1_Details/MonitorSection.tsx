@@ -55,8 +55,17 @@ export const MonitorSection = memo(function MonitorSection({ systemId }: Monitor
 
   return (
     <>
-      <Text strong style={{ fontSize: 16, display: 'block', marginBottom: 16, textAlign: 'right' }}>
-        פרטי היישות
+      <Text
+        style={{
+          fontSize: 16,
+          fontWeight: 700,
+          lineHeight: '22px',
+          display: 'block',
+          marginBottom: 16,
+          textAlign: 'right',
+        }}
+      >
+        פרטי היישות (חובה)
       </Text>
       <div
         style={{

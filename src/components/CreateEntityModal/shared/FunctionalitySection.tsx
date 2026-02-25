@@ -5,9 +5,10 @@
  * Renders as a collapsible Collapse panel since it has many fields.
  */
 
-import { memo, useState } from 'react'
+import { memo, useState, useRef } from 'react'
 import { Controller, useFormContext } from 'react-hook-form'
-import { Collapse, Input, InputNumber, Typography, Button, Tag, Space } from 'antd'
+import { Collapse, Input, InputNumber, Typography, Button, Select, Divider } from 'antd'
+import type { InputRef } from 'antd'
 import { IconPlus } from '@tabler/icons-react'
 import { JsonEditor } from './JsonEditor'
 
@@ -40,8 +41,8 @@ export const FunctionalitySection = memo(function FunctionalitySection({ basePat
             <div style={{ padding: '8px 0' }}>
               {/* Interval field */}
               <div style={{ display: 'flex', alignItems: 'center', marginBottom: 12 }}>
-                <Text strong style={{ fontSize: 14, width: 140, marginLeft: 12, flexShrink: 0 }}>
-                  זמן בין שליחות חוזרות <span style={{ color: '#ff4d4f' }}>*</span>
+                <Text style={{ fontSize: 14, fontWeight: 400, width: 140, marginLeft: 12, flexShrink: 0 }}>
+                  זמן בין שליחות חוזרות
                 </Text>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                   <Controller
@@ -57,8 +58,10 @@ export const FunctionalitySection = memo(function FunctionalitySection({ basePat
 
               {/* Email addresses field */}
               <div style={{ display: 'flex', alignItems: 'flex-start', marginBottom: 12 }}>
-                <Text strong style={{ fontSize: 14, width: 140, marginLeft: 12, flexShrink: 0, paddingTop: 4 }}>
-                  כתובות מייל <span style={{ color: '#ff4d4f' }}>*</span>
+                <Text
+                  style={{ fontSize: 14, fontWeight: 400, width: 140, marginLeft: 12, flexShrink: 0, paddingTop: 4 }}
+                >
+                  כתובות מייל
                 </Text>
                 <div style={{ flex: 1 }}>
                   <Controller
@@ -78,8 +81,8 @@ export const FunctionalitySection = memo(function FunctionalitySection({ basePat
 
               {/* URL field */}
               <div style={{ display: 'flex', alignItems: 'center', marginBottom: 12 }}>
-                <Text strong style={{ fontSize: 14, width: 140, marginLeft: 12, flexShrink: 0 }}>
-                  קישור למערכת <span style={{ color: '#ff4d4f' }}>*</span>
+                <Text style={{ fontSize: 14, fontWeight: 400, width: 140, marginLeft: 12, flexShrink: 0 }}>
+                  קישור למערכת
                 </Text>
                 <div style={{ flex: 1 }}>
                   <Controller
@@ -92,9 +95,7 @@ export const FunctionalitySection = memo(function FunctionalitySection({ basePat
 
               {/* Text field */}
               <div style={{ display: 'flex', alignItems: 'center', marginBottom: 12 }}>
-                <Text strong style={{ fontSize: 14, width: 140, marginLeft: 12, flexShrink: 0 }}>
-                  טקסט <span style={{ color: '#ff4d4f' }}>*</span>
-                </Text>
+                <Text style={{ fontSize: 14, fontWeight: 400, width: 140, marginLeft: 12, flexShrink: 0 }}>טקסט</Text>
                 <div style={{ flex: 1 }}>
                   <Controller
                     name={`${basePath}.text`}
@@ -106,8 +107,10 @@ export const FunctionalitySection = memo(function FunctionalitySection({ basePat
 
               {/* Email description field */}
               <div style={{ display: 'flex', alignItems: 'flex-start', marginBottom: 12 }}>
-                <Text strong style={{ fontSize: 14, width: 140, marginLeft: 12, flexShrink: 0, paddingTop: 4 }}>
-                  תיאור במייל <span style={{ color: '#ff4d4f' }}>*</span>
+                <Text
+                  style={{ fontSize: 14, fontWeight: 400, width: 140, marginLeft: 12, flexShrink: 0, paddingTop: 4 }}
+                >
+                  תיאור במייל
                 </Text>
                 <div style={{ flex: 1 }}>
                   <Controller
@@ -130,10 +133,16 @@ export const FunctionalitySection = memo(function FunctionalitySection({ basePat
                       <div style={{ padding: '8px 0' }}>
                         <div style={{ display: 'flex', alignItems: 'flex-start', marginBottom: 12 }}>
                           <Text
-                            strong
-                            style={{ fontSize: 14, width: 140, marginLeft: 12, flexShrink: 0, paddingTop: 4 }}
+                            style={{
+                              fontSize: 14,
+                              fontWeight: 400,
+                              width: 140,
+                              marginLeft: 12,
+                              flexShrink: 0,
+                              paddingTop: 4,
+                            }}
                           >
-                            Service Now JSON <span style={{ color: '#ff4d4f' }}>*</span>
+                            Service Now JSON
                           </Text>
                           <div style={{ flex: 1 }}>
                             <Controller
@@ -187,52 +196,61 @@ const TagsInput = ({
   direction?: 'ltr' | 'rtl'
 }) => {
   const [inputValue, setInputValue] = useState('')
+  const inputRef = useRef<InputRef>(null)
 
-  const handleInputConfirm = () => {
+  const handleInputConfirm = (e?: React.MouseEvent | React.KeyboardEvent) => {
+    e?.preventDefault()
+    e?.stopPropagation()
     const trimmed = inputValue.trim()
     if (trimmed && !value.includes(trimmed)) {
       onChange([...value, trimmed])
     }
     setInputValue('')
-  }
-
-  const handleRemove = (removedTag: string) => {
-    onChange(value.filter((t) => t !== removedTag))
+    setTimeout(() => {
+      inputRef.current?.focus()
+    }, 0)
   }
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
+    e.stopPropagation()
     if (e.key === 'Enter') {
       e.preventDefault()
-      handleInputConfirm()
+      handleInputConfirm(e)
     }
   }
 
   return (
-    <div>
-      <Space size={[0, 8]} wrap style={{ marginBottom: value.length > 0 ? 8 : 0 }}>
-        {value.map((tag) => (
-          <Tag key={tag} closable onClose={() => handleRemove(tag)} style={{ direction: 'ltr' }}>
-            {tag}
-          </Tag>
-        ))}
-      </Space>
-      <Input
-        value={inputValue}
-        onChange={(e) => setInputValue(e.target.value)}
-        onKeyDown={handleKeyDown}
-        onBlur={handleInputConfirm}
-        placeholder={placeholder}
-        suffix={
-          <Button
-            type='text'
-            size='small'
-            icon={<IconPlus size={14} />}
-            onClick={handleInputConfirm}
-            disabled={!inputValue.trim()}
-          />
-        }
-        style={{ direction, textAlign: direction === 'rtl' ? 'right' : 'left' }}
-      />
-    </div>
+    <Select
+      mode='multiple'
+      style={{ width: '100%', direction, textAlign: direction === 'rtl' ? 'right' : 'left' }}
+      placeholder={placeholder}
+      value={value}
+      onChange={(newVals: string[]) => onChange(newVals)}
+      options={value.map((item) => ({ label: item, value: item }))}
+      dropdownStyle={{ direction: 'rtl' }}
+      dropdownRender={(menu) => (
+        <>
+          {menu}
+          <Divider style={{ margin: '8px 0' }} />
+          <div style={{ padding: '0 8px 4px', display: 'flex', gap: 8, alignItems: 'center' }}>
+            <Input
+              placeholder='הזן כתובת מייל'
+              ref={inputRef}
+              value={inputValue}
+              onChange={(e) => setInputValue(e.target.value)}
+              onKeyDown={handleKeyDown}
+              style={{ direction: 'ltr', width: '90%' }}
+            />
+            <Button
+              type='text'
+              icon={<IconPlus size={16} />}
+              onClick={(e: React.MouseEvent<HTMLElement>) => handleInputConfirm(e)}
+              disabled={!inputValue.trim()}
+              style={{ flex: 1, display: 'flex', justifyContent: 'center', alignItems: 'center' }}
+            />
+          </div>
+        </>
+      )}
+    />
   )
 }

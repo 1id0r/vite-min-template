@@ -44,6 +44,7 @@ export interface Step1ContentProps {
 }
 
 export const Step1Content = memo(function Step1Content({
+  flow,
   systemId,
   categories,
   categoryId,
@@ -61,7 +62,17 @@ export const Step1Content = memo(function Step1Content({
     <>
       {/* Flow Selector - Only visible on Step 1, below stepper */}
       {/* פרטים כלליים Section Header */}
-      <Text strong style={{ fontSize: 16, display: 'block', textAlign: 'right', marginBottom: 16, marginTop: 0 }}>
+      <Text
+        style={{
+          fontSize: 16,
+          fontWeight: 700,
+          lineHeight: '22px',
+          display: 'block',
+          textAlign: 'right',
+          marginBottom: 16,
+          marginTop: 0,
+        }}
+      >
         פרטים כלליים
       </Text>
 
@@ -81,9 +92,7 @@ export const Step1Content = memo(function Step1Content({
       {showGeneralSection && (
         <div style={{ direction: 'rtl', marginTop: 8, marginBottom: 20 }}>
           <div style={{ marginBottom: 16, display: 'flex', alignItems: 'flex-start' }}>
-            <Text strong style={{ fontSize: 14, width: 100, marginLeft: 16, marginTop: 5 }}>
-              שם יישות
-            </Text>
+            <Text style={{ fontSize: 14, fontWeight: 400, width: 100, marginLeft: 16, marginTop: 5 }}>שם יישות</Text>
             <div style={{ flex: 1 }}>
               <Controller
                 name='displayName'
@@ -93,7 +102,7 @@ export const Step1Content = memo(function Step1Content({
                     {...field}
                     placeholder='הזן שם יישות'
                     status={form.formState.errors.displayName ? 'error' : undefined}
-                    style={{ width: '100%', direction: 'rtl' }}
+                    style={{ width: '100%', direction: 'rtl', fontSize: '14px', fontWeight: 400 }}
                   />
                 )}
               />
@@ -105,9 +114,7 @@ export const Step1Content = memo(function Step1Content({
             </div>
           </div>
           <div style={{ display: 'flex', alignItems: 'start' }}>
-            <Text strong style={{ fontSize: 14, width: 100, marginLeft: 16, marginTop: 5 }}>
-              תיאור
-            </Text>
+            <Text style={{ fontSize: 14, fontWeight: 400, width: 100, marginLeft: 16, marginTop: 5 }}>תיאור</Text>
             <div style={{ flex: 1 }}>
               <Controller
                 name='description'
@@ -115,10 +122,10 @@ export const Step1Content = memo(function Step1Content({
                 render={({ field }) => (
                   <TextArea
                     {...field}
-                    placeholder='הזן תיאור היישות'
+                    placeholder='הזן תיאור ותפקיד היישות'
                     rows={3}
                     status={form.formState.errors.description ? 'error' : undefined}
-                    style={{ direction: 'rtl', width: '100%' }}
+                    style={{ direction: 'rtl', width: '100%', fontSize: '14px', fontWeight: 400 }}
                   />
                 )}
               />
@@ -129,6 +136,55 @@ export const Step1Content = memo(function Step1Content({
               )}
             </div>
           </div>
+
+          {flow === 'monitor' && (
+            <>
+              <div style={{ marginBottom: 16, display: 'flex', alignItems: 'center', marginTop: 16 }}>
+                <Text style={{ fontSize: 14, fontWeight: 400, width: 100, marginLeft: 16 }}>גורם אחראי</Text>
+                <div style={{ flex: 1 }}>
+                  <Controller
+                    name='responsibleParty'
+                    control={form.control}
+                    render={({ field }) => (
+                      <Input
+                        {...field}
+                        placeholder='הזן גורם אחראי'
+                        status={form.formState.errors.responsibleParty ? 'error' : undefined}
+                        style={{ width: '100%', direction: 'rtl', fontSize: '14px', fontWeight: 400 }}
+                      />
+                    )}
+                  />
+                  {form.formState.errors.responsibleParty && (
+                    <Text type='danger' style={{ fontSize: 12, display: 'block' }}>
+                      {form.formState.errors.responsibleParty.message}
+                    </Text>
+                  )}
+                </div>
+              </div>
+              <div style={{ marginBottom: 16, display: 'flex', alignItems: 'center' }}>
+                <Text style={{ fontSize: 14, fontWeight: 400, width: 100, marginLeft: 16 }}>פרטי קשר</Text>
+                <div style={{ flex: 1 }}>
+                  <Controller
+                    name='contactInfo'
+                    control={form.control}
+                    render={({ field }) => (
+                      <Input
+                        {...field}
+                        placeholder='הזן פרטי קשר'
+                        status={form.formState.errors.contactInfo ? 'error' : undefined}
+                        style={{ width: '100%', direction: 'rtl', fontSize: '14px', fontWeight: 400 }}
+                      />
+                    )}
+                  />
+                  {form.formState.errors.contactInfo && (
+                    <Text type='danger' style={{ fontSize: 12, display: 'block' }}>
+                      {form.formState.errors.contactInfo.message}
+                    </Text>
+                  )}
+                </div>
+              </div>
+            </>
+          )}
         </div>
       )}
 

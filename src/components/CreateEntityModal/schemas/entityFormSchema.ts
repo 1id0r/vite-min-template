@@ -36,7 +36,7 @@ export const EntityFormSchema = z.object({
      timeout: z.number().optional()
   })).optional(),
   
-  elastic: z.record(z.string(), z.any()).optional(),
+  elastic: z.array(z.record(z.string(), z.any())).optional(),
 })
 
 export type EntityFormSchemaType = z.infer<typeof EntityFormSchema>

@@ -62,9 +62,7 @@ export const GenericFormField = memo(function GenericFormField({
         flexShrink: 0,
       }}
     >
-      <Text strong style={{ fontSize: 14, display: 'block' }}>
-        {displayLabel}
-      </Text>
+      <Text style={{ fontSize: 14, fontWeight: 400, display: 'block' }}>{displayLabel}</Text>
       {annotation && (
         <Text type='secondary' style={{ fontSize: 11, display: 'block' }}>
           {annotation}
@@ -82,7 +80,7 @@ export const GenericFormField = memo(function GenericFormField({
           render={({ field: rhfField }) => (
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, width: '100%' }}>
               <div style={{ flex: field.type === 'segmented' ? 'none' : 1 }}>
-                {renderInput(field, rhfField.value, rhfField.onChange, fieldStatus)}
+                {renderInput(field, rhfField.value, rhfField.onChange, fieldStatus, displayLabel)}
               </div>
               {field.suffix && (
                 <Text type='secondary' style={{ flexShrink: 0, whiteSpace: 'nowrap' }}>
@@ -94,7 +92,7 @@ export const GenericFormField = memo(function GenericFormField({
         />
       : <div style={{ display: 'flex', alignItems: 'center', gap: 8, width: '100%' }}>
           <div style={{ flex: field.type === 'segmented' ? 'none' : 1 }}>
-            {renderInput(field, value, onChange, fieldStatus)}
+            {renderInput(field, value, onChange, fieldStatus, displayLabel)}
           </div>
           {field.suffix && (
             <Text type='secondary' style={{ flexShrink: 0, whiteSpace: 'nowrap' }}>
@@ -125,12 +123,19 @@ export const GenericFormField = memo(function GenericFormField({
   )
 })
 
-function renderInput(field: FieldConfig, value: any, onChange?: (val: any) => void, status?: AntdStatus) {
+function renderInput(
+  field: FieldConfig,
+  value: any,
+  onChange?: (val: any) => void,
+  status?: AntdStatus,
+  displayLabel?: string,
+) {
+  const defaultPlaceholder = displayLabel ? `הזן ${displayLabel}` : undefined
   const commonProps = {
     disabled: field.disabled,
-    placeholder: field.placeholder,
+    placeholder: field.placeholder || defaultPlaceholder,
     status,
-    style: { width: '100%', direction: 'rtl' as const },
+    style: { width: '100%', direction: 'rtl' as const, fontSize: '14px', fontWeight: 400 },
     onChange: (val: any) => {
       const valueToEmit =
         val?.target ?

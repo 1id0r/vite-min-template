@@ -80,7 +80,7 @@ export const RulesTab = memo(function RulesTab({ entityType = 'linux' }: RulesTa
           okText: 'המשך עריכה',
           cancelText: 'מחק חוק',
           okButtonProps: { type: 'primary' },
-          cancelButtonProps: { danger: true },
+          cancelButtonProps: { style: { color: '#1677ff', borderColor: '#1677ff', backgroundColor: 'transparent' } },
           direction: 'rtl',
           onOk: () => {
             // Do nothing, let user continue editing (they clicked "continue editing" which is okText)
@@ -136,7 +136,7 @@ export const RulesTab = memo(function RulesTab({ entityType = 'linux' }: RulesTa
         okText: 'המשך עריכה',
         cancelText: 'מחק חוק',
         okButtonProps: { type: 'primary' },
-        cancelButtonProps: { danger: true },
+        cancelButtonProps: { style: { color: '#1677ff', borderColor: '#1677ff', backgroundColor: 'transparent' } },
         direction: 'rtl',
         onCancel: () => remove(index),
       })

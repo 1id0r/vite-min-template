@@ -76,7 +76,7 @@ export const BindingInstance = memo(function BindingInstance({
             {/* Rules - show button or dropdown */}
             {rules.selectedRules.length === 0 && !rules.showDropdown ?
               <div style={{ display: 'flex', justifyContent: 'flex-start', marginTop: 8, marginBottom: 16 }}>
-                <Button type='dashed' icon={<IconPlus size={14} />} onClick={rules.openDropdown}>
+                <Button type='default' icon={<IconPlus size={14} />} onClick={rules.openDropdown}>
                   הוסף חוק
                 </Button>
               </div>

@@ -14,6 +14,7 @@ import { Input, InputNumber, Button, Typography, Space } from 'antd'
 import { IconPlus, IconX, IconChevronDown, IconChevronRight } from '@tabler/icons-react'
 import { SEVERITY_LEVELS, SEVERITY_CONFIG } from '../../../schemas/ruleSchemas'
 import { JsonEditor } from './JsonEditor'
+import { GenericButton } from '../../GenericButton'
 
 const { Text } = Typography
 
@@ -76,20 +77,10 @@ export const CustomRuleInstance = memo(function CustomRuleInstance({ basePath, c
 
       {/* חומרות section */}
       <div>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
+        <div style={{ display: 'flex', alignItems: 'center', marginBottom: 12 }}>
           <Text strong style={{ fontSize: 14 }}>
             חומרות
           </Text>
-          {canAddMore && (
-            <Button
-              type='dashed'
-              size='small'
-              icon={<IconPlus size={14} />}
-              onClick={() => append({ severity: undefined, query: '', run_description: '', alert_delay: 5 })}
-            >
-              הוסף חומרה נוספת
-            </Button>
-          )}
         </div>
 
         <Space direction='vertical' style={{ width: '100%' }} size='middle'>
@@ -112,6 +103,17 @@ export const CustomRuleInstance = memo(function CustomRuleInstance({ basePath, c
             <Text type='secondary'>לחץ על "הוסף חומרה" כדי להתחיל</Text>
           </div>
         )}
+
+        <div style={{ display: 'flex', justifyContent: 'flex-start', marginTop: 16 }}>
+          <GenericButton
+            variant='link'
+            buttonType='textWithIcon'
+            text={!canAddMore ? 'מקסימום 3 חוקים' : 'הוסף חומרה נוספת'}
+            icon={IconPlus}
+            onClick={() => append({ severity: undefined, query: '', run_description: '', alert_delay: 5 })}
+            disabled={!canAddMore}
+          />
+        </div>
       </div>
     </div>
   )

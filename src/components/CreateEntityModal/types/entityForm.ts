@@ -59,15 +59,8 @@ export const DEFAULT_ENTITY_FORM_VALUES: EntityFormData = {
   measurements: [],
   attachments: [],
   entityRules: [],
-  urls: [{ url: '', timeout: 1 }],
-  elastic: [{
-    cluster: '',
-    queryName: '',
-    scheduleInterval: 5,
-    scheduleUnit: 'minutes',
-    timeout: 5,
-    jsonQuery: '',
-  }],
+  urls: [],
+  elastic: [],
 }
 
 export interface UseEntityFormResult {
@@ -92,7 +85,7 @@ export interface UseEntityFormResult {
   showBindingsPanel: boolean
   
   // Handlers
-  handleFlowChange: (newFlow: FlowId) => void
+  handleFlowChange: (newFlow: FlowId) => Promise<boolean>
   handleCategoryChange: (categoryId: string | null) => void
   handleSystemSelect: (systemId: string | null) => void
   handleMeasurementsChange: (measurements: TreeSelection[]) => void

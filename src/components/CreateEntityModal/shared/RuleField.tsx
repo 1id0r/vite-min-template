@@ -28,9 +28,7 @@ export const RuleField = ({ basePath, field, control, disabledSeverities = [], a
     <div style={{ display: 'flex', alignItems: 'center', marginBottom: 12 }}>
       <Tooltip title={field.tooltip} placement='top'>
         <div style={{ width: 100, marginLeft: 12, flexShrink: 0 }}>
-          <Text strong style={{ fontSize: 14, display: 'block' }}>
-            {formatLabel(field.label)}
-          </Text>
+          <Text style={{ fontSize: 14, fontWeight: 400, display: 'block' }}>{formatLabel(field.label)}</Text>
           {annotation && (
             <Text type='secondary' style={{ fontSize: 11, display: 'block' }}>
               {annotation}
@@ -45,7 +43,7 @@ export const RuleField = ({ basePath, field, control, disabledSeverities = [], a
           flex: 1,
           maxWidth:
             ['time', 'number'].includes(field.type) || ['duration', 'threshold', 'volume_unit'].includes(field.name) ?
-              '25%'
+              '20%'
             : undefined,
         }}
       >
@@ -56,14 +54,18 @@ export const RuleField = ({ basePath, field, control, disabledSeverities = [], a
             switch (field.type) {
               case 'number':
                 return (
-                  <InputNumber
-                    {...rhfField}
-                    min={field.min ?? 0}
-                    max={field.max}
-                    placeholder={field.placeholder}
-                    style={{ width: '100%' }}
-                    suffix={field.suffix}
-                  />
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <InputNumber
+                      {...rhfField}
+                      min={field.min ?? 0}
+                      max={field.max}
+                      placeholder={field.placeholder}
+                      style={{ width: '100%' }}
+                    />
+                    {field.suffix && (
+                      <Text style={{ fontSize: 14, fontWeight: 400, whiteSpace: 'nowrap' }}>{field.suffix}</Text>
+                    )}
+                  </div>
                 )
 
               case 'boolean':
@@ -158,15 +160,19 @@ export const StandaloneRuleField = ({
     switch (field.type) {
       case 'number':
         return (
-          <InputNumber
-            min={field.min ?? 0}
-            max={field.max}
-            placeholder={field.placeholder}
-            style={{ width: '100%' }}
-            value={value}
-            onChange={onChange}
-            suffix={field.suffix}
-          />
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <InputNumber
+              min={field.min ?? 0}
+              max={field.max}
+              placeholder={field.placeholder}
+              style={{ width: '100%' }}
+              value={value}
+              onChange={onChange}
+            />
+            {field.suffix && (
+              <Text style={{ fontSize: 14, fontWeight: 400, whiteSpace: 'nowrap' }}>{field.suffix}</Text>
+            )}
+          </div>
         )
 
       case 'boolean':
@@ -237,9 +243,7 @@ export const StandaloneRuleField = ({
     <div style={{ display: 'flex', alignItems: 'center', marginBottom: 12 }}>
       <Tooltip title={field.tooltip} placement='top'>
         <div style={{ width: 100, marginLeft: 12, flexShrink: 0 }}>
-          <Text strong style={{ fontSize: 14, display: 'block' }}>
-            {formatLabel(field.label)}
-          </Text>
+          <Text style={{ fontSize: 14, fontWeight: 400, display: 'block' }}>{formatLabel(field.label)}</Text>
           {annotation && (
             <Text type='secondary' style={{ fontSize: 11, display: 'block' }}>
               {annotation}
@@ -253,7 +257,7 @@ export const StandaloneRuleField = ({
           flex: 1,
           maxWidth:
             ['time', 'number'].includes(field.type) || ['duration', 'threshold', 'volume_unit'].includes(field.name) ?
-              '25%'
+              '20%'
             : undefined,
         }}
       >

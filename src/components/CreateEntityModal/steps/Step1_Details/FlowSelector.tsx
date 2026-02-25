@@ -39,11 +39,12 @@ export const FlowSelector = memo(function FlowSelector({ flow, flowOptions, onFl
             key={option.value}
             value={option.value}
             style={{
-              height: 34,
+              width: 92,
+              height: 32,
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              padding: '0 16px',
+              padding: 0,
               fontSize: '14px',
               borderTopRightRadius: index === 0 ? 12 : 0,
               borderBottomRightRadius: index === 0 ? 12 : 0,

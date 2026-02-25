@@ -61,8 +61,11 @@ export const EntityForm = memo(function EntityForm({ onSave }: EntityFormProps) 
     { value: 'display', label: 'יישות תצוגה' },
   ]
 
-  const handleNext = () => {
-    if (currentStep < STEPS.length) {
+  const handleNext = async () => {
+    // Validate Step 1 critical fields before allowing the user to proceed
+    const isValid = await form.trigger(['displayName', 'description', 'responsibleParty', 'contactInfo', 'links'])
+
+    if (isValid && currentStep < STEPS.length) {
       setCurrentStep(currentStep + 1)
     }
   }
@@ -109,16 +112,19 @@ export const EntityForm = memo(function EntityForm({ onSave }: EntityFormProps) 
       >
         {/* Fixed Header - Flow Selector and Stepper */}
         <div style={{ padding: '8px 16px 0' }}>
-          {/* Flow Selector - Visible only in step 1 */}
-          {currentStep === 1 && (
-            <div style={{ marginBottom: 16 }}>
-              <FlowSelector
-                flow={flow}
-                flowOptions={flowOptions}
-                onFlowChange={(value) => handleFlowChange(value as 'monitor' | 'display')}
-              />
-            </div>
-          )}
+          {/* Flow Selector - Visible globally in all steps */}
+          <div style={{ marginBottom: 16 }}>
+            <FlowSelector
+              flow={flow}
+              flowOptions={flowOptions}
+              onFlowChange={async (value) => {
+                const success = await handleFlowChange(value as 'monitor' | 'display')
+                if (success) {
+                  setCurrentStep(1)
+                }
+              }}
+            />
+          </div>
 
           {/* Stepper (hidden for display flow) */}
           {!isDisplayFlow && <FormStepper currentStep={currentStep} steps={STEPS} />}
@@ -157,7 +163,7 @@ export const EntityForm = memo(function EntityForm({ onSave }: EntityFormProps) 
             />
           : <>
               <GenericButton variant='outlined' buttonType='textOnly' text='הקודם' onClick={handleBack} />
-              <GenericButton variant='filled' buttonType='textOnly' text='יצירת יישות' onClick={handleSave} />
+              <GenericButton variant='filled' buttonType='textOnly' text='צור יישות' onClick={handleSave} />
             </>
           }
         </div>

@@ -39,10 +39,21 @@ export function useFormHandlers({ form, onSave }: UseFormHandlersParams): UseFor
   }, [form])
 
   const handleSave = useCallback(() => {
-    form.handleSubmit((data: EntityFormData) => {
-      console.log('Entity form submitted:', data)
-      onSave?.(data)
-    })()
+    form.handleSubmit(
+      (data: EntityFormData) => {
+        // Filter out empty links (where both url and label are empty) that are just UI placeholders
+        const cleanedData = {
+          ...data,
+          links: data.links?.filter(link => link.url?.trim() || link.label?.trim()) || []
+        }
+        
+        console.log('Entity form submitted:', cleanedData)
+        onSave?.(cleanedData)
+      },
+      (errors) => {
+        console.error('Form validation failed:', errors)
+      }
+    )()
   }, [form, onSave])
 
   const resetForm = useCallback(() => {

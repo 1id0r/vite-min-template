@@ -8,7 +8,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { type UseFormReturn } from 'react-hook-form'
 import { STATIC_CONFIG } from '../../../schemas/fieldConfigs'
-import type { EntityFormData } from '../types/entityForm'
+import { DEFAULT_ENTITY_FORM_VALUES, type EntityFormData } from '../types/entityForm'
 import type { SystemDefinition } from '../../../types/entity'
 
 interface UseSystemSelectionParams {
@@ -56,6 +56,16 @@ export function useSystemSelection({ form }: UseSystemSelectionParams): UseSyste
     form.setValue('measurements', [])
     form.setValue('attachments', [])
     form.setValue('monitor', {})
+    
+    // Reset Step 1 General Details
+    form.setValue('displayName', DEFAULT_ENTITY_FORM_VALUES.displayName)
+    form.setValue('description', DEFAULT_ENTITY_FORM_VALUES.description)
+    form.setValue('links', DEFAULT_ENTITY_FORM_VALUES.links)
+    
+    // Reset Step 2 fields
+    form.setValue('entityRules', DEFAULT_ENTITY_FORM_VALUES.entityRules)
+    form.setValue('urls', DEFAULT_ENTITY_FORM_VALUES.urls)
+    form.setValue('elastic', DEFAULT_ENTITY_FORM_VALUES.elastic)
   }, [form])
 
   const handleSystemSelect = useCallback((newSystemId: string | null) => {
@@ -64,6 +74,17 @@ export function useSystemSelection({ form }: UseSystemSelectionParams): UseSyste
     form.setValue('measurements', [])
     form.setValue('attachments', [])
     form.setValue('monitor', {})
+    
+    // Reset Step 1 General Details
+    form.setValue('displayName', DEFAULT_ENTITY_FORM_VALUES.displayName)
+    form.setValue('description', DEFAULT_ENTITY_FORM_VALUES.description)
+    form.setValue('links', DEFAULT_ENTITY_FORM_VALUES.links)
+    
+    // Reset Step 2 fields
+    form.setValue('entityRules', DEFAULT_ENTITY_FORM_VALUES.entityRules)
+    form.setValue('urls', DEFAULT_ENTITY_FORM_VALUES.urls)
+    form.setValue('elastic', DEFAULT_ENTITY_FORM_VALUES.elastic)
+    
     // Set entity type
     if (newSystemId) {
       const system = systems[newSystemId]

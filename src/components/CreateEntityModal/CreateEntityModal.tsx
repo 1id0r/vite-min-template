@@ -30,14 +30,15 @@ export function CreateEntityModal() {
       <Drawer
         open={opened}
         onClose={handleClose}
-        title='הוספת יישות'
+        title={<span style={{ fontSize: 20, fontWeight: 700, lineHeight: '24px' }}>הוספת יישות</span>}
         placement='right'
         size={560}
         closeIcon={null}
-        extra={<Button type='text' onClick={handleClose} icon={<IconX size={24} color='gray' />} />}
+        extra={<Button type='text' onClick={handleClose} icon={<IconX size={16} color='gray' />} />}
         styles={{
           header: { direction: 'rtl', borderBottom: 'none' },
           body: { height: 'calc(100% - 60px)', padding: 0 },
+          mask: { backgroundColor: 'transparent', backdropFilter: 'none' },
         }}
       >
         <EntityForm onSave={handleSave} onClose={handleClose} />

@@ -51,7 +51,7 @@ export const BindingSection = memo(function BindingSection({ config }: BindingSe
         okText: 'המשך עריכה',
         cancelText: 'מחק הצמדה',
         okButtonProps: { type: 'primary' },
-        cancelButtonProps: { danger: true },
+        cancelButtonProps: { style: { color: '#1677ff', borderColor: '#1677ff', backgroundColor: 'transparent' } },
         direction: 'rtl',
         onCancel: () => remove(index),
       })
@@ -77,7 +77,7 @@ export const BindingSection = memo(function BindingSection({ config }: BindingSe
               />
             ))}
             <div style={{ display: 'flex', justifyContent: 'flex-start', marginTop: 8 }}>
-              <Button type='dashed' icon={<IconPlus size={14} />} onClick={() => append(config.defaultValues)}>
+              <Button type='default' icon={<IconPlus size={14} />} onClick={() => append(config.defaultValues)}>
                 הוסף {config.title}
               </Button>
             </div>

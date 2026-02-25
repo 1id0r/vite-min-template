@@ -37,6 +37,7 @@ export function useEntityForm(onSave?: (data: EntityFormData) => void): UseEntit
     resolver: zodResolver(EntityFormSchema) as any,
     defaultValues: DEFAULT_ENTITY_FORM_VALUES,
     mode: 'onBlur',
+    reValidateMode: 'onBlur',
   })
 
   // Compose specialized hooks
