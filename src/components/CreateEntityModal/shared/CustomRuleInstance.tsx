@@ -9,10 +9,10 @@
  */
 
 import { memo, useState, useEffect } from 'react'
-import { Controller, useFormContext, useFieldArray } from 'react-hook-form'
+import { Controller, useFormContext, useFieldArray, type Control } from 'react-hook-form'
 import { Input, InputNumber, Button, Typography, Space } from 'antd'
 import { IconPlus, IconX, IconChevronDown, IconChevronRight } from '@tabler/icons-react'
-import { SEVERITY_LEVELS, SEVERITY_CONFIG } from '../../../schemas/ruleSchemas'
+import { SEVERITY_LEVELS, SEVERITY_CONFIG, type CustomSeverityEntry } from '../../../schemas/ruleSchemas'
 import { JsonEditor } from './JsonEditor'
 import { GenericButton } from '../../GenericButton'
 
@@ -21,7 +21,7 @@ const { Text } = Typography
 interface CustomRuleInstanceProps {
   /** Base path in form, e.g. 'entityRules.0.data' */
   basePath: string
-  control: any
+  control: Control<any>
 }
 
 export const CustomRuleInstance = memo(function CustomRuleInstance({ basePath, control }: CustomRuleInstanceProps) {
@@ -42,7 +42,9 @@ export const CustomRuleInstance = memo(function CustomRuleInstance({ basePath, c
 
   // Watch severity values in real-time — no useMemo (watch returns same ref, memo won't retrigger)
   const watchedEntries = watch(`${basePath}.severity_entries`) || []
-  const usedSeverities: string[] = watchedEntries.map((e: any) => e?.severity).filter(Boolean)
+  const usedSeverities: string[] = watchedEntries
+    .map((e: Partial<CustomSeverityEntry>) => e?.severity)
+    .filter(Boolean) as string[]
 
   const canAddMore = fields.length < 3
 
@@ -134,7 +136,7 @@ const SeverityEntry = ({
 }: {
   index: number
   basePath: string
-  control: any
+  control: Control<any>
   usedSeverities: string[]
   currentSeverity?: string
   onRemove: () => void
