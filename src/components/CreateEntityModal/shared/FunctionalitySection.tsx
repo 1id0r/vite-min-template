@@ -7,8 +7,7 @@
 
 import { memo, useState, useRef } from 'react'
 import { Controller, useFormContext } from 'react-hook-form'
-import { Collapse, Input, InputNumber, Typography, Button, Select, Divider } from 'antd'
-import type { InputRef } from 'antd'
+import { Collapse, Input, InputNumber, Typography, Button, Tag, Select } from 'antd'
 import { IconPlus } from '@tabler/icons-react'
 import { JsonEditor } from './JsonEditor'
 
@@ -44,15 +43,13 @@ export const FunctionalitySection = memo(function FunctionalitySection({ basePat
                 <Text style={{ fontSize: 14, fontWeight: 400, width: 140, marginLeft: 12, flexShrink: 0 }}>
                   זמן בין שליחות חוזרות
                 </Text>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: 8 }}>
                   <Controller
                     name={`${basePath}.interval`}
                     control={control}
                     render={({ field }) => <InputNumber {...field} min={1} style={{ width: 100 }} placeholder='1' />}
                   />
-                  <Text type='secondary' style={{ whiteSpace: 'nowrap' }}>
-                    דקות
-                  </Text>
+                  <Text style={{ fontSize: 14, fontWeight: 400 }}>דקות</Text>
                 </div>
               </div>
 
@@ -68,10 +65,10 @@ export const FunctionalitySection = memo(function FunctionalitySection({ basePat
                     name={`${basePath}.email_addresses`}
                     control={control}
                     render={({ field }) => (
-                      <TagsInput
+                      <EmailsDropdown
                         value={field.value || []}
                         onChange={field.onChange}
-                        placeholder='הזן כתובת מייל ולחץ Enter'
+                        placeholder='הזן כתובת מייל'
                         direction='rtl'
                       />
                     )}
@@ -181,10 +178,12 @@ export const FunctionalitySection = memo(function FunctionalitySection({ basePat
   )
 })
 
+import type { InputRef } from 'antd'
+
 /**
- * TagsInput - Input for list of email addresses as tags
+ * EmailsDropdown - Custom Select input for list of email addresses
  */
-const TagsInput = ({
+const EmailsDropdown = ({
   value = [],
   onChange,
   placeholder,
@@ -198,7 +197,7 @@ const TagsInput = ({
   const [inputValue, setInputValue] = useState('')
   const inputRef = useRef<InputRef>(null)
 
-  const handleInputConfirm = (e?: React.MouseEvent | React.KeyboardEvent) => {
+  const handleInputConfirm = (e?: React.MouseEvent<HTMLButtonElement | HTMLAnchorElement> | React.KeyboardEvent) => {
     e?.preventDefault()
     e?.stopPropagation()
     const trimmed = inputValue.trim()
@@ -211,11 +210,16 @@ const TagsInput = ({
     }, 0)
   }
 
+  const handleRemove = (e: React.MouseEvent, removedTag: string) => {
+    e.stopPropagation()
+    onChange(value.filter((t) => t !== removedTag))
+  }
+
   const handleKeyDown = (e: React.KeyboardEvent) => {
     e.stopPropagation()
     if (e.key === 'Enter') {
       e.preventDefault()
-      handleInputConfirm(e)
+      handleInputConfirm()
     }
   }
 
@@ -228,29 +232,44 @@ const TagsInput = ({
       onChange={(newVals: string[]) => onChange(newVals)}
       options={value.map((item) => ({ label: item, value: item }))}
       dropdownStyle={{ direction: 'rtl' }}
-      dropdownRender={(menu) => (
+      maxTagCount='responsive'
+      dropdownRender={(menu: React.ReactNode) => (
         <>
           {menu}
-          <Divider style={{ margin: '8px 0' }} />
-          <div style={{ padding: '0 8px 4px', display: 'flex', gap: 8, alignItems: 'center' }}>
-            <Input
-              placeholder='הזן כתובת מייל'
-              ref={inputRef}
-              value={inputValue}
-              onChange={(e) => setInputValue(e.target.value)}
-              onKeyDown={handleKeyDown}
-              style={{ direction: 'ltr', width: '90%' }}
-            />
-            <Button
-              type='text'
-              icon={<IconPlus size={16} />}
-              onClick={(e: React.MouseEvent<HTMLElement>) => handleInputConfirm(e)}
-              disabled={!inputValue.trim()}
-              style={{ flex: 1, display: 'flex', justifyContent: 'center', alignItems: 'center' }}
-            />
+          <div style={{ padding: '0 8px 4px', display: 'flex', flexDirection: 'column', gap: 8, marginTop: 8 }}>
+            <div style={{ display: 'flex', gap: 8 }}>
+              <Input
+                placeholder='הזן כתובת מייל'
+                ref={inputRef}
+                value={inputValue}
+                onChange={(e) => setInputValue(e.target.value)}
+                onKeyDown={handleKeyDown}
+                style={{ direction: 'ltr' }}
+              />
+              <Button
+                type='text'
+                icon={<IconPlus size={14} />}
+                onClick={(e: React.MouseEvent<HTMLElement>) => handleInputConfirm(e as any)}
+                disabled={!inputValue.trim()}
+              >
+                הוסף כתובת
+              </Button>
+            </div>
           </div>
         </>
       )}
+      tagRender={(props) => {
+        const { label, value: tagValue } = props
+        return (
+          <Tag
+            closable
+            onClose={(e) => handleRemove(e, tagValue)}
+            style={{ direction: 'ltr', display: 'flex', alignItems: 'center', gap: 4, marginRight: 4 }}
+          >
+            {label}
+          </Tag>
+        )
+      }}
     />
   )
 }
