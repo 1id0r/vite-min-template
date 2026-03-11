@@ -167,6 +167,10 @@ function resolveTreeUrl(params: URLSearchParams) {
 
 // ─── Entity Creation ──────────────────────────────────────────────────────────
 
+const entityBaseUrl =
+  (import.meta.env.VITE_ENTITY_API_BASE_URL as string | undefined)?.replace(/\/$/, "") ||
+  "http://127.0.0.1:8080";
+
 interface EntityPayloadInput {
   entityRules?: Array<{
     ruleKey: string
@@ -215,9 +219,14 @@ export function toBePayload(data: EntityPayloadInput) {
 /** Creates a new entity by POSTing the transformed payload to the backend */
 export async function createEntity(data: EntityPayloadInput, dashboardId: string): Promise<void> {
   const payload = toBePayload(data)
-  await request<unknown>(`/edit-mode/fullEntity/${dashboardId}`, {
+  const response = await fetch(`${entityBaseUrl}/edit-mode/fullEntity/${dashboardId}`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
     body: JSON.stringify(payload),
   })
+
+  if (!response.ok) {
+    const detail = await response.json().then((b) => b?.detail).catch(() => undefined)
+    throw new Error(detail ?? `Request failed with status ${response.status}`)
+  }
 }
