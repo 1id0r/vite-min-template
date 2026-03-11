@@ -12,9 +12,6 @@ import { BindingsTab } from './BindingsTab'
 
 // Mapping from systemId (staticConfig) to rule entity type (ruleSchemas)
 const RULE_ENTITY_MAPPING: Record<string, string> = {
-  vm_linux: 'linux',
-  vm_windows: 'windows',
-  mongo_k: 'mongok',
   s3_db: 's3',
   hadoop_hdfs: 'hdfs',
   // Add other mappings as needed, defaulting to exact match if not found

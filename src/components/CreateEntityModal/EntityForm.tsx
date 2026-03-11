@@ -21,13 +21,11 @@ import { FlowSelector } from './steps/Step1_Details/FlowSelector'
 
 interface EntityFormProps {
   onSave?: (data: EntityFormData) => void
-  onClose?: () => void
 }
 
 export const EntityForm = memo(function EntityForm({ onSave }: EntityFormProps) {
   const [submittedData, setSubmittedData] = useState<EntityFormData | null>(null)
   const [currentStep, setCurrentStep] = useState(1)
-
   const handleSaveWithResult = (data: EntityFormData) => {
     setSubmittedData(data)
     onSave?.(data)

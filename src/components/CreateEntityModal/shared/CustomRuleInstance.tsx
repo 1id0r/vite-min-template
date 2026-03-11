@@ -55,7 +55,21 @@ export const CustomRuleInstance = memo(function CustomRuleInstance({ basePath, c
         <Controller
           name={`${basePath}.rule_name`}
           control={control}
-          render={({ field }) => <Input {...field} placeholder='הזן שם חוק' style={{ width: '100%' }} />}
+          render={({ field, fieldState }) => (
+            <>
+              <Input
+                {...field}
+                placeholder='הזן שם חוק'
+                status={fieldState.error ? 'error' : undefined}
+                style={{ width: '100%' }}
+              />
+              {fieldState.error && (
+                <Text type='danger' style={{ fontSize: 12, display: 'block', marginTop: 4 }}>
+                  {fieldState.error.message}
+                </Text>
+              )}
+            </>
+          )}
         />
       </FieldRow>
 

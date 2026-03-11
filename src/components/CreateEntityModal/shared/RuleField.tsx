@@ -25,9 +25,9 @@ export const RuleField = ({ basePath, field, control, disabledSeverities = [], a
   const name = `${basePath}.${field.name}`
 
   return (
-    <div style={{ display: 'flex', alignItems: 'center', marginBottom: 12 }}>
+    <div style={{ display: 'flex', alignItems: 'flex-start', marginBottom: 12 }}>
       <Tooltip title={field.tooltip} placement='top'>
-        <div style={{ width: 100, marginLeft: 12, flexShrink: 0 }}>
+        <div style={{ width: 100, marginLeft: 12, flexShrink: 0, marginTop: 5 }}>
           <Text style={{ fontSize: 14, fontWeight: 400, display: 'block' }}>{formatLabel(field.label)}</Text>
           {annotation && (
             <Text type='secondary' style={{ fontSize: 11, display: 'block' }}>
@@ -50,87 +50,110 @@ export const RuleField = ({ basePath, field, control, disabledSeverities = [], a
         <Controller
           name={name}
           control={control}
-          render={({ field: rhfField }) => {
-            switch (field.type) {
-              case 'number':
-                return (
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                    <InputNumber
-                      {...rhfField}
-                      min={field.min ?? 0}
-                      max={field.max}
-                      placeholder={field.placeholder}
-                      style={{ width: '100%' }}
+          render={({ field: rhfField, fieldState }) => {
+            const err = fieldState.error?.message
+            const errStatus = err ? ('error' as const) : undefined
+
+            const input = (() => {
+              switch (field.type) {
+                case 'number':
+                  return (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                      <InputNumber
+                        {...rhfField}
+                        min={field.min ?? 0}
+                        max={field.max}
+                        placeholder={field.placeholder}
+                        status={errStatus}
+                        style={{ width: '100%' }}
+                      />
+                      {field.suffix && (
+                        <Text style={{ fontSize: 14, fontWeight: 400, whiteSpace: 'nowrap' }}>{field.suffix}</Text>
+                      )}
+                    </div>
+                  )
+
+                case 'boolean':
+                  return <Checkbox checked={rhfField.value} onChange={(e) => rhfField.onChange(e.target.checked)} />
+
+                case 'time':
+                  return (
+                    <TimePicker
+                      value={rhfField.value ? dayjs(rhfField.value, 'HH:mm') : undefined}
+                      onChange={(time) => rhfField.onChange(time ? time.format('HH:mm') : undefined)}
+                      format='HH:mm'
+                      style={{ width: '100%', direction: 'ltr', borderColor: err ? '#ff4d4f' : undefined }}
+                      classNames={{ popup: 'ltr-time-picker' }}
+                      placeholder='HH:mm'
                     />
-                    {field.suffix && (
-                      <Text style={{ fontSize: 14, fontWeight: 400, whiteSpace: 'nowrap' }}>{field.suffix}</Text>
-                    )}
-                  </div>
-                )
+                  )
 
-              case 'boolean':
-                return <Checkbox checked={rhfField.value} onChange={(e) => rhfField.onChange(e.target.checked)} />
+                case 'severity':
+                  return (
+                    <div
+                      style={{
+                        display: 'inline-flex',
+                        border: `1px solid ${err ? '#ff4d4f' : '#d9d9d9'}`,
+                        borderRadius: 6,
+                        overflow: 'hidden',
+                      }}
+                    >
+                      {SEVERITY_LEVELS.map((sev) => {
+                        const config = SEVERITY_CONFIG[sev]
+                        const isDisabled = disabledSeverities.includes(sev)
+                        const isSelected = rhfField.value === sev
+                        return (
+                          <div
+                            key={sev}
+                            onClick={() => !isDisabled && rhfField.onChange(sev)}
+                            style={{
+                              padding: '4px 14px',
+                              cursor: isDisabled ? 'not-allowed' : 'pointer',
+                              backgroundColor: isSelected ? '#1677ff' : 'transparent',
+                              color:
+                                isSelected ? '#fff'
+                                : isDisabled ? '#bfbfbf'
+                                : '#595959',
+                              borderRight: 'none',
+                              fontWeight: isSelected ? 600 : 400,
+                              fontSize: 13,
+                              transition: 'all 0.15s ease',
+                              opacity: isDisabled ? 0.45 : 1,
+                              lineHeight: '22px',
+                            }}
+                          >
+                            {config.label}
+                          </div>
+                        )
+                      })}
+                    </div>
+                  )
 
-              case 'time':
-                return (
-                  <TimePicker
-                    value={rhfField.value ? dayjs(rhfField.value, 'HH:mm') : undefined}
-                    onChange={(time) => rhfField.onChange(time ? time.format('HH:mm') : undefined)}
-                    format='HH:mm'
-                    style={{ width: '100%', direction: 'ltr' }}
-                    classNames={{ popup: 'ltr-time-picker' }}
-                    placeholder='HH:mm'
-                  />
-                )
+                case 'select':
+                  return (
+                    <Select
+                      {...rhfField}
+                      status={errStatus}
+                      style={{ width: '100%' }}
+                      options={field.options?.map((opt) => ({ value: opt, label: opt }))}
+                    />
+                  )
 
-              case 'severity':
-                return (
-                  <div
-                    style={{ display: 'inline-flex', border: '1px solid #d9d9d9', borderRadius: 6, overflow: 'hidden' }}
-                  >
-                    {SEVERITY_LEVELS.map((sev) => {
-                      const config = SEVERITY_CONFIG[sev]
-                      const isDisabled = disabledSeverities.includes(sev)
-                      const isSelected = rhfField.value === sev
-                      return (
-                        <div
-                          key={sev}
-                          onClick={() => !isDisabled && rhfField.onChange(sev)}
-                          style={{
-                            padding: '4px 14px',
-                            cursor: isDisabled ? 'not-allowed' : 'pointer',
-                            backgroundColor: isSelected ? '#1677ff' : 'transparent',
-                            color:
-                              isSelected ? '#fff'
-                              : isDisabled ? '#bfbfbf'
-                              : '#595959',
-                            borderRight: 'none',
-                            fontWeight: isSelected ? 600 : 400,
-                            fontSize: 13,
-                            transition: 'all 0.15s ease',
-                            opacity: isDisabled ? 0.45 : 1,
-                            lineHeight: '22px',
-                          }}
-                        >
-                          {config.label}
-                        </div>
-                      )
-                    })}
-                  </div>
-                )
+                default: // text
+                  return <Input {...rhfField} status={errStatus} />
+              }
+            })()
 
-              case 'select':
-                return (
-                  <Select
-                    {...rhfField}
-                    style={{ width: '100%' }}
-                    options={field.options?.map((opt) => ({ value: opt, label: opt }))}
-                  />
-                )
-
-              default: // text
-                return <Input {...rhfField} />
-            }
+            return (
+              <>
+                {input}
+                {err && (
+                  <Text type='danger' style={{ fontSize: 12, display: 'block', marginTop: 4 }}>
+                    {err}
+                  </Text>
+                )}
+              </>
+            )
           }}
         />
       </div>

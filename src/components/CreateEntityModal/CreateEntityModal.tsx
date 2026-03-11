@@ -41,7 +41,7 @@ export function CreateEntityModal() {
           mask: { backgroundColor: 'transparent', backdropFilter: 'none' },
         }}
       >
-        <EntityForm onSave={handleSave} onClose={handleClose} />
+        <EntityForm onSave={handleSave} />
       </Drawer>
     </>
   )

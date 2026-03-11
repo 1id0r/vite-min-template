@@ -79,7 +79,7 @@ export const STATIC_CONFIG: EntityConfig = {
     { 
       id: 'databases', 
       label: 'מסדי נתונים', 
-      systemIds: ['mongo_k', 'sql_server', 'redis', 'postgresql', 'elastic', 'data'] 
+      systemIds: ['mongok', 'sql_server', 'redis', 'postgresql', 'elastic', 'data']
     },
     { 
       id: 'filesystems', 
@@ -110,10 +110,10 @@ export const STATIC_CONFIG: EntityConfig = {
     nifi: { id: 'nifi', label: 'NiFi' },
     s3: { id: 's3', label: 'S3' },
     kafka: { id: 'kafka', label: 'Kafka' },
-    mongo_k: { id: 'mongo_k', label: 'Mongo K' },
+    mongok: { id: 'mongok', label: 'Mongo K' },
     sql_server: { id: 'sql_server', label: 'SQL Server' },
-    vm_linux: { id: 'vm_linux', label: 'Linux' },
-    vm_windows: { id: 'vm_windows', label: 'Windows' },
+    linux: { id: 'linux', label: 'Linux' },
+    windows: { id: 'windows', label: 'Windows' },
     pvc: { id: 'pvc', label: 'PVC' },
     openshift: { id: 'openshift', label: 'OpenShift' },
     data: { id: 'data', label: 'Data' },

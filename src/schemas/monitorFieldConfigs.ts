@@ -14,7 +14,7 @@ import type { FormFieldsConfig } from './fieldConfigs'
 
 // Monitor field configurations by system ID
 export const MonitorFieldConfigs: Record<string, FormFieldsConfig> = {
-  mongo_k: {
+  mongok: {
     title: 'Mongo monitoring',
     fields: [
       { name: 'cluster', type: 'text', label: 'Cluster', labelHe: 'אשכול', required: true, colSpan: 12 },

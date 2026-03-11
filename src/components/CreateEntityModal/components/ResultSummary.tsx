@@ -10,6 +10,7 @@ import { Alert, Space, message } from 'antd'
 import { IconCopy, IconCheck } from '@tabler/icons-react'
 import { GenericButton } from '../../GenericButton'
 import type { EntityFormData } from '../hooks/useEntityForm'
+import { toBePayload } from '../../../api/client'
 
 interface ResultSummaryProps {
   result: EntityFormData | null
@@ -19,10 +20,12 @@ interface ResultSummaryProps {
 export function ResultSummary({ result, onClose }: ResultSummaryProps) {
   const [copied, setCopied] = useState(false)
 
+  const payload = result ? toBePayload(result) : null
+
   const handleCopy = async () => {
-    if (!result) return
+    if (!payload) return
     try {
-      await navigator.clipboard.writeText(JSON.stringify(result, null, 2))
+      await navigator.clipboard.writeText(JSON.stringify(payload, null, 2))
       setCopied(true)
       message.success('Copied to clipboard')
       setTimeout(() => setCopied(false), 2000)
@@ -40,7 +43,7 @@ export function ResultSummary({ result, onClose }: ResultSummaryProps) {
         showIcon
       />
 
-      {result && (
+      {payload && (
         <div style={{ position: 'relative' }}>
           <div style={{ position: 'absolute', top: 8, left: 8, zIndex: 1 }}>
             <GenericButton
@@ -70,7 +73,7 @@ export function ResultSummary({ result, onClose }: ResultSummaryProps) {
               margin: 0,
             }}
           >
-            {JSON.stringify(result, null, 2)}
+            {JSON.stringify(payload, null, 2)}
           </pre>
         </div>
       )}

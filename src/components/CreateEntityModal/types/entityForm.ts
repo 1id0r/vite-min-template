@@ -43,7 +43,16 @@ export interface EntityFormData {
      timeout?: number;
   }[]
   
-  elastic?: Record<string, any>[]
+  elastic?: {
+    query_id?: string
+    type?: string
+    cluster?: string
+    index?: string
+    name?: string
+    timeout?: string
+    intreval_secs?: string
+    json?: string
+  }[]
 }
 
 /** Default values for entity form initialization */

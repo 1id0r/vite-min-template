@@ -6,11 +6,15 @@
  */
 
 import { useCallback } from 'react'
+import { message } from 'antd'
 import { type UseFormReturn } from 'react-hook-form'
 import type { Attachment } from '../../../types/entity'
 import type { TreeSelection } from '../../../types/tree'
 import type { EntityFormData } from '../types/entityForm'
 import { DEFAULT_ENTITY_FORM_VALUES } from '../types/entityForm'
+import { createEntity } from '../../../api/client'
+// TODO: replace with actual import path
+import { usePath } from 'your-path-hook'
 
 interface UseFormHandlersParams {
   form: UseFormReturn<EntityFormData>
@@ -26,6 +30,7 @@ interface UseFormHandlersResult {
 }
 
 export function useFormHandlers({ form, onSave }: UseFormHandlersParams): UseFormHandlersResult {
+  const { currentPath: dashboardId } = usePath()
   const handleMeasurementsChange = useCallback((measurements: TreeSelection[]) => {
     form.setValue('measurements', measurements)
   }, [form])
@@ -40,15 +45,19 @@ export function useFormHandlers({ form, onSave }: UseFormHandlersParams): UseFor
 
   const handleSave = useCallback(() => {
     form.handleSubmit(
-      (data: EntityFormData) => {
-        // Filter out empty links (where both url and label are empty) that are just UI placeholders
+      async (data: EntityFormData) => {
         const cleanedData = {
           ...data,
           links: data.links?.filter(link => link.url?.trim() || link.label?.trim()) || []
         }
-        
-        console.log('Entity form submitted:', cleanedData)
-        onSave?.(cleanedData)
+
+        try {
+          await createEntity(cleanedData, dashboardId)
+          onSave?.(cleanedData)
+        } catch (error) {
+          const msg = error instanceof Error ? error.message : 'Failed to create entity'
+          message.error(msg)
+        }
       },
       (errors) => {
         console.error('Form validation failed:', errors)

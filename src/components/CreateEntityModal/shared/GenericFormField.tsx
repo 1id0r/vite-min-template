@@ -77,18 +77,28 @@ export const GenericFormField = memo(function GenericFormField({
         <Controller
           name={name}
           control={control}
-          render={({ field: rhfField }) => (
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8, width: '100%' }}>
-              <div style={{ flex: field.type === 'segmented' ? 'none' : 1 }}>
-                {renderInput(field, rhfField.value, rhfField.onChange, fieldStatus, displayLabel)}
-              </div>
-              {field.suffix && (
-                <Text type='secondary' style={{ flexShrink: 0, whiteSpace: 'nowrap' }}>
-                  {field.suffix}
-                </Text>
-              )}
-            </div>
-          )}
+          render={({ field: rhfField, fieldState }) => {
+            const rhfError = fieldState.error?.message
+            return (
+              <>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, width: '100%' }}>
+                  <div style={{ flex: field.type === 'segmented' ? 'none' : 1 }}>
+                    {renderInput(field, rhfField.value, rhfField.onChange, rhfError ? 'error' : fieldStatus, displayLabel)}
+                  </div>
+                  {field.suffix && (
+                    <Text type='secondary' style={{ flexShrink: 0, whiteSpace: 'nowrap' }}>
+                      {field.suffix}
+                    </Text>
+                  )}
+                </div>
+                {rhfError && (
+                  <Text type='danger' style={{ fontSize: 12, display: 'block', marginTop: 4 }}>
+                    {rhfError}
+                  </Text>
+                )}
+              </>
+            )
+          }}
         />
       : <div style={{ display: 'flex', alignItems: 'center', gap: 8, width: '100%' }}>
           <div style={{ flex: field.type === 'segmented' ? 'none' : 1 }}>

@@ -1,0 +1,87 @@
+{
+  "flow": "monitor",
+  "systemId": "mongok",
+  "displayName": "new mongok",
+  "entityType": "mongok",
+  "description": "hhh",
+  "contactInfo": "",
+  "responsibleParty": "",
+  "links": [],
+  "monitor": {
+    "cluster": " -internal "
+  },
+  "measurements": [
+    {
+      "vid": "string",
+      "displayName": "string"
+    }
+  ],
+  "attachments": [],
+  "entityRules": {
+    "ssm": [
+      {
+        "ruleKey": "cpu_mongok",
+        "groupRules": [
+          {
+            "severity": "critical",
+            "threshold": [
+              "95",
+              ">"
+            ]
+          }
+        ]
+      }
+    ],
+    "custom": [
+      {
+        "ruleKey": "rabbitmq_critical",
+        "groupRules": [
+          {
+            "severity": "critical",
+            "query": "rabbitmq_queue_messages_ready{cluster=\"rabbit@.svc.cluster.local\", dur",
+            "description": "There is {{ $value }} error messages in queue {{ $labels.queue }}",
+            "threshold": [
+              "95",
+              ">"
+            ]
+          }
+        ],
+        "monitorId": "{{ $labels.queue }}",
+        "tsdb": " _victra"
+      }
+    ]
+  },
+  "urls": [
+    {
+      "monitor": {
+        "url": "http://url.com"
+      },
+      "ssmRules": [
+        {
+          "ruleKey": "cpu_mongok",
+          "groupRules": [
+            {
+              "severity": "critical",
+              "threshold": [
+                "95",
+                ">"
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "esQuery": [
+    {
+      "query_id": "string",
+      "type": "string",
+      "cluster": "string",
+      "index": "string",
+      "name": "string",
+      "timeout": "string",
+      "intreval_secs": "string",
+      "json": "string"
+    }
+  ]
+}

@@ -164,3 +164,60 @@ function resolveTreeUrl(params: URLSearchParams) {
   }
   return `${baseUrl}${treeRoute}?${qs}`;
 }
+
+// ─── Entity Creation ──────────────────────────────────────────────────────────
+
+interface EntityPayloadInput {
+  entityRules?: Array<{
+    ruleKey: string
+    data: Record<string, unknown>
+    enabled?: boolean
+    ruleLabel?: string
+  }>
+  urls?: Array<{ url: string; timeout?: number }>
+  elastic?: object[]
+}
+
+/** Transforms internal form data into the shape expected by the backend */
+export function toBePayload(data: EntityPayloadInput) {
+  const { entityRules, urls, elastic, ...rest } = data
+
+  const ssm: object[] = []
+  const custom: object[] = []
+
+  ;(entityRules || []).forEach((rule) => {
+    if (rule.ruleKey === 'custom') {
+      const { monitorId, tsdb, ...ruleData } = rule.data as Record<string, unknown>
+      custom.push({
+        ruleKey: rule.ruleKey,
+        groupRules: [ruleData],
+        ...(monitorId !== undefined && { monitorId }),
+        ...(tsdb !== undefined && { tsdb }),
+      })
+    } else {
+      ssm.push({ ruleKey: rule.ruleKey, groupRules: [rule.data] })
+    }
+  })
+
+  const transformedUrls = (urls || []).map((u) => ({
+    monitor: { url: u.url },
+    ssmRules: [] as object[],
+  }))
+
+  return {
+    ...rest,
+    entityRules: { ssm, custom },
+    urls: transformedUrls,
+    esQuery: elastic || [],
+  }
+}
+
+/** Creates a new entity by POSTing the transformed payload to the backend */
+export async function createEntity(data: EntityPayloadInput, dashboardId: string): Promise<void> {
+  const payload = toBePayload(data)
+  await request<unknown>(`/edit-mode/fullEntity/${dashboardId}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  })
+}
